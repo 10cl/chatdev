@@ -19,5 +19,5 @@ export async function trackInstallSource() {
   const { source } = await ofetch('https://chatdev.toscl.com/api/user/source', {
     credentials: 'include',
   })
-  trackEvent('install', { source })
+  trackEvent('install', { source, language: navigator.language })
 }
