@@ -59,15 +59,6 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
       </a>
     )
   }
-  if (error.code === ErrorCode.BING_FORBIDDEN) {
-    store.set("input_text_message", "Join new Bing waitlist")
-
-    return (
-      <a href="https://bing.com/new" target="_blank" rel="noreferrer">
-        <Button color="primary" text="Join new Bing waitlist" size="small" />
-      </a>
-    )
-  }
   if (error.code === ErrorCode.POE_UNAUTHORIZED) {
     store.set("input_text_message", t('Login at poe.com'))
 
