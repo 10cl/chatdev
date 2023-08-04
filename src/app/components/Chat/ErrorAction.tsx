@@ -157,7 +157,11 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
   ) {
     store.set("input_text_message", t('Please check your network connection'))
 
-    return <p className="ml-2 text-secondary-text text-sm">{t('Please check your network connection')}</p>
+    return (
+        <div>
+          <p className="ml-2 text-secondary-text text-sm">{t('Please check your network connection')}</p>
+        </div>
+    )
   }
   if (error.code === ErrorCode.POE_MESSAGE_LIMIT) {
     store.set("input_text_message", t('This is a limitation set by poe.com'))

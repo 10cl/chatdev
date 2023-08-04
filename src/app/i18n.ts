@@ -90,6 +90,7 @@ const resources = {
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已执行完毕，您可以继续等待其他伙伴的加入。点击上方切换按钮进入聊天模式，以查看项目概览。当所有成员都到齐后，您可以开始圆桌会议，靠近对应的伙伴继续讨论当前的项目。",
       'Login to ChatGPT': '登录ChatGPT',
       'Switch to API mode': '切换到API模式',
+      Mode: '模式',
     },
   },
   'zh-CN': {
