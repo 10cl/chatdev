@@ -69,6 +69,8 @@ export class ChatGPTWebBot extends AbstractBot {
       }),
     })
 
+    const isFirstMessage = !this.conversationContext
+
     await parseSSEResponse(resp, (message) => {
       console.debug('chatgpt sse message', message)
       if (message === '[DONE]') {
@@ -111,6 +113,12 @@ export class ChatGPTWebBot extends AbstractBot {
       }
       throw err
     })
+
+    // auto generate title on first response
+    if (isFirstMessage && this.conversationContext) {
+      const c = this.conversationContext
+      chatGPTClient.generateChatTitle(this.accessToken, c.conversationId, c.lastMessageId)
+    }
   }
 
   resetConversation() {
