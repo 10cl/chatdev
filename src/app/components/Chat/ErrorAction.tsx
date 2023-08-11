@@ -4,9 +4,12 @@ import Browser from 'webextension-polyfill'
 import { chatGPTClient } from '~app/bots/chatgpt-webapp/client'
 import { ConversationContext } from '~app/context'
 import { ChatError, ErrorCode } from '~utils/errors'
-import Button from '../Button'
+import Button, { Props as ButtonProps } from '../Button'
 import MessageBubble from './MessageBubble'
-import store from "store2";
+import store from "store2"
+const ActionButton: FC<ButtonProps> = (props) => {
+  return <Button {...props} size="small" className="drop-shadow-lg" color="primary" />
+}
 
 const ChatGPTAuthErrorAction = () => {
   const { t } = useTranslation()
@@ -33,14 +36,14 @@ const ChatGPTAuthErrorAction = () => {
 
   return (
     <div className="flex flex-row gap-2 items-center">
-      <Button color="primary" text={t('Login to ChatGPT')} onClick={fixChatGPT} isLoading={fixing} size="small" />
+      <ActionButton color="primary" text={t('Login to ChatGPT')} onClick={fixChatGPT} isLoading={fixing} size="small" />
       <span className="text-sm text-primary-text">OR</span>
       <a
         href={Browser.runtime.getURL('app.html#/setting')}
         target={isSidePanel ? '_blank' : undefined}
         rel="noreferrer"
       >
-        <Button color="primary" text={t('Switch to API mode')} size="small" />
+        <ActionButton color="primary" text={t('Switch to API mode')} size="small" />
       </a>
     </div>
   )
@@ -55,7 +58,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://bing.com" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Login at bing.com')} size="small" />
+        <ActionButton color="primary" text={t('Login at bing.com')} size="small" />
       </a>
     )
   }
@@ -64,7 +67,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://poe.com" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Login at poe.com')} size="small" />
+        <ActionButton color="primary" text={t('Login at poe.com')} size="small" />
       </a>
     )
   }
@@ -73,7 +76,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://xinghuo.xfyun.cn" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Login at xfyun.cn')} size="small" />
+        <ActionButton color="primary" text={t('Login at xfyun.cn')} size="small" />
       </a>
     )
   }
@@ -82,7 +85,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://openai.com/waitlist/gpt-4-api" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Join the waitlist')} size="small" />
+        <ActionButton color="primary" text={t('Join the waitlist')} size="small" />
       </a>
     )
   }
@@ -91,14 +94,14 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://chat.openai.com" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Login to ChatGPT')} size="small" />
+        <ActionButton color="primary" text={t('Login to ChatGPT')} size="small" />
       </a>
     )
   }
   if (error.code === ErrorCode.CLAUDE_WEB_UNAUTHORIZED) {
     return (
       <a href="https://claude.ai" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Login to Claude.ai')} size="small" />
+        <ActionButton color="primary" text={t('Login to Claude.ai')} size="small" />
       </a>
     )
   }
@@ -110,14 +113,14 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
   if (error.code === ErrorCode.CONVERSATION_LIMIT) {
     store.set("input_text_message", "Conversation limit!")
 
-    return <Button color="primary" text="Restart" size="small" onClick={() => conversation?.reset()} />
+    return <ActionButton color="primary" text="Restart" size="small" onClick={() => conversation?.reset()} />
   }
   if (error.code === ErrorCode.BARD_EMPTY_RESPONSE) {
     store.set("input_text_message", "Visit bard.google.com")
 
     return (
       <a href="https://bard.google.com" target="_blank" rel="noreferrer">
-        <Button color="primary" text="Visit bard.google.com" size="small" />
+        <ActionButton color="primary" text="Visit bard.google.com" size="small" />
       </a>
     )
   }
@@ -126,7 +129,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://www.bing.com/turing/captcha/challenge" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Verify')} size="small" />
+        <ActionButton color="primary" text={t('Verify')} size="small" />
       </a>
     )
   }
@@ -135,7 +138,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://chat.lmsys.org" target="_blank" rel="noreferrer">
-        <Button color="primary" text={t('Refresh session')} size="small" />
+        <ActionButton color="primary" text={t('Refresh session')} size="small" />
       </a>
     )
   }
