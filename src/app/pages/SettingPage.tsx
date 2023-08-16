@@ -8,9 +8,11 @@ import RadioGroup from '~app/components/RadioGroup'
 import Select from '~app/components/Select'
 import ChatGPTAPISettings from '~app/components/Settings/ChatGPTAPISettings'
 import ChatGPTAzureSettings from '~app/components/Settings/ChatGPTAzureSettings'
+import ChatGPTOpenRouterSettings from '~app/components/Settings/ChatGPTOpenRouterSettings'
 import ChatGPTPoeSettings from '~app/components/Settings/ChatGPTPoeSettings'
 import ChatGPWebSettings from '~app/components/Settings/ChatGPTWebSettings'
 import ClaudeAPISettings from '~app/components/Settings/ClaudeAPISettings'
+import ClaudeOpenRouterSettings from '~app/components/Settings/ClaudeOpenRouterSettings'
 import ClaudePoeSettings from '~app/components/Settings/ClaudePoeSettings'
 import EnabledBotsSettings from '~app/components/Settings/EnabledBotsSettings'
 import KDB from '~app/components/Settings/KDB'
@@ -136,6 +138,8 @@ function SettingPage() {
             <ChatGPTAzureSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           ) : userConfig.chatgptMode === ChatGPTMode.Poe ? (
             <ChatGPTPoeSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
+          ) : userConfig.chatgptMode === ChatGPTMode.OpenRouter ? (
+            <ChatGPTOpenRouterSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           ) : (
             <ChatGPWebSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           )}
@@ -151,6 +155,8 @@ function SettingPage() {
             <ClaudeAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           ) : userConfig.claudeMode === ClaudeMode.Webapp ? (
             <ClaudeWebappSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
+          ) : userConfig.claudeMode === ClaudeMode.OpenRouter ? (
+            <ClaudeOpenRouterSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           ) : (
             <ClaudePoeSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           )}
