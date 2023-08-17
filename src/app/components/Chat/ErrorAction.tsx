@@ -36,14 +36,14 @@ const ChatGPTAuthErrorAction = () => {
 
   return (
     <div className="flex flex-row gap-2 items-center">
-      <ActionButton color="primary" text={t('Login to ChatGPT')} onClick={fixChatGPT} isLoading={fixing} size="small" />
+      <ActionButton text={t('Login to ChatGPT')} onClick={fixChatGPT} isLoading={fixing} />
       <span className="text-sm text-primary-text">OR</span>
       <a
         href={Browser.runtime.getURL('app.html#/setting')}
         target={isSidePanel ? '_blank' : undefined}
         rel="noreferrer"
       >
-        <ActionButton color="primary" text={t('Switch to API mode')} size="small" />
+        <ActionButton text={t('Switch to API mode')} />
       </a>
     </div>
   )
@@ -58,7 +58,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://bing.com" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Login at bing.com')} size="small" />
+        <ActionButton text={t('Login at bing.com')} />
       </a>
     )
   }
@@ -67,7 +67,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://poe.com" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Login at poe.com')} size="small" />
+        <ActionButton text={t('Login at poe.com')} />
       </a>
     )
   }
@@ -76,7 +76,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://xinghuo.xfyun.cn" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Login at xfyun.cn')} size="small" />
+        <ActionButton text={t('Login at xfyun.cn')} />
       </a>
     )
   }
@@ -85,7 +85,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://openai.com/waitlist/gpt-4-api" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Join the waitlist')} size="small" />
+        <ActionButton text={t('Join the waitlist')} />
       </a>
     )
   }
@@ -94,14 +94,14 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://chat.openai.com" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Login to ChatGPT')} size="small" />
+        <ActionButton text={t('Login to ChatGPT')} />
       </a>
     )
   }
   if (error.code === ErrorCode.CLAUDE_WEB_UNAUTHORIZED) {
     return (
       <a href="https://claude.ai" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Login to Claude.ai')} size="small" />
+        <ActionButton text={t('Login to Claude.ai')} />
       </a>
     )
   }
@@ -120,7 +120,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://bard.google.com" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text="Visit bard.google.com" size="small" />
+        <ActionButton text="Visit bard.google.com" />
       </a>
     )
   }
@@ -129,7 +129,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://www.bing.com/turing/captcha/challenge" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Verify')} size="small" />
+        <ActionButton text={t('Verify')} />
       </a>
     )
   }
@@ -138,7 +138,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
     return (
       <a href="https://chat.lmsys.org" target="_blank" rel="noreferrer">
-        <ActionButton color="primary" text={t('Refresh session')} size="small" />
+        <ActionButton text={t('Refresh session')} />
       </a>
     )
   }
@@ -161,9 +161,9 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     store.set("input_text_message", t('Please check your network connection'))
 
     return (
-        <div>
-          <p className="ml-2 text-secondary-text text-sm">{t('Please check your network connection')}</p>
-        </div>
+      <div>
+        <p className="ml-2 text-secondary-text text-sm">{t('Please check your network connection')}</p>
+      </div>
     )
   }
   if (error.code === ErrorCode.POE_MESSAGE_LIMIT) {
