@@ -1,0 +1,32 @@
+#loading {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 101;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading-wrapper {
+    position: relative;
+    /*top: -50%;*/
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#loading-wrapper img {
+    /*height: 82px;*/
+    margin-bottom: 27px;
+    /*background-color: gray;*/
+    padding: 10px;
+}
