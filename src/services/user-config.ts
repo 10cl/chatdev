@@ -59,7 +59,7 @@ const userConfigWithDefaultValue = {
   azureOpenAIApiKey: '',
   azureOpenAIApiInstanceName: '',
   azureOpenAIApiDeploymentName: '',
-  enabledBots: Object.keys(CHATBOTS).slice(0, 1) as BotId[],
+  enabledBots: Object.keys(CHATBOTS).slice(0, 2) as BotId[],
   claudeApiKey: '',
   claudeMode: ClaudeMode.Poe,
   claudeApiModel: ClaudeAPIModel['claude-instant-1'],

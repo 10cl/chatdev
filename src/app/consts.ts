@@ -20,6 +20,10 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: any }> = {
     name: 'ChatGPT',
     avatar: chatgptLogo,
   },
+  xunfei: {
+    name: i18n.t('iFlytek Spark'),
+    avatar: xunfeiLogo,
+  },
   bing: {
     name: 'Bing',
     avatar: bingLogo,
@@ -31,10 +35,6 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: any }> = {
   claude: {
     name: 'Claude',
     avatar: claudeLogo,
-  },
-  xunfei: {
-    name: i18n.t('iFlytek Spark'),
-    avatar: xunfeiLogo,
   },
   chatglm: {
     name: 'ChatGLM',

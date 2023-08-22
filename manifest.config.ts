@@ -6,7 +6,7 @@ export default defineManifest(async (env) => {
     name: '__MSG_appName__',
     description: '__MSG_appDesc__',
     default_locale: 'en',
-    version: '1.0.0',
+    version: '1.0.1',
     icons: {
       '16': 'src/assets/icon.png',
       '32': 'src/assets/icon.png',
@@ -35,10 +35,10 @@ export default defineManifest(async (env) => {
     commands: {
       'open-app': {
         suggested_key: {
-          default: 'Alt+C',
-          windows: 'Alt+C',
-          linux: 'Alt+C',
-          mac: 'Command+C',
+          default: 'Alt+L',
+          windows: 'Alt+L',
+          linux: 'Alt+L',
+          mac: 'Command+L',
         },
         description: 'Open ChatDev app',
       },
