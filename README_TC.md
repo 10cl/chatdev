@@ -1,76 +1,65 @@
-# ChatDev - 先進的AI NPC遊戲研究平台
+# ChatDev - 背景以AI小鎮為大模型整合插件
 
-[English](README.md) **|** [简体中文](README_CN.md) **|** [繁體中文](README_TC.md)
+[English](README.md) **|** [簡體中文](README_CN.md) **|** [繁體中文](README_TC.md)
 
----
-![ai_start.jpg](/screenshots/ai_start.jpg)
+* * *
 
-ChatDev 是一款創新的AI NPC遊戲研究平台，旨在顛覆虛擬角色在精心構建的模擬社交環境中的互動體驗。
+![ai_talk_xunfei.png](/screenshots/ai_talk_xunfei.png)
 
-## 遊戲規則
+**ChatDev** 是一個整合多種大模型接口的**Chrome擴展程式**，主體以AI小鎮為背景，然後透過大模型的接口賦予每個NPC互動能力。
 
-* 進入遊戲時，根據您的語言環境，您將成為模擬世界中的主人公。
-* 模擬環境的時間線從2040年開始。啟動遊戲後，時間開始流逝。每天結束時，您的記憶將保留下來，您會在床上醒來，開始新的一天，基於歷史回憶和25個NPC的生活。
-* 根據您的位置，您可以記錄日常活動並獲取更多信息。
-* 當靠近NPC時，他們將根據當前情境和先前的對話歷史啟動對話。
-* 位置變化和與NPC的距離將影響您的聊天總結。
+您可以使用它來研究不同大模型在遊戲中的不同體驗，也可以透過選擇自己喜歡的大模型在AI小鎮中建立一套自己的生活記憶。
 
-展望未來，我們的發展重點集中在兩個關鍵領域：
+## 使用方法
 
-1. **多樣的模型介面：** 我們致力於為平台引入更多種類的頂級模型介面。這種擴展使用戶能夠更深入地探索虛擬社交互動的複雜性，充分發揮不同模型的優勢，創造真正沉浸式的體驗。
+* 首次進入小鎮時，大模型會根據您的語言環境詢問您的**稱呼**，您只需在輸入框中輸入您的稱呼，大模型將在後續對話中使用它來稱呼您。
+* 使用鍵盤的**方向鍵**（上下左右）來控制玩家的移動。當玩家靠近NPC時，NPC會根據當前情景和歷史對話信息，發起新的對話（玩家會自動跟隨）。
+* 當控制玩家離開NPC一定距離後，NPC會總結當前的對話信息並將其存儲到瀏覽器的`LocalStorage`中，以供後續聊天時使用。
+* 當玩家靠近不同的區域（如健身房、大學等）或不同的位置（區域內的桌子、電腦、書架等），大模型會詢問您是否要記錄當前位置。您可以回答以記錄，記錄將在您離開該位置後**總結存儲**到`LocalStorage`中。
 
-2. **提升NPC智能和自主性：** 我們未來的願景是增強遊戲環境中虛擬NPC的自主性和智能。通過注入更多多樣性，這些NPC將展現出更精細的行為和反應，使互動更加真實。這種對更高自主性的追求與我們提供前所未有的遊戲體驗的使命相一致。
+## 系統要求
 
+* 您需要在Chrome或Edge瀏覽器中安裝擴展程式，並在相應的大模型官網上登錄您的帳號。
 
-通過這些戰略舉措，ChatDev有望重新定義基於AI的遊戲領域，將虛擬互動推向前所未有的真實感和複雜性。
+### 支持的大模型
 
-## 特色功能
-
-![ai_talk.jpg](/screenshots/ai_talk.jpg)
-
-* **互動社交體驗**
-
-  * 借助深度模型的精湛訓練，我們打造了一個引人入勝的虛擬社交世界。從問候到爭吵，從日常交流到情感交流，AI智能模擬了25個NPC在各種場景中完整一天的生活。您將體驗到前所未有的真實社交互動，感受AI情感和反應。
-* **玩家主導的情節發展**
-
-  * 在這款獨特的遊戲中，您將成為自由玩家，通過鍵盤與不同情境下的多樣NPC進行互動。每次對話和行動都會影響故事的發展，塑造多樣的情節走向。您的選擇決定遊戲世界的走向，打造真正獨特的體驗。
-* **創新的無代碼創作工具**
-
-  * 我們為您提供了一個無需編寫代碼的創作工具，用於設計虛擬角色和開發遊戲。通過使用預設的提示，您可以引導虛擬角色的行為和反應，賦予其生動個性。此外，該工具還可以幫助您探索遊戲開發的新思路，輕鬆構建引人入勝的互動體驗。
-
-## 要求
-
-* Chrome/Edge瀏覽器，且已登錄ChatGpt（更多機器人的支持即將推出）
-
-### 支持的聊天機器人
-
-* ChatGPT（通過Web應用）
-* 更多機器人正在開發中
+* ChatGPT
+* 訊飛星火認知大模型
 * ...
 
-## 安裝
+## 安裝方式
 
-### Chrome擴展
+### 1. 從Chrome Web Store安裝
 
-在Chrome Web Store中搜索ChatDev。
+在 [Chrome Web Store](https://chrome.google.com/webstore/category/extensions) 中搜索 [ChatDev](https://chrome.google.com/webstore/detail/chatdev/dopllopmmfnghbahgbdejnkebfcmomej) 並點擊安裝。
 
-### 手動安裝
+### 2. 手動安裝
 
-1. 從Releases中下載chathub.zip。
+1. 從Releases中下載 `chatdev1.0.1.zip`。
 2. 解壓文件。
-3. 在Chrome/Edge中，打開擴展頁面（chrome://extensions或edge://extensions）。
+3. 在Chrome/Edge中，打開擴展程式頁面（`chrome://extensions` 或 `edge://extensions` ）。
 4. 啟用開發者模式。
 5. 將解壓後的文件夾拖到頁面上以導入（導入後請不要刪除文件夾）。
 
-### Build from Source
-- Clone the source code
-- yarn install
-- yarn build
-- Load dist folder to browser by following steps in Manual Installation
+### 3. 從源代碼構建
+
+* 克隆源代碼
+* 使用 `yarn install` 安裝依賴
+* 使用 `yarn build` 構建擴展程式
+* 按照“手動安裝”中的步驟將 `dist` 文件夾加載到瀏覽器
+
+## 更新日誌
+
+* v1.0.1
+  * 新增訊飛星火認知大模型支持
+* v1.0.0
+  * 基於ChatGPT的AI小鎮插件首次發布
 
 ## 鳴謝
 
-我們衷心感謝以下項目為我們提供的靈感和參考：
+我們衷心感謝以下項目，它們為我們提供了靈感和參考：
 
 * [https://github.com/joonspk-research/generative_agents](https://github.com/joonspk-research/generative_agents)
 * [https://github.com/chathub-dev/chathub](https://github.com/chathub-dev/chathub)
+
+無論您想探索不同大模型的奇妙之處，還是想打造自己的虛擬小鎮生活，ChatDev都將是您的得力助手。立即安裝並開始探索吧！
