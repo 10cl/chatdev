@@ -19,9 +19,9 @@ export class XunfeiBot extends AbstractBot {
   private conversationContext?: ConversationContext
 
   async doSendMessage(params: SendMessageParams) {
-    if (!(await requestHostPermission('https://*.xfyun.cn/'))) {
+/*    if (!(await requestHostPermission('https://!*.xfyun.cn/'))) {
       throw new ChatError('Missing xfyun.cn permission', ErrorCode.MISSING_HOST_PERMISSION)
-    }
+    }*/
 
     if (!this.conversationContext) {
       const [geeToken, { chatId }] = await Promise.all([getGeeToken(), createConversation()])
@@ -36,7 +36,7 @@ export class XunfeiBot extends AbstractBot {
     form.append('fd', generateFD())
     form.append('isBot', '0')
 
-    const resp = await fetch('https://xinghuo.xfyun.cn/iflygpt/u/chat_message/chat', {
+    const resp = await fetch('https://xinghuo.xfyun.cn/iflygpt-chat/u/chat_message/chat', {
       method: 'POST',
       signal: params.signal,
       body: form,

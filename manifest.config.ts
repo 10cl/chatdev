@@ -21,6 +21,7 @@ export default defineManifest(async (env) => {
     host_permissions: [
       'https://*.bing.com/',
       'https://*.openai.com/',
+      'https://*.xfyun.cn/',
       'https://bard.google.com/',
       'https://*.chatdev.toscl.com/',
     ],
