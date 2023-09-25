@@ -7,6 +7,9 @@
 
 **ChatDev** is a powerful **Chrome extension** that integrates multiple large language model interfaces to provide diverse conversational experiences. With visual customization of Prompt-Flow task sequences, you can not only explore the performance of different large models in games but also create your own task execution flows. Interact with virtual NPCs to enrich your experiences, and craft your unique memories in the AI town by selecting your preferred large models.
 
+https://github.com/10cl/chatdev/assets/6964022/2cbdb313-e0e5-49d8-bd03-58c5b710ca72
+
+
 ## Key Features
 
 * **No coding required, freely customize prompts**
