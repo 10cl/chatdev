@@ -1,6 +1,9 @@
 import i18next from 'i18next'
 import { ofetch } from 'ofetch'
 import Browser from 'webextension-polyfill'
+import store from "store2";
+import promptsLocal from '~/assets/prompts.json'
+import {uuid} from "~utils";
 
 export interface Prompt {
   id: string
@@ -10,7 +13,24 @@ export interface Prompt {
 
 export async function loadLocalPrompts() {
   const { prompts: value } = await Browser.storage.local.get('prompts')
-  return (value || []) as Prompt[]
+  let prompts_result = (value || []) as Prompt[]
+  if (store.get("prompts") === undefined || store.get("prompts") === null || store.get("prompts") === ""){
+    const prompts_json = promptsLocal
+    prompts_json.forEach(item => {
+      // @ts-ignore
+      item.id = uuid()
+    });
+
+    const prompt_dict = {};
+    prompts_json.forEach(item => {
+      // @ts-ignore
+      prompt_dict[item.title] = item.prompt;
+    });
+    store.set("prompts", prompt_dict)
+    prompts_result = <Prompt[]>prompts_json
+    await Browser.storage.local.set({ prompts: prompts_result })
+  }
+  return prompts_result
 }
 
 export async function saveLocalPrompt(prompt: Prompt) {
@@ -28,12 +48,30 @@ export async function saveLocalPrompt(prompt: Prompt) {
     prompts.unshift(prompt)
   }
   await Browser.storage.local.set({ prompts })
+
+  const { prompts: prompts_value } = await Browser.storage.local.get('prompts')
+  const prompt_dict = {};
+  // @ts-ignore
+  prompts_value.forEach(item => {
+    // @ts-ignore
+    prompt_dict[item.title] = item.prompt;
+  });
+  store.set("prompts", prompt_dict)
   return existed
 }
 
 export async function removeLocalPrompt(id: string) {
   const prompts = await loadLocalPrompts()
   await Browser.storage.local.set({ prompts: prompts.filter((p) => p.id !== id) })
+
+  const { prompts: prompts_value } = await Browser.storage.local.get('prompts')
+  const prompt_dict = {};
+  // @ts-ignore
+  prompts_value.forEach(item => {
+    // @ts-ignore
+    prompt_dict[item.title] = item.prompt;
+  });
+  store.set("prompts", prompt_dict)
 }
 
 export async function loadRemotePrompts() {
