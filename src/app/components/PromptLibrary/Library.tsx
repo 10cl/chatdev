@@ -9,6 +9,7 @@ import { uuid } from '~utils'
 import Button from '../Button'
 import { Input, Textarea } from '../Input'
 import Tabs, { Tab } from '../Tabs'
+import {GoBook} from "react-icons/go";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
   return (
@@ -39,13 +40,18 @@ const PromptItem = (props: {
 
   return (
     <div className="group relative flex items-center space-x-3 rounded-lg border border-primary-border bg-primary-background px-5 py-4 shadow-sm hover:border-gray-400">
-      <div className="min-w-0 flex-1">
+        {props.title.indexOf("Profile_") != -1 && (
+            <img src={("./assets/profile/" + props.title.replace("Profile_", "")) + ".png"} className="w-5 h-5"  alt={props.title}/>
+        )}
+        {props.title.indexOf("Profile_") == -1 && (
+            <GoBook size={22} color="#707070" className="cursor-pointer"/>
+        )}
+        <div className="min-w-0 flex-1">
         <p title={props.prompt} className="truncate text-sm font-medium text-primary-text">{props.title}</p>
       </div>
       <div className="flex flex-row gap-1">
         {props.edit && <ActionButton text={t('Edit')} onClick={props.edit} />}
         {props.copyToLocal && <ActionButton text={t(saved ? 'Saved' : 'Save')} onClick={copyToLocal} />}
-        <ActionButton text={t('Use')} onClick={() => props.insertPrompt(props.prompt)} />
       </div>
       {props.remove && (
         <img
