@@ -70,6 +70,11 @@ function Sidebar() {
               </a>
             </Tooltip>
           )}
+          <Tooltip content={t('Settings')}>
+            <Link to="/setting">
+              <IconButton icon={settingIcon} />
+            </Link>
+          </Tooltip>
         </div>
       </div>
       <CommandBar />
