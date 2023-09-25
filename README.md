@@ -3,7 +3,7 @@
 [English](README.md) **|** [简体中文](README_CN.md) **|** [繁體中文](README_TC.md)
 
 * * *
-![chatdev.png](/images/chatdev.png)
+![chatdev.png](/screenshots/chatdev.png)
 
 **ChatDev** is a powerful **Chrome extension** that integrates multiple large language model interfaces to provide diverse conversational experiences. With visual customization of Prompt-Flow task sequences, you can not only explore the performance of different large models in games but also create your own task execution flows. Interact with virtual NPCs to enrich your experiences, and craft your unique memories in the AI town by selecting your preferred large models.
 
@@ -18,15 +18,15 @@
 
 ## Develop Your Own Language Model Prompt Flow
 
-![prompt-edit.png](/images/prompt-edit.png)
+![prompt-edit.png](/screenshots/prompt-edit.png)
 
 ## Execute According to Your Defined Flow Within the Game
 
-![prompt-flow.jpg](/images/prompt-flow.jpg)
+![prompt-flow.jpg](/screenshots/prompt-flow.jpg)
 
 ## Customize Your Prompt Actions and NPC Profiles
 
-![prompt.png](/images/prompt.png)
+![prompt.png](/screenshots/prompt.png)
 
 ## Game Controls
 
