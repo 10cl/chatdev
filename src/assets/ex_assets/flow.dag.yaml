@@ -1,0 +1,46 @@
+outputs:
+  overview:
+    type: string
+    reference: ${task_overview.output}
+nodes:
+  - name: task_team_org
+    type: prompt
+    speak_result: 'player'
+    source:
+      type: code
+      path: Planning_Task_Team_Org
+    inputs:
+      npc_intro: ${inputs.npc_introduce}
+      input_text: ${inputs.input_text}
+  - name: task_company
+    type: prompt
+    source:
+      type: code
+      path: Planning_Task_Company
+    inputs:
+      input_text: ${inputs.input_text}
+  - name: task_prompt_update
+    type: prompt
+    source:
+      type: code
+      path: Planning_Task_Prompt_Enhance
+    inputs:
+      input_text: ${inputs.input_text}
+  - name: task_duty
+    type: prompt
+    source:
+      type: code
+      path: Planning_Task_Team_Duty
+    inputs:
+      input_text: ${task_prompt_update.output}
+      task_team: ${task_team_org.output}
+  - name: task_overview
+    type: prompt
+    source:
+      type: code
+      path: Planning_Task_Overview
+    inputs:
+      input_text: ${task_prompt_update.output}
+      company_info: ${task_company.output}
+      task_team: ${task_team_org.output}
+      task_duty: ${task_duty.output}
