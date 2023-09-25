@@ -6,6 +6,9 @@ import { setConversationMessages } from '~services/chat-history'
 import { ChatMessageModel } from '~types'
 import { uuid } from '~utils'
 import { BotId } from '../bots'
+import store from "store2";
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
 
 export function useChat(botId: BotId) {
   const chatAtom = useMemo(() => chatFamily({ botId, page: 'singleton' }), [botId])
@@ -40,9 +43,11 @@ export function useChat(botId: BotId) {
         signal: abortController.signal,
         onEvent(event) {
           if (event.type === 'UPDATE_ANSWER') {
+            store.set("input_text_message", "")
             updateMessage(botMessageId, (message) => {
               message.text = event.data.text
             })
+            store.set("response_update_text", event.data.text)
           } else if (event.type === 'ERROR') {
             console.error('sendMessage error', event.error.code, event.error)
             updateMessage(botMessageId, (message) => {
@@ -53,6 +58,7 @@ export function useChat(botId: BotId) {
               draft.generatingMessageId = ''
             })
           } else if (event.type === 'DONE') {
+            store.set("input_text_message", "")
             setChatState((draft) => {
               draft.abortController = undefined
               draft.generatingMessageId = ''
