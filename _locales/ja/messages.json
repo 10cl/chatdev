@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev"
+    "message": "ChatDev: Promptフローを使用してAIエージェントを視覚化します。"
   },
   "appDesc": {
-    "message": "Chat with your generative ai agents."
+    "message": "複数の大規模モデルの対話能力をサポートし、カスタムのPrompt Flowを使用してゲーム内エフェクトを視覚的に生成します。"
   }
 }

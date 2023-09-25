@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev"
+    "message":  "ChatDev : Visualisez votre AI Agent."
   },
   "appDesc": {
-    "message": "Chat with your generative ai agents."
+    "message": "Prend en charge les capacités de conversation de plusieurs modèles de grande taille et génère visuellement des effets de jeu grâce à des Flows de Prompt personnalisés."
   }
 }

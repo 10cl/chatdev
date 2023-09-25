@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev"
+    "message": "ChatDev: แสดงผล AI Agent."
   },
   "appDesc": {
-    "message": "Chat with your generative ai agents."
+    "message":  "รองรับความสามารถในการสนทนาของโมเดลขนาดใหญ่หลายราย และสร้างเอฟเฟคในเกมในรูปแบบทางสายตาผ่าน Prompt Flows ที่กำหนดเอง"
   }
 }

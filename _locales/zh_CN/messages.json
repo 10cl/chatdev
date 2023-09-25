@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev"
+    "message": "ChatDev：可视化您的AI Agent。"
   },
   "appDesc": {
-    "message": "Chat with your generative ai agents."
+    "message": "支持多种大模型的对话能力，通过自定义Prompt-Flow，可视化生成游戏效果。"
   }
 }
