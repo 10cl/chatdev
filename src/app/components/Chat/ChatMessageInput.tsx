@@ -34,7 +34,7 @@ interface Props {
 
 const ChatMessageInput: FC<Props> = (props) => {
   const { t } = useTranslation()
-  const { placeholder = t('Use / to select prompts, Shift+Enter to add new line') } = props
+  const { placeholder = t('Use ↑ ↓ ← → control the player\'s movement, Enter here for communication') } = props
 
   const [value, setValue] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
@@ -104,7 +104,7 @@ const ChatMessageInput: FC<Props> = (props) => {
 
   const onValueChange = useCallback((v: string) => {
     setValue(v)
-    setIsComboboxOpen(v === '/')
+    //setIsComboboxOpen(v === '/')
   }, [])
 
   useEffect(() => {
