@@ -75,3 +75,21 @@ body {
   @include dark-theme;
   @import 'highlight.js/scss/github-dark.scss';
 }
+
+.mouse-position-modal {
+  min-width: 240px;
+  height: 57px;
+  background: #fff;
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  position: absolute;
+  z-index: 2000;
+  padding: 8px 12px;
+  .mouse-position-modal-content {
+    font-size: 16px;
+    color: #262626;
+  }
+}
+.button-rotate-180{
+  transform: rotate(180deg) translateZ(0px);
+}

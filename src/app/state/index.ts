@@ -24,6 +24,8 @@ export const chatFamily = atomFamily(
 
 export const licenseKeyAtom = atomWithStorage('licenseKey', '', undefined, { unstable_getOnInit: true })
 export const sidebarCollapsedAtom = atomWithStorage('sidebarCollapsed', true)
+export const sidebarRightCollapsedAtom = atomWithStorage('sidebarRightCollapsed', true)
+export const chatInList = atomWithStorage('chatInList', true)
 export const themeColorAtom = atomWithStorage('themeColor', getDefaultThemeColor())
 export const followArcThemeAtom = atomWithStorage('followArcTheme', false)
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')

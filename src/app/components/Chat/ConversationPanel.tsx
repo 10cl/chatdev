@@ -1,8 +1,9 @@
 import cx from 'classnames'
-import { FC, useCallback, useMemo, useState } from 'react'
+import {FC, Suspense, useCallback, useMemo, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import clearIcon from '~/assets/icons/clear.svg'
 import historyIcon from '~/assets/icons/history.svg'
+import editIcon from '~/assets/icons/edit.svg'
 import shareIcon from '~/assets/icons/share.svg'
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
@@ -16,8 +17,25 @@ import SwitchBotDropdown from '../SwitchBotDropdown'
 import Tooltip from '../Tooltip'
 import ChatMessageInput from './ChatMessageInput'
 import ChatMessageList from './ChatMessageList'
+import LocalPrompts from './LocalPrompts'
 import store from 'store2'
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
+import React, { useEffect  } from 'react';
+import GameButton from '../GameButtom';
+import {useAtom} from "jotai/index";
+import {chatInList, sidebarRightCollapsedAtom} from "~app/state";
+import {BeatLoader} from "react-spinners";
+import {loadLocalPrompts, Prompt, saveLocalPrompt} from "~services/prompts";
+import {Input} from "~app/components/Input";
+import AceEditor from "react-ace";
+import useSWR from "swr";
 
+import "ace-builds/src-noconflict/theme-github";
+
+import "ace-builds/src-noconflict/mode-yaml";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-language_tools";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -36,6 +54,7 @@ const ConversationPanel: FC<Props> = (props) => {
   const mode = props.mode || 'full'
   const marginClass = 'mx-5'
   const [showHistory, setShowHistory] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
 
   const context: ConversationContextValue = useMemo(() => {
@@ -46,24 +65,45 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
+      setShowEditor(false)
       // chatDev begin
       // props.onUserSendMessage(input as string, props.botId)
       store.set("input_text_pending", input)
+      store.set("start_page", props.botId)
       // chatDev end
     },
     [props],
   )
 
-  function checkElement(){
-    const value = store.get("input_text")? store.get("input_text") : ""
-    if(value != ""){
-      props.onUserSendMessage(value, props.botId)
-      store.set("input_text", "")
+  useEffect(() => {
+    startTimer();
+    return () => {
+      stopTimer();
+    };
+  }, []);
+
+  const [count, setCount] = useState(0);
+  const [intervalId, setIntervalId] = useState(null);
+  const startTimer = () => {
+    const id = setInterval(() => {
+      setCount((prevCount) => prevCount + 1);
+      const value = store.get("input_text") ? store.get("input_text") : ""
+      if (value != "") {
+        props.onUserSendMessage(value, props.botId)
+        store.set("input_text", "")
+      }
+    }, 1000);
+
+    // @ts-ignore
+    setIntervalId(id);
+  };
+
+  const stopTimer = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
     }
-
-  }
-
-  setInterval(checkElement, 1000);
+  };
 
   const resetConversation = useCallback(() => {
     if (!props.generating) {
@@ -76,10 +116,78 @@ const ConversationPanel: FC<Props> = (props) => {
     trackEvent('open_history_dialog', { botId: props.botId })
   }, [props.botId])
 
+  const openFlowEditor = useCallback(() => {
+    setShowEditor(!showEditor)
+    trackEvent('open_edit', { botId: props.botId })
+  }, [props.botId])
+
   const openShareDialog = useCallback(() => {
     setShowShareDialog(true)
     trackEvent('open_share_dialog', { botId: props.botId })
   }, [props.botId])
+
+  const getOffsetX = (e: any) =>{
+    const event = e || window.event;
+    const srcObj = e.target || e.srcElement;
+    if (event.offsetX){
+      return event.offsetX;
+    }else{
+      const rect = srcObj.getBoundingClientRect();
+      const clientx = event.clientX;
+      return clientx - rect.left;
+    }
+  }
+
+
+  const getOffsetY = (e: any) => {
+    const event = e || window.event;
+    const srcObj = e.target || e.srcElement;
+    if (event.offsetY){
+      return event.offsetY;
+    }else{
+      const rect = srcObj.getBoundingClientRect();
+      const clientx = event.clientY;
+      return clientx - rect.top;
+    }
+  }
+
+  const [visible, setVisible] = useState(false);
+  const [defaultPosition, setDefaultPosition] = useState({
+    x: 32,
+    y: 32
+  })
+  useEffect(() => {
+    const ele = document.getElementById('game-container') as HTMLElement;
+    // ele.addEventListener('mouseenter', show)
+    // ele.addEventListener('mousemove', mouseMove)
+    // ele.addEventListener('mouseleave', hide)
+    return () => {
+      // ele.removeEventListener('mouseenter', show)
+      // ele.removeEventListener('mousemove', mouseMove)
+      // ele.removeEventListener('mouseleave', hide)
+    }
+  }, [])
+
+  const show = () => {
+    setVisible(true)
+  }
+
+  const hide = () => {
+    setVisible(false)
+  }
+
+  const mouseMove = (e: MouseEvent) => {
+    const x = getOffsetX(e) + 18;
+    const y = getOffsetY(e) + 18;
+    setDefaultPosition({ x, y });
+  }
+
+  function setCollapsedAndUpdate() {
+    setShowEditor(false)
+    setCollapsed((c) => !c)
+  }
+
+  const [collapsed, setCollapsed] = useAtom(chatInList)
 
   return (
     <ConversationContext.Provider value={context}>
@@ -99,8 +207,31 @@ const ConversationPanel: FC<Props> = (props) => {
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
             )}
           </div>
+          <div className="flex flex-row items-center gap-2 shrink-0 cursor-pointer group">
+            <div className="flex flex-row items-center gap-2">
+              <button
+                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", collapsed ? '' : 'button-rotate-180')}
+                  id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
+                  onClick={() => setCollapsedAndUpdate()}
+                  data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
+                <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-row items-center gap-3">
+            <Tooltip content={t('Edit')}>
+              <img src={editIcon} className="w-5 h-5 cursor-pointer" onClick={openFlowEditor} />
+            </Tooltip>
+            <Tooltip content={t('View history')}>
+              <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
+            </Tooltip>
+          </div>
         </div>
-        <ChatMessageList botId={props.botId} messages={props.messages} className={marginClass} />
+
+        <LocalPrompts className={cx(showEditor?"":"hidden")} setShowEditor={setShowEditor}/>
+
+        <ChatMessageList botId={props.botId} messages={props.messages} className={cx(showEditor?"hidden":"")} />
+
         <div className={cx('mt-3 flex flex-col', marginClass, mode === 'full' ? 'mb-3' : 'mb-[5px]')}>
           <div className={cx('flex flex-row items-center gap-[5px]', mode === 'full' ? 'mb-3' : 'mb-0')}>
             {mode === 'compact' && <span className="font-medium text-xs text-light-text">Send to {botInfo.name}</span>}
@@ -126,6 +257,13 @@ const ConversationPanel: FC<Props> = (props) => {
             }
           />
         </div>
+      </div>
+      <div id="mouse-position-demo" className="mouse-position-demo">
+        <GameButton
+            visible={visible}
+            content="Mouse follow"
+            defaultPosition={defaultPosition}
+        />
       </div>
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
       {showShareDialog && (

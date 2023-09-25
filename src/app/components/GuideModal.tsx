@@ -33,32 +33,12 @@ const GuideModal: FC = () => {
         <div className="flex flex-col items-center gap-4 py-6">
           <p className="font-semibold text-primary-text">{t('Enjoy ChatDev? Give us a 5-star rating!')}</p>
           <a
-            href="https://chrome.google.com/webstore/detail/chathub-all-in-one-chatbo/iaakpnchhognanibcahlpcplchdfmgma"
+            href="https://chrome.google.com/webstore/detail/chatdev/dopllopmmfnghbahgbdejnkebfcmomej"
             target="_blank"
             rel="noreferrer"
           >
             <Button text={t('Write review')} />
           </a>
-        </div>
-      </Dialog>
-    )
-  }
-
-  if (openTimes > 0 && openTimes % 50 === 0 && !premiumState.isLoading && !premiumState.activated) {
-    return (
-      <Dialog title="🥳 🥳 🥳" open={open} onClose={() => setOpen(false)} className="rounded-2xl w-[600px]">
-        <div className="flex flex-col items-center gap-4 py-6">
-          <p className="font-semibold text-primary-text w-[300px] text-center">
-            {t('You have opened ChatDev {{openTimes}} times, consider unlock all features?', { openTimes })}
-          </p>
-          <Link
-            to="/premium"
-            search={{ source: 'open-times' }}
-            onClick={() => setOpen(false)}
-            className="focus-visible:outline-none"
-          >
-            <Button color="primary" text={t('Checkout premium features')} />
-          </Link>
         </div>
       </Dialog>
     )
