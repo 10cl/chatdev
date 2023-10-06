@@ -88,8 +88,6 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow已经开启，请在输入框中输入您的需求。ChatDev将会根据右侧定义的Prompt Flow，自动拆分需求并在地图上开启相关的圆桌会议。",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow已关闭，您可以继续在地图上自由探索，寻找NPC进行交流。",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已执行完毕，您可以继续等待其他伙伴的加入。点击上方切换按钮进入聊天模式，以查看项目概览。当所有成员都到齐后，您可以开始圆桌会议，靠近对应的伙伴继续讨论当前的项目。",
-      'Login to ChatGPT': '登录ChatGPT',
-      'Set API key': '设置API key',
     },
   },
   'zh-CN': {
@@ -177,8 +175,6 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow已经开启，请在输入框中输入您的需求。ChatDev将会根据右侧定义的Prompt Flow，自动拆分需求并在地图上开启相关的圆桌会议。",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow已关闭，您可以继续在地图上自由探索，寻找NPC进行交流。",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已执行完毕，您可以继续等待其他伙伴的加入。点击上方切换按钮进入聊天模式，以查看项目概览。当所有成员都到齐后，您可以开始圆桌会议，靠近对应的伙伴继续讨论当前的项目。",
-      'Login to ChatGPT': '登录ChatGPT',
-      'Set API key': '设置API key',
     },
   },
   de: {
