@@ -183,6 +183,7 @@ const ConversationPanel: FC<Props> = (props) => {
   }
 
   function setCollapsedAndUpdate() {
+    trackEvent('switch_map_and_chat')
     setShowEditor(false)
     setCollapsed((c) => !c)
   }
