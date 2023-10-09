@@ -53,7 +53,12 @@ const PromptItem = (props: {
         {props.edit && <ActionButton text={t('Edit')} onClick={props.edit} />}
         {props.copyToLocal && <ActionButton text={t(saved ? 'Saved' : 'Save')} onClick={copyToLocal} />}
       </div>
-      {props.remove && (
+      {props.title.indexOf("Flow_Dag_Yaml") == -1
+          && props.title.indexOf("Profile_") == -1
+          && props.title.indexOf("Planning_") == -1
+          && props.title.indexOf("Action_") == -1
+          && props.title.indexOf("Memory_") == -1
+          && props.remove && (
         <img
           src={closeIcon}
           className="hidden group-hover:block absolute right-[-8px] top-[-8px] cursor-pointer w-4 h-4 rounded-full bg-primary-background"
