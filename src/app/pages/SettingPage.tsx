@@ -96,6 +96,14 @@ function SettingPage() {
   return (
     <PagePanel title={`${t('Settings')} (v${getVersion()})`}>
       <div className="flex flex-col gap-5 mt-3">
+        <div>
+          <p className="font-bold mb-1 text-lg">{t('Export/Import All Data')}</p>
+          <p className="mb-3 opacity-80">{t('Data includes all your settings, chat histories, and local prompts')}</p>
+          <div className="flex flex-row gap-3">
+            <Button size="small" text={t('Export')} icon={<BiExport />} onClick={exportData} />
+            <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importData} />
+          </div>
+        </div>
         <div className="flex flex-col gap-2">
           <p className="font-bold text-lg">{t('Shortcut to open this app')}</p>
           <div className="flex flex-row gap-2 items-center">
