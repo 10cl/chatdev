@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import cx from 'classnames'
-import { AiFillCloud, AiFillFileMarkdown } from 'react-icons/ai'
 import { ChatMessageModel } from '~types'
-import Button from '../Button'
 import Dialog from '../Dialog'
 import MarkdownView from './MarkdownView'
-import ShareGPTView from './ShareGPTView'
+import store from "store2";
 
 interface Props {
   open: boolean
@@ -14,38 +12,16 @@ interface Props {
 }
 
 const ShareDialog = (props: Props) => {
-  const [mode, setMode] = useState<'markdown' | 'sharegpt' | undefined>()
+  const [mode, setMode] = useState<'markdown' | undefined>()
+
   return (
     <Dialog
-      title="Share Chat"
+      title="Share Prompt Library"
       open={props.open}
       onClose={props.onClose}
-      className={cx('rounded-xl', mode ? 'w-[800px] h-[400px]' : 'w-[600px] h-[250px]')}
+      className={cx('rounded-xl', mode ? 'w-[800px] h-[400px]' : 'w-[600px] h-[350px]')}
     >
-      {(() => {
-        if (mode === 'markdown') {
-          return <MarkdownView messages={props.messages} />
-        }
-        if (mode === 'sharegpt') {
-          return <ShareGPTView messages={props.messages} />
-        }
-        return (
-          <div className="flex flex-col gap-5 justify-center items-center p-5 h-full">
-            <Button
-              text="Markdown"
-              color="primary"
-              icon={<AiFillFileMarkdown className="mr-1" />}
-              onClick={() => setMode('markdown')}
-            />
-            <Button
-              text="ShareGPT"
-              color="primary"
-              icon={<AiFillCloud className="mr-1" />}
-              onClick={() => setMode('sharegpt')}
-            />
-          </div>
-        )
-      })()}
+      <MarkdownView text={"```json\n" + JSON.stringify(store.get("prompts"), null, 2) + "\n```"} />
     </Dialog>
   )
 }

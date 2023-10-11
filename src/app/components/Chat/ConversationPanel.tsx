@@ -217,10 +217,15 @@ const ConversationPanel: FC<Props> = (props) => {
                   data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
                 <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
               </button>
+              <label className="text-[13px] whitespace-nowrap text-light-text font-medium select-none"
+                     id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(collapsed ? '聊天模式' : '游戏模式')}</label>
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">
-            <Tooltip content={t('Edit')}>
+            <Tooltip content={t('Share Prompt Library')}>
+              <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />
+            </Tooltip>
+            <Tooltip content={t('Edit') + " Prompt Flow"}>
               <img src={editIcon} className="w-5 h-5 cursor-pointer" onClick={openFlowEditor} />
             </Tooltip>
             <Tooltip content={t('View history')}>
