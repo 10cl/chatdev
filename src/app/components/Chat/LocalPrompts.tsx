@@ -1,4 +1,4 @@
-import {FC, useCallback} from 'react'
+import {FC, useCallback, useState} from 'react'
 import cx from 'classnames'
 import './main.css'
 import React from "react";
@@ -8,6 +8,8 @@ import {loadLocalPrompts, Prompt, saveLocalPrompt} from "~services/prompts";
 import {trackEvent} from "~app/plausible";
 import AceEditor from "react-ace";
 import Button from "~app/components/Button";
+import {useAtom} from "jotai/index";
+import {editorPromptAtom, editorPromptTimesAtom, showEditorAtom} from "~app/state";
 
 interface Props {
     setShowEditor: (show: boolean) => void;
@@ -16,10 +18,12 @@ interface Props {
 
 
 function PromptForm(props: { initialData: Prompt[];onSubmit: (data: Prompt) => void; setShowEditor: (show: boolean) => void;  }) {
+    const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
+    const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
     const { t } = useTranslation()
     function getFlowYaml() {
         for (let i = 0; i < props.initialData.length; i++) {
-            if (props.initialData[i].title == "Flow_Dag_Yaml") {
+            if (props.initialData[i].title == editorPrompt) {
                 return props.initialData[i].prompt;
             }
         }
@@ -30,7 +34,7 @@ function PromptForm(props: { initialData: Prompt[];onSubmit: (data: Prompt) => v
         let prompt = null
 
         for (let i = 0; i < props.initialData.length; i++) {
-            if (props.initialData[i].title == "Flow_Dag_Yaml") {
+            if (props.initialData[i].title == editorPrompt) {
                 prompt = props.initialData[i];
             }
         }
@@ -42,7 +46,7 @@ function PromptForm(props: { initialData: Prompt[];onSubmit: (data: Prompt) => v
     function onSubmitInfo() {
         let prompt = null
         for (let i = 0; i < props.initialData.length; i++) {
-            if (props.initialData[i].title == "Flow_Dag_Yaml") {
+            if (props.initialData[i].title == editorPrompt) {
                 prompt = props.initialData[i];
             }
         }
@@ -55,6 +59,7 @@ function PromptForm(props: { initialData: Prompt[];onSubmit: (data: Prompt) => v
     return (
         <div className="overflow-auto h-full flex flex-col ">
             <AceEditor
+                key={editorPromptTimes}
                 mode="yaml"
                 theme="github"
                 name="prompt"

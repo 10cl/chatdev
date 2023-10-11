@@ -1,8 +1,14 @@
 import cx from 'classnames'
-import {useAtom} from 'jotai'
+import {useAtom, useAtomValue} from "jotai/index";
 import collapseIcon from '~/assets/icons/collapse.svg'
-import {sidebarRightCollapsedAtom} from '~app/state'
-import {useCallback, useEffect, useState} from 'react';
+import {
+    editorPromptAtom,
+    editorPromptTimesAtom,
+    followArcThemeAtom,
+    showEditorAtom,
+    sidebarRightCollapsedAtom
+} from '~app/state'
+import React, {MouseEvent as ReactMouseEvent, useCallback, useEffect, useState} from 'react';
 // @ts-ignore
 import ReactFlow, {
     MiniMap,
@@ -20,6 +26,10 @@ import CustomEdge from "~app/components/Sidebar/CustomEdge";
 import useSWR from "swr";
 import {loadLocalPrompts} from "~services/prompts";
 import {useTranslation} from "react-i18next";
+import {Node} from "@reactflow/core/dist/esm/types/nodes";
+import Tooltip from "~app/components/Tooltip";
+import editIcon from "~assets/icons/edit.svg";
+import {trackEvent} from "~app/plausible";
 
 function PromptFlow() {
     function updateFlow() {
@@ -142,13 +152,41 @@ function PromptFlow() {
     const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
     const [collapsed, setCollapsed] = useAtom(sidebarRightCollapsedAtom)
+    const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+    const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
+    const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
 
     const edgeTypes: EdgeTypes = {
         default: CustomEdge,
     };
 
-    const [nodeBg, setNodeBg] = useState('#bbd9e9');
+    const threshold = 500;
 
+    const [nodeBg, setNodeBg] = useState('#bbd9e9');
+    const onNodeClick = (event: ReactMouseEvent, node: Node) => {
+        const currentTime = new Date().getTime();
+        const lastClickTime = store.get("chatdev_node_click_time")
+        if (lastClickTime !== null && lastClickTime !== undefined) {
+            const timeInterval = currentTime - lastClickTime;
+            if (timeInterval < threshold) {
+                // @ts-ignore
+                if (node.source && node.source.path) {
+                    // @ts-ignore
+                    setEditorPrompt(node.source.path);
+                    setEditorPromptTimes(editorPromptTimes + 1);
+                    setShowEditor(true);
+                    trackEvent('open_editor_node');
+                }
+            }
+        }
+        store.set("chatdev_node_click_time", currentTime)
+    }
+    const openFlowEditor = useCallback(() => {
+        setEditorPrompt("Flow_Dag_Yaml")
+        setEditorPromptTimes(editorPromptTimes + 1)
+        setShowEditor(!showEditor)
+        trackEvent('open_editor_prompt_flow')
+    },[])
 
     return (
         <aside
@@ -173,6 +211,7 @@ function PromptFlow() {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
+                    onNodeClick={onNodeClick}
                     // edgeTypes={edgeTypes}
                 >
                     {/*<MiniMap/>*/}
@@ -180,6 +219,9 @@ function PromptFlow() {
                     <Background/>
                 </ReactFlow>
             </div>
+            <Tooltip content={t('Edit') + " Prompt Flow"}>
+                <img src={editIcon} className="w-6 h-6 cursor-pointer my-5" onClick={openFlowEditor} />
+            </Tooltip>
         </aside>
     )
 }

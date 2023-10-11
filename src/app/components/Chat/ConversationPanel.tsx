@@ -23,8 +23,8 @@ import {requestHostPermission} from "~app/utils/permissions";
 import {ChatError, ErrorCode} from "~utils/errors";
 import React, { useEffect  } from 'react';
 import GameButton from '../GameButtom';
-import {useAtom} from "jotai/index";
-import {chatInList, sidebarRightCollapsedAtom} from "~app/state";
+import {useAtom, useAtomValue} from "jotai/index";
+import {chatInList, followArcThemeAtom, showEditorAtom, sidebarRightCollapsedAtom} from "~app/state";
 import {BeatLoader} from "react-spinners";
 import {loadLocalPrompts, Prompt, saveLocalPrompt} from "~services/prompts";
 import {Input} from "~app/components/Input";
@@ -54,7 +54,9 @@ const ConversationPanel: FC<Props> = (props) => {
   const mode = props.mode || 'full'
   const marginClass = 'mx-5'
   const [showHistory, setShowHistory] = useState(false)
-  const [showEditor, setShowEditor] = useState(false)
+
+  const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+
   const [showShareDialog, setShowShareDialog] = useState(false)
 
   const context: ConversationContextValue = useMemo(() => {
@@ -114,11 +116,6 @@ const ConversationPanel: FC<Props> = (props) => {
   const openHistoryDialog = useCallback(() => {
     setShowHistory(true)
     trackEvent('open_history_dialog', { botId: props.botId })
-  }, [props.botId])
-
-  const openFlowEditor = useCallback(() => {
-    setShowEditor(!showEditor)
-    trackEvent('open_edit', { botId: props.botId })
   }, [props.botId])
 
   const openShareDialog = useCallback(() => {
@@ -224,9 +221,6 @@ const ConversationPanel: FC<Props> = (props) => {
           <div className="flex flex-row items-center gap-3">
             <Tooltip content={t('Share Prompt Library')}>
               <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />
-            </Tooltip>
-            <Tooltip content={t('Edit') + " Prompt Flow"}>
-              <img src={editIcon} className="w-5 h-5 cursor-pointer" onClick={openFlowEditor} />
             </Tooltip>
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />

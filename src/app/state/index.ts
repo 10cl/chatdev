@@ -28,4 +28,8 @@ export const sidebarRightCollapsedAtom = atomWithStorage('sidebarRightCollapsed'
 export const chatInList = atomWithStorage('chatInList', true)
 export const themeColorAtom = atomWithStorage('themeColor', getDefaultThemeColor())
 export const followArcThemeAtom = atomWithStorage('followArcTheme', false)
+export const showEditorAtom = atomWithStorage('showEditor', false)
+export const editorPromptAtom = atomWithStorage('editorPrompt', 'Flow_Dag_Yaml')
+export const editorPromptTimesAtom = atomWithStorage<number>('editorPromptTimes', 0)
+
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')
