@@ -215,7 +215,7 @@ const ConversationPanel: FC<Props> = (props) => {
                 <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
               </button>
               <label className="text-[13px] whitespace-nowrap text-light-text font-medium select-none"
-                     id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(collapsed ? '聊天模式' : '游戏模式')}</label>
+                     id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(collapsed ? t('Chat Mode') : t('Game Mode'))}</label>
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">

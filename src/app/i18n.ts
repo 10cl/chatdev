@@ -90,7 +90,10 @@ const resources = {
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已执行完毕，您可以继续等待其他伙伴的加入。点击上方切换按钮进入聊天模式，以查看项目概览。当所有成员都到齐后，您可以开始圆桌会议，靠近对应的伙伴继续讨论当前的项目。",
       'Login to ChatGPT': '登录ChatGPT',
       'Switch to API mode': '切换到API模式',
-      Mode: '模式',
+      "Game Mode": "游戏模式",
+      "Chat Mode": "聊天模式",
+      "Share Prompt Library": "分享提示库",
+      "Prompt Flow": "提示流",
     },
   },
   'zh-CN': {
@@ -148,7 +151,7 @@ const resources = {
       'Poe subscribers only': 'Poe订阅会员可用',
       'Quick access in Chrome side bar': '在Chrome侧边栏快速访问',
       'You have opened ChatDev {{openTimes}} times, consider unlock all features?':
-        '哇！你已经打开ChatDev {{openTimes}}次了，是否要解锁全部功能呢？🥺',
+          '哇！你已经打开ChatDev {{openTimes}}次了，是否要解锁全部功能呢？🥺',
       'Open Prompt Library': '管理提示词',
       'Use / to select prompts, Shift+Enter to add new line': '使用 / 选择提示词，Shift+Enter添加换行',
       'Your Prompts': '你的提示词',
@@ -172,7 +175,7 @@ const resources = {
       'Upgrade to premium to chat with more than two bots at once': '升级会员，同时和两个以上的机器人聊天',
       Upgrade: '升级',
       'This usually mean you need to add a payment method to your OpenAI account, checkout: ':
-        '这通常意味着您需要在OpenAI账户中添加付款方式，请查看：',
+          '这通常意味着您需要在OpenAI账户中添加付款方式，请查看：',
       'Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these prompt flows, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?': "欢迎使用我们的Chrome插件 Chatdev！在这里，您可以尽情探索多种大模型的聊天功能，并使用可视化的prompt工作流编辑器轻松创建自定义工作流。通过这些prompt流，您可以在游戏中实时生成令人惊叹的演示效果，并最终达到您期望的结果。在游戏中，我们可能需要称呼您，您希望我们怎么称呼您呢？",
       "Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our Prompt Flow will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual Prompt Flow to turn your ideas into reality!":"欢迎，{player_name}！我们非常高兴您的加入。当您打开右侧边栏并输入您的需求后，我们的Prompt流会将您的需求分配给CEO、CTO、产品和测试人员。他们将在一个虚拟的圆桌会议上共同讨论，逐步将您的需求转化为切实可行的商业计划。您可以靠近某个NPC，继续与他们讨论，你也可以编辑可视化的Prompt流，将您的想法变为现实！",
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow已经开启，请在输入框中输入您的需求。ChatDev将会根据右侧定义的Prompt Flow，自动拆分需求并在地图上开启相关的圆桌会议。",
@@ -180,6 +183,10 @@ const resources = {
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已执行完毕，您可以继续等待其他伙伴的加入。点击上方切换按钮进入聊天模式，以查看项目概览。当所有成员都到齐后，您可以开始圆桌会议，靠近对应的伙伴继续讨论当前的项目。",
       'Login to ChatGPT': '登录ChatGPT',
       'Switch to API mode': '切换到API模式',
+      "Game Mode": "游戏模式",
+      "Chat Mode": "聊天模式",
+      "Share Prompt Library": "分享提示库",
+      "Prompt Flow": "提示流",
     },
   },
   de: {
@@ -194,13 +201,16 @@ const resources = {
       Import: 'Importieren',
       'Export/Import All Data': 'Alle Daten exportieren/importieren',
       'Data includes all your settings, chat histories, and local prompts':
-        'Daten beinhalten alle Einstellungen, Chatverläufe und lokale Prompts',
+          'Daten beinhalten alle Einstellungen, Chatverläufe und lokale Prompts',
       'Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these prompt flows, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?': "Willkommen bei unserer Chrome-Erweiterung Chatdev! Hier können Sie die Chatfunktionen mehrerer großer Modelle erkunden und mithilfe des visuellen Prompt-Workflow-Editors benutzerdefinierte Workflows erstellen. Über diese Prompt-Flows können Sie in Echtzeit beeindruckende Demos im Spiel erstellen und schließlich die gewünschten Ergebnisse erzielen. Im Spiel müssen wir Sie möglicherweise ansprechen. Wie dürfen wir Sie nennen?",
       "Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our Prompt Flow will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual Prompt Flow to turn your ideas into reality!": "Willkommen, {player_name}! Wir freuen uns sehr über Ihre Teilnahme. Wenn Sie die rechte Seitenleiste ?ffnen und Ihre Anforderungen eingeben, wird unser Prompt-Workflow Ihre Anforderungen an CEO, CTO, Produktmanager und Tester verteilen. Sie werden in einer virtuellen Rundtischkonferenz gemeinsam besprechen und Schritt für Schritt in ein realisierbares Gesch?ftsprojekt umsetzen. Sie k?nnen sich einem beliebigen NPC n?hern, um die Diskussion fortzusetzen, oder den visuellen Prompt-Workflow bearbeiten, um Ihre Ideen in die Realit?t umzusetzen!",
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow ist bereits geöffnet. Bitte geben Sie Ihre Anforderungen im Eingabefeld ein. ChatDev wird sie automatisch gemäß dem auf der rechten Seite definierten Prompt Flow zerlegen und auf der Karte die entsprechende Rundtischsitzung eröffnen.",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow ist bereits geschlossen. Sie können weiterhin frei auf der Karte erkunden und ,nach NPCs suchen, um Gespräche zu führen.",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Der Prompt Flow wurde abgeschlossen. Sie können weiterhin auf andere Teammitglieder warten. Klicken Sie oben auf die Schaltfläche, um in den Chatmodus zu wechseln und eine Übersicht über das Projekt anzuzeigen. Wenn alle Mitglieder bereit sind, können Sie die Runde Tischsitzung beginnen und sich dem entsprechenden Teammitglied nähern, um die aktuelle Projektbesprechung fortzusetzen.",
-
+      "Game Mode": "Spielmodus",
+      "Chat Mode": "Chat-Modus",
+      "Share Prompt Library": "Teilen von Vorschlägen-Bibliothek",
+      "Prompt Flow": "Aufforderungsfluss",
     },
   },
   es: {
@@ -215,13 +225,16 @@ const resources = {
       Import: 'Importar',
       'Export/Import All Data': 'Exportar/Importar todos los datos',
       'Data includes all your settings, chat histories, and local prompts':
-        'Los datos incluyen todas tus configuraciones, historiales de chat y promociones locales',
+          'Los datos incluyen todas tus configuraciones, historiales de chat y promociones locales',
       'Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these prompt flows, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?': "Bienvenido a nuestra extensión de Chrome, Chatdev. Aquí, puedes explorar las capacidades de chat de varios modelos grandes y crear flujos de trabajo personalizados utilizando el editor visual de flujos de comandos. A través de estos flujos de comandos, puedes generar demos sorprendentes en tiempo real en el juego y, en última instancia, obtener los resultados que desees. En el juego, es posible que necesitemos dirigirnos a ti. ¿Cómo te gustaría que te llamáramos?",
       "Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our Prompt Flow will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual Prompt Flow to turn your ideas into reality!": "Bienvenido, {player_name}! Estamos encantados de tenerte a bordo. Cuando abres la barra lateral derecha e ingresas tus requisitos, nuestro Flujo de Prompts asignará tus requisitos al CEO, CTO, Gerente de Producto y Probador. Ellos los discutirán en conjunto en una reunión virtual de mesa redonda, transformando gradualmente tus requisitos en un plan de negocios factible. Puedes acercarte a cualquier NPC para continuar la discusión o editar el Flujo de Prompts visual para convertir tus ideas en realidad.",
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"El Flujo de Prompts ya está abierto. Por favor, ingrese sus requisitos en el cuadro de entrada. ChatDev los desmontará automáticamente y abrirá la reunión de mesa redonda correspondiente en el mapa según el Flujo de Prompts definido a la derecha.",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "El Flujo de Prompts ya está cerrado. Puede continuar explorando libremente en el mapa y ,buscar NPCs para interactuar.",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"El Flujo de Prompts ha sido completado. Puede continuar esperando a que se unan otros miembros del equipo. Haga clic en el botón de arriba para cambiar al modo de chat y ver el resumen del proyecto. Cuando todos los miembros estén presentes, puede iniciar la reunión de mesa redonda y acercarse al miembro del equipo correspondiente para continuar la discusión actual del proyecto.",
-
+      "Game Mode":"Modo de juego",
+      "Chat Mode":"Modo de chat",
+      "Share Prompt Library":"Compartir Biblioteca de Prompts",
+      "Prompt Flow":"Flujo de Indicaciones",
     },
   },
   fr: {
@@ -236,13 +249,16 @@ const resources = {
       Import: 'Importer',
       'Export/Import All Data': 'Exporter/Importer toutes les données',
       'Data includes all your settings, chat histories, and local prompts':
-        'Les données incluent tous vos paramètres, historiques de chat et invitations locales',
+          'Les données incluent tous vos paramètres, historiques de chat et invitations locales',
       'Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these prompt flows, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?': "Bienvenue dans notre extension Chrome Chatdev ! Ici, vous pouvez explorer les capacités de chat de plusieurs grands modèles et créer des workflows personnalisés à l'aide de l'éditeur de workflow visuel de prompts. À travers ces flux de prompts, vous pouvez générer des démonstrations étonnantes en temps réel dans le jeu et finalement obtenir les résultats que vous souhaitez. Dans le jeu, nous pourrions avoir besoin de vous appeler. Comment aimeriez-vous que nous vous appelions ?",
       "Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our Prompt Flow will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual Prompt Flow to turn your ideas into reality!":"Bienvenue, {player_name} ! Nous sommes ravis de vous avoir à bord. Lorsque vous ouvrez la barre latérale droite et que vous saisissez vos besoins, notre Flux de Prompts répartira vos besoins entre le PDG, le CTO, le Directeur Produit et le Testeur. Ils les discuteront collectivement lors d'une réunion virtuelle de table ronde, transformant progressivement vos besoins en un plan d'affaires réalisable. Vous pouvez approcher n'importe quel PNJ pour poursuivre la discussion ou modifier le Flux de Prompts visuel pour concrétiser vos idées en réalité !",
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Le Flux de Prompts est déjà ouvert. Veuillez entrer vos exigences dans la zone de saisie. ChatDev les désassemblera automatiquement et ouvrira la réunion de table ronde correspondante sur la carte selon le Flux de Prompts défini à droite.",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Le Flux de Prompts est déjà fermé. Vous pouvez continuer à explorer librement sur la carte ,et chercher des PNJs avec qui interagir.",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Le Flux de Prompts a été terminé. Vous pouvez continuer à attendre que d'autres membres de l'équipe se joignent. Cliquez sur le bouton ci-dessus pour passer en mode chat et afficher la vue d'ensemble du projet. Lorsque tous les membres seront présents, vous pourrez démarrer la réunion de table ronde et vous approcher du membre de l'équipe correspondant pour poursuivre la discussion actuelle du projet.",
-
+      "Game Mode": "Mode de jeu",
+      "Chat Mode": "Mode de discussion",
+      "Share Prompt Library": "Partager la Bibliothèque de Suggestions",
+      "Prompt Flow": "Flux d'indications",
     },
   },
   in: {
@@ -258,7 +274,7 @@ const resources = {
       Import: 'Impor',
       'Export/Import All Data': 'Ekspor/Impor Semua Data',
       'Data includes all your settings, chat histories, and local prompts':
-        'Data mencakup semua pengaturan, riwayat percakapan, dan prompt lokal Anda',
+          'Data mencakup semua pengaturan, riwayat percakapan, dan prompt lokal Anda',
       Edit: 'Edit',
       Use: 'Gunakan',
       Send: 'Kirim',
@@ -313,7 +329,10 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow sudah terbuka. Silakan masukkan kebutuhan Anda di kotak input. ChatDev akan secara otomatis membongkar mereka dan membuka pertemuan meja bundar yang relevan di peta sesuai dengan Flow Prompt yang didefinisikan di sebelah kanan.",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow sudah ditutup. Anda dapat terus menjelajahi peta dengan bebas dan mencari NPC ,untuk berinteraksi.",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow telah selesai. Anda dapat terus menunggu anggota tim lainnya bergabung. Klik tombol di atas untuk beralih ke mode obrolan dan melihat gambaran proyek. Ketika semua anggota hadir, Anda dapat memulai pertemuan meja bundar dan mendekati anggota tim yang sesuai untuk melanjutkan diskusi proyek saat ini.",
-
+      "Game Mode": "Mode Permainan",
+      "Chat Mode": "Mode Obrolan",
+      "Share Prompt Library": "Bagikan Perpustakaan Petunjuk",
+      "Prompt Flow": "Alur Petunjuk",
     },
   },
   ja: {
@@ -405,7 +424,10 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flowは既に開かれています。入力ボックスに要件を入力してください。ChatDevはそれらを自動的に分解し、右側で定義されたPrompt Flowに従って地図上で関連する円卓会議を開催します。",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flowは既に閉じられています。マップ上で自由に探索し、NPCとの対話を探すことができます。",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flowは完了しました。他のチームメンバーの参加を待ち続けることができます。上のボタンをクリックしてチャットモードに切り替え、プロジェクトの概要を表示します。すべてのメンバーが揃ったときに、ラウンドテーブルミーティングを開始し、現在のプロジェクトの議論を続けるために該当するチームメンバーに近づくことができます。",
-
+      "Game Mode": "ゲームモード",
+      "Chat Mode": "チャットモード",
+      "Share Prompt Library": "プロンプトライブラリを共有",
+      "Prompt Flow": "プロンプトフロー",
     },
   },
   th: {
@@ -426,7 +448,10 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow ถูกเปิดแล้ว โปรดป้อนความต้องการของคุณในกล่องข้อมูล ChatDev จะทำการถอดแยกและเปิดการประชุมโต๊ะกลมที่เกี่ยวข้องบนแผนที่โดยอัตโนมัติตาม Flow Prompt ที่กำหนดข้างขวา",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow ถูกปิดแล้ว คุณสามารถดำเนินการสำรวจบนแผนที่อย่างเสรีต่อและค้นหา NPC เพื่อโต้ตอบ",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow ได้เสร็จสิ้นแล้ว คุณสามารถรอคอยสมาชิกทีมคนอื่น ๆ เข้าร่วมต่อไปได้ คลิกที่ปุ่มด้านบนเพื่อสลับไปยังโหมดสนทนาและดูภาพรวมของโครงการ ขณะที่สมาชิกทุกคนมีครบ คุณสามารถเริ่มการประชุมโต๊ะกลมและเข้าหาสมาชิกทีมที่เกี่ยวข้องเพื่อดำเนินการสนทนาโครงการปัจจุบันต่อไปได้",
-
+      "Game Mode": "โหมดเกม",
+      "Chat Mode": "โหมดแชท",
+      "Share Prompt Library": "แบ่งปันคลังคำแนะนำ",
+      "Prompt Flow": "กระแสคำแนะนำ",
     },
   },
   'zh-TW': {
@@ -446,6 +471,10 @@ const resources = {
       "Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.":"Prompt Flow已經開啟，請在輸入框中輸入您的需求。ChatDev將根據右側定義的Prompt Flow自動拆解需求，並在地圖上開啟相關的圓桌會議。",
       "Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.": "Prompt Flow已關閉，您可以繼續在地圖上自由探索，尋找NPC進行交流。",
       "The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.":"Prompt Flow已執行完畢，您可以繼續等待其他夥伴的加入。點擊上方切換按鈕進入聊天模式，以查看專案概觀。當所有成員都到齊後，您可以開始圓桌會議，靠近對應的夥伴繼續討論當前的專案。",
+      "Game Mode":"遊戲模式",
+      "Chat Mode":"聊天模式",
+      "Share Prompt Library":"分享提示库",
+      "Prompt Flow":"提示流",
     },
   },
 }

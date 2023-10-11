@@ -56,10 +56,12 @@ function PromptFlow() {
     const promptFlowOpen = t("Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.")
     const promptFlowClose = t("Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
     const promptFlowDone = t("The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
+    const promptTaskIntroduce = t('Introduce yourself')
     useEffect(() => {
         const links = document.querySelectorAll('a');
         loadLocalPrompts()
         store.set("prompt_welcome", welcomeStr);
+        store.set("prompt_task_introduce", promptTaskIntroduce);
         store.set("prompt_welcome_intro", welcomeIntro);
         store.set("prompt_flow_open", promptFlowOpen);
         store.set("prompt_flow_close", promptFlowClose);
@@ -219,7 +221,7 @@ function PromptFlow() {
                     <Background/>
                 </ReactFlow>
             </div>
-            <Tooltip content={t('Edit') + " Prompt Flow"}>
+            <Tooltip content={t('Edit') + t('Prompt Flow')}>
                 <img src={editIcon} className="w-6 h-6 cursor-pointer my-5" onClick={openFlowEditor} />
             </Tooltip>
         </aside>
