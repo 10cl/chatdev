@@ -102,7 +102,7 @@
     "remark-supersub": "^1.0.0",
     "swr": "^2.1.5",
     "turndown": "^7.1.2",
-    "unified": "^11.0.3",
+    "unified": "^10.1.2",
     "uuid": "^9.0.0",
     "webextension-polyfill": "^0.10.0",
     "websocket-as-promised": "^2.0.1"
