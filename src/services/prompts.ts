@@ -3,7 +3,7 @@ import { ofetch } from 'ofetch'
 import Browser from 'webextension-polyfill'
 import store from "store2";
 import promptsLocal from '~/assets/prompts.json'
-import {uuid} from "~utils";
+import {getVersion, uuid} from "~utils";
 
 export interface Prompt {
   id: string
@@ -14,13 +14,13 @@ export interface Prompt {
 export async function loadLocalPrompts() {
   const { prompts: value } = await Browser.storage.local.get('prompts')
   let prompts_result = (value || []) as Prompt[]
-  if (store.get("prompts") === undefined || store.get("prompts") === null || store.get("prompts") === ""){
+  if (store.get("prompts") === undefined || store.get("prompts") === null || store.get("prompts") === "" || getVersion() !== store.get("version")){
     const prompts_json = promptsLocal
     prompts_json.forEach(item => {
       // @ts-ignore
       item.id = uuid()
     });
-
+    store.set("version", getVersion())
     const prompt_dict = {};
     prompts_json.forEach(item => {
       // @ts-ignore
