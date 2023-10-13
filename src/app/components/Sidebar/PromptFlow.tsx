@@ -66,7 +66,10 @@ function PromptFlow() {
         store.set("prompt_flow_open", promptFlowOpen);
         store.set("prompt_flow_close", promptFlowClose);
         store.set("prompt_flow_done", promptFlowDone);
-
+        const player_init = store.get("player_init");
+        if(player_init !== undefined && player_init < 2){
+            store.set("player_init", 0)
+        }
         links.forEach((link) => {
             if (link.href.includes('react')) {
                 link.style.display = 'none';
@@ -95,9 +98,11 @@ function PromptFlow() {
         const id = setInterval(() => {
             setCount((prevCount) => prevCount + 1);
             const prompts = store.get("prompts")
-            if (store.get("player_init") !== undefined && store.get("player_init") == 2){
+            const player_init = store.get("player_init");
+            if (player_init !== undefined && player_init == 2){
                 store.set("player_init", 3)
-                setCollapsed(true)
+                updateFlow()
+                setCollapsed(false)
             }
             if (prompts !== undefined && prompts['Flow_Dag_Yaml'] != promptsCache){
                 promptsCache = prompts['Flow_Dag_Yaml']
