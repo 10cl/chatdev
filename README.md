@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./screenshots/chatgpt_architecture.svg">
+    <img src="./screenshots/chatdev.png">
 </p>
 <h1 align="center">ChatDev: Visualize Your AI Agent</h1>
 
@@ -15,7 +15,8 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 
 ### ⚡️ Install
 
-<a href="https://chrome.google.com/webstore/detail/chatdev-visualize-your-ai/dopllopmmfnghbahgbdejnkebfcmomej?utm_source=github"><img src="https://user-images.githubusercontent.com/64502893/231991498-8df6dd63-727c-41d0-916f-c90c15127de3.png" width="200" alt="Get ChatDev for Chromium"></a>
+<a href="https://chrome.google.com/webstore/detail/chatdev-visualize-your-ai/dopllopmmfnghbahgbdejnkebfcmomej?utm_source=github"><img src="/screenshots/chrome-logo.png" width="200" alt="Get ChatDev for Chromium"></a>
+<a href="https://microsoftedge.microsoft.com/addons/detail/ceoneifbmcdiihmgfjeodiholmbpmibm?utm_source=github"><img src="/screenshots/edge-logo.png" width="160" alt="Get ChatDev for Microsoft Edge"></a>
 
 ##
 
@@ -32,7 +33,8 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 
 </div>
 
-**ChatDev** is a powerful **Chrome extension** that integrates multiple large language model interfaces to provide diverse conversational experiences. With visual customization of Prompt-Flow task sequences, you can not only explore the performance of different large models in games but also create your own task execution flows. Interact with virtual NPCs to enrich your experiences, and craft your unique memories in the AI town by selecting your preferred large models.
+*ChatDev** is an integrated multiple large language model **Chrome extension**, that supports chat mode and game mode.
+you can **personalize** these AI agents, and use **Visualized** prompt flow to let Multi-Persona Self-Collaboration.
 
 ## 📷 Screenshot
 ![game-prompt-flow.png](./screenshots/game-prompt-flow.png)
@@ -52,9 +54,10 @@ Supported ChatGPT & iFlytek Spark & Bing & Bard & Claude & ChatGLM & Alpaca & Vi
 
 ## 🔨 Installation
 
-### 1. Install from Chrome Web Store
+### 1. Install from Web Store
 
-Search for [ChatDev](https://chrome.google.com/webstore/detail/chatdev/dopllopmmfnghbahgbdejnkebfcmomej) in the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions) and click "Install."
+1. Search for [ChatDev](https://chrome.google.com/webstore/detail/chatdev/dopllopmmfnghbahgbdejnkebfcmomej) in the [Chrome Web Store](https://chrome.google.com/webstore/category/extensions) and click "Install."
+2. Search for [ChatDev](https://microsoftedge.microsoft.com/addons/detail/chatdev-visualize-your-a/ceoneifbmcdiihmgfjeodiholmbpmibm) in the [Microsoft-Edge-Extensions](https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home) and click "Get."
 
 ### 2. Manual Installation
 
