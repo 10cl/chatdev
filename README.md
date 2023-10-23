@@ -33,7 +33,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 
 </div>
 
-*ChatDev** is an integrated multiple large language model **Chrome extension**, that supports chat mode and game mode.
+**ChatDev** is an integrated multiple large language model **Chrome extension**, that supports chat mode and game mode.
 you can **personalize** these AI agents, and use **Visualized** prompt flow to let Multi-Persona Self-Collaboration.
 
 ## 📷 Screenshot
@@ -43,11 +43,9 @@ you can **personalize** these AI agents, and use **Visualized** prompt flow to l
 ## ✨ Features
 * Use different chatbots in one application, which currently supports ChatGPT, the new Bing Chat, Google Bard, Claude, and more than 10 open source models.
 * Invoking large model interfaces in the browser in the form of Webapis requires no code capability
-* Interact with NPCS in the form of games and discuss real needs
-* Customize the role definition of NPCS
-* Customize NPC behavior and plan Prompt
-* Customize Prompt Flow
-* Once Prompt Flow is enabled, express your needs in one sentence, and NPCS will be automatically selected to form teams, perform quests, and present them in an interactive gameplay style.
+* Interact with NPCs in the form of games and discuss real needs
+* customize prompts(NPCs & location), and custom prompt flows(brain of their actions)
+* Once Prompt Flow is enabled, express your needs in one sentence, and NPCs will be automatically selected to form teams, perform quests, and present them in an interactive gameplay style.
 
 ## 🤖 Bots
 Supported ChatGPT & iFlytek Spark & Bing & Bard & Claude & ChatGLM & Alpaca & Vicuna & Koala & Dolly & LLaMA & StableLM & OpenAssistant & ChatRWKV...
@@ -61,7 +59,7 @@ Supported ChatGPT & iFlytek Spark & Bing & Bard & Claude & ChatGLM & Alpaca & Vi
 
 ### 2. Manual Installation
 
-1. Download `chatdev1.1.1.zip` from the Releases page.
+1. Download `chatdev1.1.3.zip` from the Releases page.
 2. Extract the files.
 3. In Chrome/Edge, open the extensions page (`chrome://extensions` or `edge://extensions`).
 4. Enable developer mode.
@@ -75,6 +73,20 @@ Supported ChatGPT & iFlytek Spark & Bing & Bard & Claude & ChatGLM & Alpaca & Vi
 * Follow the steps in "Manual Installation" to load the `dist` folder into your browser.
 
 ## 📜 Changelog
+* v1.1.3
+
+  * Flow_Dag_Yaml prompt type Add config prompt type, that is, do not send this node to the large model, and directly return the path content for parsing (Add Planning_Task_Team_Org configuration of NPC participating in the meeting)
+  * Mouse over the markers (NPCs, furniture, etc.) to display prompt description and edit button
+  * Default speed increased from 0.5 to 1, and reduced to 0.5 when chatting with NPCs
+  * When starting a round table, automatically select the appropriate meeting address, draw the area of the meeting, and temporarily stop the player action.
+  * The round table automatically ends when the player leaves the round table area
+  * When you get close to an NPC, draw the area of the chat
+  * When the NPC is less than 400 away from the player, the current activity record is not output, the distance is less than 100 and the chat is automatically requested, and the chat is automatically ended when the NPC is out of the chat area (> 200)
+  * The icon in the upper left corner only keeps the button to control the volume, and cancelling the switch and one-click home function of the control prompt
+  * Reduce the location change of the mark point, and support the mark address can be customized prompt, the location is defined as "Position_base64(xxx)"
+  * Chat record storage is changed from localStorage to indexDb to prevent temporary over limit problems
+  * Fixed an issue where the time loop would return home
+  * Issue with modified air cannon messages
 * v1.1.1
 
   * prompt flow double-click the editable node
