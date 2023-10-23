@@ -31,5 +31,8 @@ export const followArcThemeAtom = atomWithStorage('followArcTheme', false)
 export const showEditorAtom = atomWithStorage('showEditor', false)
 export const editorPromptAtom = atomWithStorage('editorPrompt', 'Flow_Dag_Yaml')
 export const editorPromptTimesAtom = atomWithStorage<number>('editorPromptTimes', 0)
+export const promptLibraryDialogOpen = atomWithStorage('promptLibraryDialogOpen', false)
+export const promptEdit = atomWithStorage('promptEdit', "")
+export const floatTipsOpen = atomWithStorage('floatTipsOpen', false)
 
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')

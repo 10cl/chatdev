@@ -21,6 +21,8 @@ import Button from '../Button'
 import PromptCombobox, { ComboboxContext } from '../PromptCombobox'
 import PromptLibraryDialog from '../PromptLibrary/Dialog'
 import TextInput from './TextInput'
+import {promptEdit, promptLibraryDialogOpen} from "~app/state";
+import {useAtom} from "jotai/index";
 
 interface Props {
   mode: 'full' | 'compact'
@@ -39,7 +41,8 @@ const ChatMessageInput: FC<Props> = (props) => {
   const [value, setValue] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useState(false)
+  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
@@ -113,6 +116,7 @@ const ChatMessageInput: FC<Props> = (props) => {
   }, [])
 
   useEffect(() => {
+    setIsPromptLibraryDialogOpen(false)
     if (isComboboxOpen) {
       trackEvent('open_prompt_combobox')
     }
@@ -131,6 +135,7 @@ const ChatMessageInput: FC<Props> = (props) => {
   )
 
   const openPromptLibrary = useCallback(() => {
+    setPromptEdit("")
     setIsPromptLibraryDialogOpen(true)
     trackEvent('open_prompt_library')
   }, [])

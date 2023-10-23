@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useMemo, useState } from 'react'
+import {Suspense, useCallback, useEffect, useMemo, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import { BeatLoader } from 'react-spinners'
 import useSWR from 'swr'
@@ -10,6 +10,10 @@ import Button from '../Button'
 import { Input, Textarea } from '../Input'
 import Tabs, { Tab } from '../Tabs'
 import {GoBook} from "react-icons/go";
+import store from "store2";
+import {toBase64} from "js-base64";
+import {useAtom} from "jotai/index";
+import {floatTipsOpen, promptEdit} from "~app/state";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
   return (
@@ -91,7 +95,7 @@ function PromptForm(props: { initialData: Prompt; onSubmit: (data: Prompt) => vo
 
   return (
     <form className="flex flex-col gap-2 w-full" onSubmit={onSubmit}>
-      <div className="w-full">
+      <div className={"w-full " + (props.initialData.title.indexOf("Profile_") != -1 || props.initialData.title.indexOf("Position_") != -1? "hidden":"")}>
         <span className="text-sm font-semibold block mb-1 text-primary-text">Prompt {t('Title')}</span>
         <Input className="w-full" name="title" defaultValue={props.initialData.title} />
       </div>
@@ -110,13 +114,44 @@ function PromptForm(props: { initialData: Prompt; onSubmit: (data: Prompt) => vo
 function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   const { t } = useTranslation()
   const [formData, setFormData] = useState<Prompt | null>(null)
-  const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
+    const [profile, setProfile] = useState(false)
+    const [visible, setVisible] = useAtom(floatTipsOpen);
+    const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
+
+    const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
+    useEffect(() => {
+        let prompt = null
+        if (promptEditValue.indexOf("Profile_") !== -1) {
+            for (let i = 0; i < localPromptsQuery.data.length; i++) {
+                if (localPromptsQuery.data[i].title == promptEditValue) {
+                    prompt = localPromptsQuery.data[i];
+                }
+            }
+        } else if (promptEditValue.indexOf("Position_") !== -1) {
+            for (let i = 0; i < localPromptsQuery.data.length; i++) {
+                if (localPromptsQuery.data[i].title == promptEditValue) {
+                    prompt = localPromptsQuery.data[i];
+                }
+            }
+            if (prompt == null){
+                prompt = { id: uuid(), title: promptEditValue, prompt: store.get("pointerover_pos_name") }
+            }
+        }
+        setPromptEdit("")
+        if (prompt !== null) {
+            setFormData(prompt)
+            setProfile(true)
+        }else{
+            setProfile(false)
+        }
+    }, [])
 
   const savePrompt = useCallback(
     async (prompt: Prompt) => {
       const existed = await saveLocalPrompt(prompt)
       localPromptsQuery.mutate()
       setFormData(null)
+      store.set("edit_" + prompt.title, true)
       trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
     },
     [localPromptsQuery],
@@ -138,8 +173,8 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   return (
     <>
       {localPromptsQuery.data.length ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
-          {localPromptsQuery.data.map((prompt) => (
+        <div className={"grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 " + (profile? "hidden":"")}>
+          {localPromptsQuery.data.map((prompt) => (prompt.title.indexOf("Position_") == -1 &&
             <PromptItem
               key={prompt.id}
               title={prompt.title}
@@ -204,7 +239,7 @@ const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
   const tabs = useMemo<Tab[]>(
     () => [
       { name: t('Your Prompts'), value: 'local' },
-      { name: t('Community Prompts'), value: 'community' },
+      // { name: t('Community Prompts'), value: 'community' },
     ],
     [t],
   )

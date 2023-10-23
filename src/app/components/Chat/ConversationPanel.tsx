@@ -24,7 +24,13 @@ import {ChatError, ErrorCode} from "~utils/errors";
 import React, { useEffect  } from 'react';
 import GameButton from '../GameButtom';
 import {useAtom, useAtomValue} from "jotai/index";
-import {chatInList, followArcThemeAtom, showEditorAtom, sidebarRightCollapsedAtom} from "~app/state";
+import {
+  chatInList, floatTipsOpen,
+  followArcThemeAtom, promptEdit,
+  promptLibraryDialogOpen,
+  showEditorAtom,
+  sidebarRightCollapsedAtom
+} from "~app/state";
 import {BeatLoader} from "react-spinners";
 import {loadLocalPrompts, Prompt, saveLocalPrompt} from "~services/prompts";
 import {Input} from "~app/components/Input";
@@ -36,6 +42,7 @@ import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
+import {toBase64} from "js-base64";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -94,6 +101,9 @@ const ConversationPanel: FC<Props> = (props) => {
         props.onUserSendMessage(value, props.botId)
         store.set("input_text", "")
       }
+      if (isPromptLibraryDialogOpen){
+        setVisible(false)
+      }
     }, 1000);
 
     // @ts-ignore
@@ -148,19 +158,21 @@ const ConversationPanel: FC<Props> = (props) => {
     }
   }
 
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useAtom(floatTipsOpen);
+  const [gameContent, setGameContent] = useState("");
   const [defaultPosition, setDefaultPosition] = useState({
     x: 32,
     y: 32
   })
   useEffect(() => {
+    setVisible(false)
     const ele = document.getElementById('game-container') as HTMLElement;
     // ele.addEventListener('mouseenter', show)
-    // ele.addEventListener('mousemove', mouseMove)
+    ele.addEventListener('mousemove', mouseMove)
     // ele.addEventListener('mouseleave', hide)
     return () => {
       // ele.removeEventListener('mouseenter', show)
-      // ele.removeEventListener('mousemove', mouseMove)
+      ele.removeEventListener('mousemove', mouseMove)
       // ele.removeEventListener('mouseleave', hide)
     }
   }, [])
@@ -172,11 +184,43 @@ const ConversationPanel: FC<Props> = (props) => {
   const hide = () => {
     setVisible(false)
   }
+  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
 
   const mouseMove = (e: MouseEvent) => {
-    const x = getOffsetX(e) + 18;
-    const y = getOffsetY(e) + 18;
-    setDefaultPosition({ x, y });
+    let offsetX = 0
+    let offsetY = 0
+    if (window.innerWidth - 500 < getOffsetX(e)){
+      offsetX = -315
+    }else{
+      offsetX = 90
+    }
+    if (window.innerHeight - 350 < getOffsetY(e)){
+      offsetY = 0
+    }else{
+      offsetY = 50
+    }
+    const x = getOffsetX(e) + offsetX;
+    const y = getOffsetY(e) + offsetY;
+    if (y < window.innerHeight - 250){
+      const prompts = store.get("prompts")
+      const pointerover = store.get("pointerover")
+      const pointerover_pos = store.get("pointerover_pos")
+      if (prompts !== undefined){
+        if (pointerover){
+          const promptKey = "Profile_" + store.get("pointerover_name")
+          setPromptEdit(promptKey)
+          setGameContent(prompts[promptKey])
+
+        }else if (pointerover_pos){
+          const promptKey  = 'Position_' + toBase64(store.get("pointerover_pos_name"))
+          setPromptEdit(promptKey)
+          setGameContent(prompts[promptKey] != undefined ?prompts[promptKey]: store.get("pointerover_pos_name"))
+        }
+        setVisible(pointerover || pointerover_pos)
+        setDefaultPosition({ x, y });
+      }
+    }
   }
 
   function setCollapsedAndUpdate() {
@@ -222,6 +266,9 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={t('Share Prompt Library')}>
               <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />
             </Tooltip>
+            <Tooltip content={t('Clear conversation')}>
+              <img src={clearIcon} className="w-5 h-5 cursor-pointer" onClick={resetConversation} />
+            </Tooltip>
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
             </Tooltip>
@@ -261,7 +308,7 @@ const ConversationPanel: FC<Props> = (props) => {
       <div id="mouse-position-demo" className="mouse-position-demo">
         <GameButton
             visible={visible}
-            content="Mouse follow"
+            content={gameContent}
             defaultPosition={defaultPosition}
         />
       </div>

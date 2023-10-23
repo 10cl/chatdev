@@ -77,16 +77,16 @@ body {
 }
 
 .mouse-position-modal {
-  min-width: 240px;
-  height: 57px;
-  background: #fff;
+  min-width: 400px;
+  width: 400px;
+  height: auto;
+  background: #ffffffe0;
   box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   position: absolute;
-  z-index: 2000;
   padding: 8px 12px;
   .mouse-position-modal-content {
-    font-size: 16px;
+    font-size: 0.8em;
     color: #262626;
   }
 }
