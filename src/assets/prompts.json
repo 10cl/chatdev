@@ -1,7 +1,7 @@
 [
   {
     "title": "Flow_Dag_Yaml",
-    "prompt": "outputs:\n  overview:\n    type: string\n    reference: ${task_overview.output}\nnodes:\n  - name: task_team_org\n    type: prompt\n    source:\n      type: code\n      path: Planning_Task_Team_Org\n    inputs:\n      npc_intro: ${inputs.npc_introduce}\n      input_text: ${inputs.input_text}\n  - name: task_company\n    type: prompt\n    source:\n      type: code\n      path: Planning_Task_Company\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_prompt_update\n    type: prompt\n    speak: true\n    source:\n      type: code\n      path: Planning_Task_Prompt_Enhance\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_overview\n    type: prompt\n    source:\n      type: code\n      path: Planning_Task_Overview\n    inputs:\n      input_text: ${task_prompt_update.output}\n      company_info: ${task_company.output}\n      task_team: ${task_team_org.output}\n"
+    "prompt": "outputs:\n  overview:\n    type: string\n    reference: ${task_overview.output}\nnodes:\n  - name: task_team_org\n    type: config\n    source:\n      path: Planning_Task_Team_Org\n    inputs:\n      npc_intro: ${inputs.npc_introduce}\n      input_text: ${inputs.input_text}\n  - name: task_company\n    type: prompt\n    source:\n      path: Planning_Task_Company\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_prompt_update\n    type: prompt\n    speak: true\n    source:\n      path: Planning_Task_Prompt_Enhance\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_overview\n    type: prompt\n    source:\n      path: Planning_Task_Overview\n    inputs:\n      input_text: ${task_prompt_update.output}\n      company_info: ${task_company.output}\n      task_team: ${task_team_org.output}\n"
   },
   {
     "title": "Action_Target_Task_Npc",
@@ -21,15 +21,11 @@
   },
   {
     "title": "Planning_Task_Team_Org",
-    "prompt": "Here are the some characters introduction:\n\n#### START INTRODUCTION\n{npc_intro}\n\n#### END INTRODUCTION\n\nYou are an entrepreneur who currently needs to achieve your business goal: >>>>{input_text}<<<<\n\nyou need to choose 4 people to start a business with you, you need a CEO, a CTO, a product manager, and a tester\n\n1. You need to output in the following format, write CEO Name, CTO Name, product manager name, tester name inside [], respectively. for example: \"[CEO:Bob Green]\".\n2. Output language: {language}, The name needs to remain in English\n3. The following examples has nothing to do with your business goal\n\n#### START EXAMPLES\n\n------ Example Inputs ------\nDevelop a student-focused mobile application dedicated to managing and regulating children's daily smartphone usage.\n\n------ Example Outputs ------\nFor the Develop a student-focused mobile application business, I would choose the following team members:\n[CEO:Hailey Johnson], With her imaginative and resourceful nature, Hailey can lead the company, bringing creativity and innovation to the project.\n[CTO:Ryan Park], As a software engineer with a strong problem-solving mindset, Ryan is well-suited to oversee the technical aspects of the mobile app development.\n[Product Manager:Latoya Williams], Latoya's attention to detail and organization skills make her an ideal product manager to ensure the app aligns with the project's objectives.\n[Tester:Wolfgang Schulz], Wolfgang's dedication and hardworking nature, along with his focus on efficiency, make him a suitable tester to ensure the app functions smoothly.\n\n#### END EXAMPLES"
-  },
-  {
-    "title": "Planning_Task_Judge",
-    "prompt": "Based on my input, determine whether my input is to start a project or task or business plan, my input is >>>>{input_text}<<<<\nYou can only reply \"true\" or \"false\""
+    "prompt": "[CEO:Hailey Johnson]\n[CTO:Ryan Park]\n[Product Manager:Latoya Williams]\n[Tester:Wolfgang Schulz]"
   },
   {
     "title": "Action_Influence_Env_Init",
-    "prompt": "Context: \n Player Name: {player_name}\n Player Position: {player_position}\n Current time: {now_time} \n The current locale based on the i18next identifier is '{language}', you need output in '{language}'. No need to output your analysis process. \nYou are a social game conversion service, I'm player '{player_name}'. \n Now, I just woke up, in the {player_position}. Please ask me a short question for collect my information and guide me through the game.No need to output your analysis process. now you say:"
+    "prompt": "You are a mark on the game map, and this is your description:\n#####################\n{player_position}\n#####################\nCurrent time is {now_time}, I just moved to your place, This is where I usually record conversations and plan future events. \n\nhere is our chat history:\n{history}\n\nBy summarizing the above information and the current time and location, remind me in a brief sentence what to do and ask me a short question to get what conversation or project would you like to record today.\n1. no need to output your analysis process\n2. Output language: {language}\n\nNow, your prompt:"
   },
   {
     "title": "Action_Influence_Env_Changed",
@@ -37,15 +33,15 @@
   },
   {
     "title": "Action_Influence_Npc_Near",
-    "prompt": "Context: \n Player Name: {player_name}\n Player Position: {player_position}\n Current time: {now_time} \n The current locale based on the i18next identifier is '{language}', you need output in '{language}'. No need to output your analysis process. \n{npc_name} Introduction: \n {npc_intro} \n {npc_name} Current Activity: \n {npc_activity} \n History Conversion: {history} \n You are a {npc_name}, I'm player '{player_name}'. \n (If there is no more context to indicate that they are meeting for the first time, Introduce yourself and regular chat greeting)\n  You and me are in the {player_position} \n What would you say now?\nNo need to output your analysis process. now you say:"
+    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, you are {npc_activity}.\n\nhere is our chat history:\n{history}\n\nI just met you, what you might say?\n1. If there is no more context to indicate that they are meeting for the first time, Introduce yourself and regular chat greeting\n2. no need to output your analysis process\n3. Output language: {language}"
   },
   {
     "title": "Action_Target_Dialogue_Env",
-    "prompt": "Context:\n- Player Name: {player_name}\n- Player Position: {player_position}\n- Current Time: {now_time}\n- Language: {language}\n- History: {history}\n\nYou are a social game conversion service, and I'm player '{player_name}'.\n\nI just arrived at {player_position}. This is where I usually record conversations and plan future events. \n\nBy summarizing the above information and the current time and location, remind me in a brief sentence what to do and ask me a short question To get what conversation or project would you like to record toda. \n\nNow, your prompt:"
+    "prompt": "You are a mark on the game map, and this is your description:\n#####################\n{player_position}\n#####################\nCurrent time is {now_time}, we are chatting.\n\n1. no need to output your analysis process\n2. Output language: {language}\n\nNow, your prompt:"
   },
   {
     "title": "Action_Target_Dialogue_Npc",
-    "prompt": "Context: \n Player Name: {player_name}\n Player Position: {player_position}\n Current time: {now_time} \n The current locale based on the i18next identifier is '{language}', you need output in '{language}'. No need to output your analysis process. \nYou are {npc_name}, I'm player '{player_name}'. \n You and me are in {player_position} \n Now, I say: '{input_text}'. \n What would you say now?\nNo need to output your analysis process. now you say:"
+    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, we are chatting.\nI say: >>>>{input_text}<<<<. what you might say?\n1. no need to output your analysis process\n2. Output language: {language}"
   },
   {
     "title": "Memory_Operation_Write_Input",
@@ -150,5 +146,13 @@
   {
     "title": "Profile_Maria_Lopez",
     "prompt": "Name: Maria Lopez, Age: 21\nInnate tendency: energetic, enthusiastic, inquisitive\nLearned tendency: Maria Lopez is a student at Oak Hill College studying physics and a part time Twitch game streamer who loves to connect with people and explore new ideas.\nCurrently: Maria Lopez is working on her physics degree and streaming games on Twitch to make some extra money. She visits Hobbs Cafe for studying and eating just about everyday.\nLifestyle: Maria Lopez goes to bed around midnight, awakes up around 10am, eats dinner around 7pm."
+  },
+  {
+    "title": "Position_IFlvdSBmYW1pbHkncyBob3VzZSwgY29tbW9uIHJvb20gc2hlbGY=",
+    "prompt": "A bookshelf is a multifunctional piece of furniture that holds other items in addition to books. Its design is very flexible and can be adjusted and customized according to individual needs.\nOn the shelves were these books:\n1. Fiction: including literary classics, modern novels, science fiction, mystery novels, etc.\n2. Non-fiction: history, biography, philosophy, psychology, sociology, etc.\n3. Self-help: including success, spiritual growth, interpersonal relationships, health, etc.\n4. Science and Technology: including natural science, computer science, engineering technology, etc.\n5. Art and Design: including painting, photography, architecture, fashion design, etc."
+  },
+  {
+    "title": "Position_IFlvdSBmYW1pbHkncyBob3VzZSwgWW91J3MgYmVkcm9vbSBiZWQ=",
+    "prompt": "A comfortable bed, which is not only a place for him to rest and sleep, but also a space for him to think, relax and enjoy his personal time.\nProvide a comfortable sleeping environment: This bed is equipped with a high-quality mattress and pillows to ensure adequate rest and rejuvenation after work.\nBooks and magazines: The nightstand is stocked with programming books, technical magazines, and novels to read and study during breaks.\nCreative lighting: The bed or bed may have a creative lighting hanging, such as a desk lamp made of mechanical parts or an LED light strip, to add personality and atmosphere to the room."
   }
 ]
