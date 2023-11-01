@@ -59,7 +59,7 @@ const PromptItem = (props: {
       </div>
       {props.title.indexOf("Flow_Dag_Yaml") == -1
           && props.title.indexOf("Profile_") == -1
-          && props.title.indexOf("Planning_") == -1
+          /*&& props.title.indexOf("Planning_") == -1*/
           && props.title.indexOf("Action_") == -1
           && props.title.indexOf("Memory_") == -1
           && props.remove && (
