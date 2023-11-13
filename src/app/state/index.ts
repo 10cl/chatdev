@@ -24,15 +24,24 @@ export const chatFamily = atomFamily(
 
 export const licenseKeyAtom = atomWithStorage('licenseKey', '', undefined, { unstable_getOnInit: true })
 export const sidebarCollapsedAtom = atomWithStorage('sidebarCollapsed', true)
-export const sidebarRightCollapsedAtom = atomWithStorage('sidebarRightCollapsed', true)
-export const chatInList = atomWithStorage('chatInList', true)
+export const seminarDisableAtom = atomWithStorage('sidebarRightCollapsed', true)
+
+/* import */
+export const workFlowingDisableAtom = atomWithStorage('workFlowingDisable', false)
+export const gameModeEnable = atomWithStorage('gameModeEnable', true)
 export const themeColorAtom = atomWithStorage('themeColor', getDefaultThemeColor())
 export const followArcThemeAtom = atomWithStorage('followArcTheme', false)
 export const showEditorAtom = atomWithStorage('showEditor', false)
+export const showGptsDialogAtom = atomWithStorage('showGptsDialog', false)
+export const showHistoryAtom = atomWithStorage('showHistory', false)
+export const showSettingsAtom = atomWithStorage('showSettings', true)
 export const editorPromptAtom = atomWithStorage('editorPrompt', 'Flow_Dag_Yaml')
+export const editorYamlTimesAtom = atomWithStorage<number>('editorYamlTimes', 0)
 export const editorPromptTimesAtom = atomWithStorage<number>('editorPromptTimes', 0)
 export const promptLibraryDialogOpen = atomWithStorage('promptLibraryDialogOpen', false)
 export const promptEdit = atomWithStorage('promptEdit', "")
+export const inputTextAtom = atomWithStorage('input_text', "")
+export const promptVersionAtom = atomWithStorage('prompt_version', "")
 export const floatTipsOpen = atomWithStorage('floatTipsOpen', false)
 
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')
