@@ -56,6 +56,8 @@ export class ClaudeWebBot extends AbstractBot {
           type: 'UPDATE_ANSWER',
           data: { text: result.trimStart() },
         })
+      } else if (payload.error) {
+        throw new Error(JSON.stringify(payload.error))
       }
     })
 

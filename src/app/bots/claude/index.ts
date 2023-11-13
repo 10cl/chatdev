@@ -1,5 +1,5 @@
 import { ClaudeMode, getUserConfig } from '~/services/user-config'
-import { AsyncAbstractBot } from '../abstract-bot'
+import { AsyncAbstractBot, MessageParams } from '../abstract-bot'
 import { ClaudeApiBot } from '../claude-api'
 import { ClaudeWebBot } from '../claude-web'
 import { PoeWebBot } from '../poe'

@@ -20,6 +20,7 @@ export type Event =
 export interface MessageParams {
   prompt: string
   rawUserInput?: string
+  image?: File
   signal?: AbortSignal
 }
 
@@ -48,6 +49,7 @@ export abstract class AbstractBot {
         this.doSendMessage({
           prompt: params.prompt,
           rawUserInput: params.rawUserInput,
+          image: params.image,
           signal: params.signal,
           onEvent(event) {
             if (event.type === 'UPDATE_ANSWER') {

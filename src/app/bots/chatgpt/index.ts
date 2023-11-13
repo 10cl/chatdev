@@ -1,6 +1,6 @@
 import { ChatGPTMode, getUserConfig } from '~/services/user-config'
 import { ChatError, ErrorCode } from '~utils/errors'
-import { AsyncAbstractBot } from '../abstract-bot'
+import { AsyncAbstractBot, MessageParams } from '../abstract-bot'
 import { ChatGPTApiBot } from '../chatgpt-api'
 import { ChatGPTAzureApiBot } from '../chatgpt-azure'
 import { ChatGPTWebBot } from '../chatgpt-webapp'
@@ -43,5 +43,9 @@ export class ChatGPTBot extends AsyncAbstractBot {
       return new OpenRouterBot({ apiKey: config.openrouterApiKey, model })
     }
     return new ChatGPTWebBot(config.chatgptWebappModelName)
+  }
+
+  async sendMessage(params: MessageParams) {
+    return this.doSendMessageGenerator(params)
   }
 }

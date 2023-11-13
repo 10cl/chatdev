@@ -1,11 +1,12 @@
+import { get as getPath } from 'lodash-es'
 import { v4 as uuidv4 } from 'uuid'
 import { ChatGPTWebModel } from '~services/user-config'
 import { ChatError, ErrorCode } from '~utils/errors'
 import { parseSSEResponse } from '~utils/sse'
 import { AbstractBot, SendMessageParams } from '../abstract-bot'
-import { fetchArkoseToken } from './arkose'
+import { getArkoseToken } from './arkose'
 import { chatGPTClient } from './client'
-import { ResponseContent } from './types'
+import { ImageContent, ResponseContent } from './types'
 
 function removeCitations(text: string) {
   return text.replaceAll(/\u3010\d+\u2020source\u3011/g, '')
@@ -38,9 +39,18 @@ export class ChatGPTWebBot extends AbstractBot {
     const modelName = await this.getModelName()
     console.debug('Using model:', modelName)
 
-    let arkoseToken: string | undefined
-    if (modelName.startsWith('gpt-4')) {
-      arkoseToken = await fetchArkoseToken()
+    const arkoseToken = await getArkoseToken()
+
+    const image: ImageContent | undefined = undefined
+    if (params.image) {
+      /*const fileId = await chatGPTClient.uploadFile(this.accessToken, params.image)
+      const size = await getImageSize(params.image)
+      image = {
+        asset_pointer: `file-service://${fileId}`,
+        width: size.width,
+        height: size.height,
+        size_bytes: params.image.size,
+      }*/
     }
 
     const resp = await chatGPTClient.fetch('https://chat.openai.com/backend-api/conversation', {
@@ -56,10 +66,9 @@ export class ChatGPTWebBot extends AbstractBot {
           {
             id: uuidv4(),
             author: { role: 'user' },
-            content: {
-              content_type: 'text',
-              parts: [params.prompt],
-            },
+            content: image
+              ? { content_type: 'multimodal_text', parts: [image, params.prompt] }
+              : { content_type: 'text', parts: [params.prompt] },
           },
         ],
         model: modelName,
@@ -82,6 +91,16 @@ export class ChatGPTWebBot extends AbstractBot {
         data = JSON.parse(message)
       } catch (err) {
         console.error(err)
+        return
+      }
+      if (!data.message && data.error) {
+        params.onEvent({
+          type: 'ERROR',
+          error: new ChatError(data.error, ErrorCode.UNKOWN_ERROR),
+        })
+        return
+      }
+      if (getPath(data, 'message.author.role') !== 'assistant') {
         return
       }
       const content = data.message?.content as ResponseContent | undefined
