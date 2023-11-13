@@ -4,7 +4,7 @@ import { BeatLoader } from 'react-spinners'
 import useSWR from 'swr'
 import closeIcon from '~/assets/icons/close.svg'
 import { trackEvent } from '~app/plausible'
-import { Prompt, loadLocalPrompts, loadRemotePrompts, removeLocalPrompt, saveLocalPrompt } from '~services/prompts'
+import { Prompt, loadLocalPrompts, removeLocalPrompt, saveLocalPrompt } from '~services/prompts'
 import { uuid } from '~utils'
 import Button from '../Button'
 import { Input, Textarea } from '../Input'
@@ -201,30 +201,6 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   )
 }
 
-function CommunityPrompts(props: { insertPrompt: (text: string) => void }) {
-  const promptsQuery = useSWR('community-prompts', () => loadRemotePrompts(), { suspense: true })
-
-  const copyToLocal = useCallback(async (prompt: Prompt) => {
-    await saveLocalPrompt({ ...prompt, id: uuid() })
-  }, [])
-
-  return (
-    <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
-        {promptsQuery.data.map((prompt, index) => (
-          <PromptItem
-            key={index}
-            title={prompt.title}
-            prompt={prompt.prompt}
-            insertPrompt={props.insertPrompt}
-            copyToLocal={() => copyToLocal(prompt)}
-          />
-        ))}
-      </div>
-    </>
-  )
-}
-
 const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
   const { t } = useTranslation()
 
@@ -239,7 +215,6 @@ const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
   const tabs = useMemo<Tab[]>(
     () => [
       { name: t('Your Prompts'), value: 'local' },
-      // { name: t('Community Prompts'), value: 'community' },
     ],
     [t],
   )
@@ -252,13 +227,6 @@ const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
           return (
             <Suspense fallback={<BeatLoader size={10} className="mt-5" color="rgb(var(--primary-text))" />}>
               <LocalPrompts insertPrompt={insertPrompt} />
-            </Suspense>
-          )
-        }
-        if (tab === 'community') {
-          return (
-            <Suspense fallback={<BeatLoader size={10} className="mt-5" color="rgb(var(--primary-text))" />}>
-              <CommunityPrompts insertPrompt={insertPrompt} />
             </Suspense>
           )
         }
