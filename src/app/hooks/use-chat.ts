@@ -29,8 +29,26 @@ export function useChat(botId: BotId) {
     async (input: string) => {
       trackEvent('send_message', { botId })
       const botMessageId = uuid()
+
+        function getValidMark() {
+            let isGameMode = store.get("gameModeEnable")
+            if (isGameMode == null) {
+                isGameMode = true
+            }
+
+            if (!isGameMode) {
+                return ""
+            }
+
+            const playerPos = store.get("player_mark")
+            if (playerPos != undefined && playerPos != "") {
+                return playerPos
+            }
+
+            return "";
+        }
       setChatState((draft) => {
-        draft.messages.push({ id: uuid(), text: input, author: 'user' }, { id: botMessageId, text: '', author: botId })
+        draft.messages.push({ id: uuid(), text: input, author: 'user', mark: getValidMark() }, { id: botMessageId, text: '', author: botId, mark: getValidMark()})
       })
       const abortController = new AbortController()
       setChatState((draft) => {

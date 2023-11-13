@@ -21,7 +21,7 @@ const HistoryDialog: FC<Props> = (props) => {
 
   return (
     <Dialog
-      title={`History conversations with ${botName}`}
+      title={`History conversations`}
       open={props.open}
       onClose={props.onClose}
       className="rounded-2xl w-[1000px] min-h-[400px]"
