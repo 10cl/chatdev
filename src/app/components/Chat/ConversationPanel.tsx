@@ -3,6 +3,7 @@ import {FC, Suspense, useCallback, useMemo, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import clearIcon from '~/assets/icons/clear.svg'
 import historyIcon from '~/assets/icons/history.svg'
+import libraryIcon from '~/assets/icons/library.svg'
 import editIcon from '~/assets/icons/edit.svg'
 import shareIcon from '~/assets/icons/share.svg'
 import { CHATBOTS } from '~app/consts'
@@ -271,6 +272,9 @@ const ConversationPanel: FC<Props> = (props) => {
             </Tooltip>
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
+            </Tooltip>
+            <Tooltip content={t('Open Prompt Library')}>
+              <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openPromptLibrary} />
             </Tooltip>
           </div>
         </div>
