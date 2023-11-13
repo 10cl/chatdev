@@ -1,51 +1,19 @@
 [
   {
-    "title": "Flow_Dag_Yaml",
-    "prompt": "outputs:\n  overview:\n    type: string\n    reference: ${task_overview.output}\nnodes:\n  - name: task_team_org\n    type: config\n    source:\n      path: Planning_Task_Team_Org\n    inputs:\n      npc_intro: ${inputs.npc_introduce}\n      input_text: ${inputs.input_text}\n  - name: task_company\n    type: prompt\n    source:\n      path: Planning_Task_Company\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_prompt_update\n    type: prompt\n    speak: true\n    source:\n      path: Planning_Task_Prompt_Enhance\n    inputs:\n      input_text: ${inputs.input_text}\n  - name: task_overview\n    type: prompt\n    source:\n      path: Planning_Task_Overview\n    inputs:\n      input_text: ${task_prompt_update.output}\n      company_info: ${task_company.output}\n      task_team: ${task_team_org.output}\n"
-  },
-  {
-    "title": "Action_Target_Task_Npc",
-    "prompt": "You are {npc_name}, you and me are in talking our project，our company info is >>>>{overview}<<<<\nI said to you:  '{input_text}'.\nWhat would you say now?\nThere are 3 limits to your answers：\n1.    Output language: {language}\n2.    no need to output your analysis process.\n3.    In 400 words or less\n\nnow you say:"
-  },
-  {
-    "title": "Planning_Task_Overview",
-    "prompt": "You are an expert business plan writer and write the business overview section of my business plan: >>>>{input_text}<<<<.\n\n{company_info}\n\n{task_team}\n\nEnsure it covers all the information required in a business overview.\nYou may suggest or add any value-adding information when required, output language: {language}"
-  },
-  {
-    "title": "Planning_Task_Prompt_Enhance",
-    "prompt": "You are an professional prompt engineer that can improve user input prompt to make LLM better understand these prompts.\n\nI will give you a short description of a business goal, please rewrite it into a detailed prompt that can make large language model know how to make this business goal better based this prompt.\nhere is the short description: \">>>>{input_text}<<<<\".\n\n1. the prompt should ensure LLMs make your business goal that can be more feasible\n2. Response should not contain more than 200 words\n3. Output language: {language}\n4. The following examples has nothing to do with prompt\n\n#### START EXAMPLES\n\n------ Example Inputs ------\nDevelop a student-focused mobile application dedicated to managing and regulating children's daily smartphone usage.\n\n------ Example Outputs ------\nDevelop a student-focused mobile application for parents and guardians, aimed at managing and regulating children's daily smartphone usage.  The app should provide features such as setting time limits, monitoring screen time, tracking app usage, and sending notifications to remind children to take breaks from their devices.  Additionally, the app should encourage healthy habits by promoting physical activity, social interaction, and academic engagement during designated device-free times.  The app should be user-friendly, accessible on both Android and iOS platforms, and offer personalized recommendations based on each child's interests and needs.\n\n#### END EXAMPLES"
-  },
-  {
-    "title": "Planning_Task_Company",
-    "prompt": "You are an entrepreneur who currently needs to achieve your business goal: >>>>{input_text}<<<<\nyou need to plan your company name based on current needs, and the future goals and mission statement.\n1. Response should not contain more than 200 words\n2. minimize\n3. Output language: {language}"
-  },
-  {
-    "title": "Planning_Task_Team_Org",
-    "prompt": "[CEO:Hailey Johnson]\n[CTO:Ryan Park]\n[Product Manager:Latoya Williams]\n[Tester:Wolfgang Schulz]"
-  },
-  {
-    "title": "Action_Influence_Env_Init",
-    "prompt": "You are a mark on the game map, and this is your description:\n#####################\n{player_position}\n#####################\nCurrent time is {now_time}, I just moved to your place, This is where I usually record conversations and plan future events. \n\nhere is our chat history:\n{history}\n\nBy summarizing the above information and the current time and location, remind me in a brief sentence what to do and ask me a short question to get what conversation or project would you like to record today.\n1. no need to output your analysis process\n2. Output language: {language}\n\nNow, your prompt:"
-  },
-  {
     "title": "Action_Influence_Env_Changed",
-    "prompt": "Context:\n- Player Name: {player_name}\n- Player Position: {player_position}\n- Current Time: {now_time}\n- Language: {language}\n- History: {history}\n\nYou are a social game conversion service, and I'm player '{player_name}'.\n\nI just arrived at {player_position}. This is where I usually record conversations and plan future events. \n\nBy summarizing the above information and the current time and location, remind me in a brief sentence what to do and ask me a short question To get what conversation or project would you like to record toda. \n\nNow, your prompt:"
+    "prompt": "Context:\n- Player Name: {player_name}\n- Player Position: {player_position}\n- Current Time: {now_time}\n- Language: {lang}\n- History: {history}\n\nYou are a social game conversion service, and I'm player '{player_name}'.\n\nI just arrived at {player_position}. This is where I usually record conversations and plan future events. \n\nBy summarizing the above information and the current time and location, remind me in a brief sentence what to do and ask me a short question To get what conversation or project would you like to record toda. \n\nNow, your prompt:"
   },
   {
     "title": "Action_Influence_Npc_Near",
-    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, you are {npc_activity}.\n\nhere is our chat history:\n{history}\n\nI just met you, what you might say?\n1. If there is no more context to indicate that they are meeting for the first time, Introduce yourself and regular chat greeting\n2. no need to output your analysis process\n3. Output language: {language}"
+    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, you are {npc_activity}.\n\nhere is our chat history:\n{history}\n\nI just met you, what you might say?\n1. If there is no more context to indicate that they are meeting for the first time, Introduce yourself and regular chat greeting\n2. no need to output your analysis process\n3. Output language: {lang}"
   },
   {
     "title": "Action_Target_Dialogue_Env",
-    "prompt": "You are a mark on the game map, and this is your description:\n#####################\n{player_position}\n#####################\nCurrent time is {now_time}, we are chatting.\n\n1. no need to output your analysis process\n2. Output language: {language}\n\nNow, your prompt:"
+    "prompt": "You are a mark on the game map, and this is your description:\n#####################\n{player_position}\n#####################\nCurrent time is {now_time}, we are chatting. I say: >>>>{input_text}<<<<\n\n1. no need to output your analysis process\n2. Output language: {lang}\n\nNow, your prompt:"
   },
   {
     "title": "Action_Target_Dialogue_Npc",
-    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, we are chatting.\nI say: >>>>{input_text}<<<<. what you might say?\n1. no need to output your analysis process\n2. Output language: {language}"
-  },
-  {
-    "title": "Memory_Operation_Write_Input",
-    "prompt": "Context: \n Player Name: {player_name} \n Player Position: {player_position} \n Current time: {now_time} \n Player Input History: \n  {history} \n Summarize the above conversation and extract the key information from 'Player Input History', important info is 'content', that needs to be recorded, reducing it to one paragraph as much as possible, The key piece of information to record is the player's input, No need to output your analysis process. This is a conversation summary:"
+    "prompt": "The following is your personal introduction:\n#####################\n{npc_intro}\n#####################\nCurrent time is {now_time}, we are chatting.\nI say: >>>>{input_text}<<<<. what you might say?\n1. no need to output your analysis process\n2. Output language: {lang}"
   },
   {
     "title": "Profile_Hailey_Johnson",

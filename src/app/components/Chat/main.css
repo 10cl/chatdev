@@ -30,3 +30,28 @@
     /*background-color: gray;*/
     padding: 10px;
 }
+
+.path-marker{
+    position: absolute;
+    background: #bbdaea57;
+    border-bottom: 1px #5f95fc solid;
+}
+
+.flow-open{
+    background: #bbd9e9;
+}
+
+.prompt-flow-save:active{
+    opacity: 0.5;
+}
+
+.margin-5{
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.prompt-intro {
+    line-height: 15px;
+    font-size: 14px;
+    word-break: break-all;
+}

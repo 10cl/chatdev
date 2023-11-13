@@ -2,8 +2,6 @@ import Browser from 'webextension-polyfill'
 import { ALL_IN_ONE_PAGE_ID } from '~app/consts'
 import { getUserConfig } from '~services/user-config'
 import { trackInstallSource } from './source'
-import i18next from "i18next";
-import store from 'store2'
 
 async function openAppPage() {
   const tabs = await Browser.tabs.query({})
@@ -16,7 +14,6 @@ async function openAppPage() {
   const { startupPage } = await getUserConfig()
   const hash = startupPage === ALL_IN_ONE_PAGE_ID ? '' : `#/chat/${startupPage}`
   await Browser.tabs.create({ url: `app.html${hash}` })
-  store.set("i18next_languages", i18next.languages);
 }
 
 Browser.action.onClicked.addListener(() => {

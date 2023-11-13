@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import {FC, useCallback, useEffect, useState} from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { BiExport, BiImport } from 'react-icons/bi'
@@ -14,10 +14,10 @@ import ChatGPWebSettings from '~app/components/Settings/ChatGPTWebSettings'
 import ClaudeAPISettings from '~app/components/Settings/ClaudeAPISettings'
 import ClaudeOpenRouterSettings from '~app/components/Settings/ClaudeOpenRouterSettings'
 import ClaudePoeSettings from '~app/components/Settings/ClaudePoeSettings'
+import ClaudeWebappSettings from '~app/components/Settings/ClaudeWebappSettings'
 import EnabledBotsSettings from '~app/components/Settings/EnabledBotsSettings'
 import KDB from '~app/components/Settings/KDB'
 import { ALL_IN_ONE_PAGE_ID, CHATBOTS } from '~app/consts'
-import { usePremium } from '~app/hooks/use-premium'
 import { exportData, importData } from '~app/utils/export'
 import {
   BingConversationStyle,
@@ -29,7 +29,9 @@ import {
 } from '~services/user-config'
 import { getVersion } from '~utils'
 import PagePanel from '../components/Page'
-import ClaudeWebappSettings from '~app/components/Settings/ClaudeWebappSettings'
+import {BotId} from "~app/bots";
+import {useAtom} from "jotai/index";
+import {showSettingsAtom} from "~app/state";
 
 const BING_STYLE_OPTIONS = [
   { name: 'Precise', value: BingConversationStyle.Precise },
@@ -37,12 +39,12 @@ const BING_STYLE_OPTIONS = [
   { name: 'Creative', value: BingConversationStyle.Creative },
 ]
 
-function SettingPage() {
+const SettingPage = () => {
   const { t } = useTranslation()
   const [shortcuts, setShortcuts] = useState<string[]>([])
   const [userConfig, setUserConfig] = useState<UserConfig | undefined>(undefined)
   const [dirty, setDirty] = useState(false)
-  const premiumState = usePremium()
+  const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
 
   useEffect(() => {
     Browser.commands.getAll().then((commands) => {
@@ -86,7 +88,10 @@ function SettingPage() {
     }
     await updateUserConfig({ ...userConfig!, openaiApiHost: apiHost })
     toast.success('Saved')
-    setTimeout(() => location.reload(), 500)
+    setTimeout(() => {
+      setShowSettings(false)
+      location.reload()
+    }, 500)
   }, [userConfig])
 
   if (!userConfig) {
