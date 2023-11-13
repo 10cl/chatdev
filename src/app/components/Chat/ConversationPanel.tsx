@@ -296,7 +296,17 @@ const ConversationPanel: FC<Props> = (props) => {
 
         <LocalPrompts className={cx(showEditor?"":"hidden")} setShowEditor={setShowEditor}/>
 
-        <ChatMessageList botId={props.botId} messages={props.messages} className={cx(showEditor?"hidden":"")} />
+        <div className={cx("overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
+          {inputText && setTimer(props)}
+          <ChatMessageList botId={props.botId} messages={props.messages}/>
+          <div id="loading">
+            <div id="loading-wrapper">
+              <img src={loadingImg} alt=""/>
+              <span>Loading...</span>
+            </div>
+          </div>
+          <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")}></div>
+        </div>
 
         <div className={cx('mt-3 flex flex-col', marginClass, mode === 'full' ? 'mb-3' : 'mb-[5px]')}>
           <div className={cx('flex flex-row items-center gap-[5px]', mode === 'full' ? 'mb-3' : 'mb-0')}>
