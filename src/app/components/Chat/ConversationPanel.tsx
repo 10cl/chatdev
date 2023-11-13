@@ -68,6 +68,14 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const [showShareDialog, setShowShareDialog] = useState(false)
 
+  function setTimer(props: Props){
+    console.log("id:" + props.botId)
+    setTimeout(function (){
+      updateSendMessage(props)
+    }, 5000)
+    return true;
+  }
+
   const context: ConversationContextValue = useMemo(() => {
     return {
       reset: props.resetConversation,
@@ -76,48 +84,57 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
+      let isGameMode = store.get("gameModeEnable")
+      if (isGameMode == null){
+        isGameMode = true
+      }
+
+      let isWorkFlowingDisable = store.get("workFlowingDisable")
+      if (isWorkFlowingDisable == null){
+        isWorkFlowingDisable = false
+      }
+
+      console.error("isGameMode: " + isGameMode + ", props: " + props.botId)
       setShowEditor(false)
-      // chatDev begin
-      // props.onUserSendMessage(input as string, props.botId)
-      store.set("input_text_pending", input)
-      store.set("start_page", props.botId)
-      // chatDev end
+      /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
+        store.set("input_text_pending", input)
+        store.set("start_page", props.botId)
+
+        setTimeout(function (){
+          updateSendMessage(props)
+        }, 500)
+      }/*Chat Mode*/else{
+        props.onUserSendMessage(input as string, props.botId)
+      }
     },
     [props],
   )
 
-  useEffect(() => {
-    startTimer();
-    return () => {
-      stopTimer();
-    };
-  }, []);
+  function updateSendMessage(sendProp: Props) {
+    const botId = sendProp.botId
+    const value = store.get("input_text") ? store.get("input_text") : ""
+    if (value != "") {
+      console.log("timer sendMessage " + botId)
 
-  const [count, setCount] = useState(0);
-  const [intervalId, setIntervalId] = useState(null);
-  const startTimer = () => {
-    const id = setInterval(() => {
-      setCount((prevCount) => prevCount + 1);
-      const value = store.get("input_text") ? store.get("input_text") : ""
-      if (value != "") {
-        props.onUserSendMessage(value, props.botId)
-        store.set("input_text", "")
-      }
-      if (isPromptLibraryDialogOpen){
-        setVisible(false)
-      }
-    }, 1000);
-
-    // @ts-ignore
-    setIntervalId(id);
-  };
-
-  const stopTimer = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
+      sendProp.onUserSendMessage(value, botId)
+      store.set("input_text", "")
     }
-  };
+
+    if (isPromptLibraryDialogOpen){
+      setGameFloatVisible(false)
+    }
+
+    //  game update
+    if(store.get("workFlowingDisable") != null){
+      setWorkFlowingDisable(store.get("workFlowingDisable"))
+    }
+
+    if (store.get("task_refresh") == true){
+      setShowWebPreviewDialog(true)
+      trackEvent('open_web_preview', { botId: botId })
+      store.set("task_refresh", false)
+    }
+  }
 
   const resetConversation = useCallback(() => {
     if (!props.generating) {
@@ -243,6 +260,10 @@ const ConversationPanel: FC<Props> = (props) => {
     setShowAssistant(false)
     trackEvent('close_assistant')
   },[])
+  function getLastMessage() {
+    const errorMsg = props.messages[props.messages.length-1].error
+    return errorMsg != undefined && errorMsg.message
+  }
 
   return (
     <ConversationContext.Provider value={context}>
@@ -258,6 +279,8 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={props.bot.name || botInfo.name}>
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
+            {setTimer(props) && props.messages.length > 0 && !props.messages[props.messages.length-1].text && !props.messages[props.messages.length-1].error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
+            {props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
             {mode === 'compact' && props.onSwitchBot && (
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
             )}
