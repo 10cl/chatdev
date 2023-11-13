@@ -6,6 +6,7 @@ import historyIcon from '~/assets/icons/history.svg'
 import libraryIcon from '~/assets/icons/library.svg'
 import editIcon from '~/assets/icons/edit.svg'
 import shareIcon from '~/assets/icons/share.svg'
+import assistantIcon from '~/assets/icons/assistant.svg'
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
 import { trackEvent } from '~app/plausible'
@@ -230,7 +231,18 @@ const ConversationPanel: FC<Props> = (props) => {
     setCollapsed((c) => !c)
   }
 
+  const openAssistant = useCallback(() => {
+    setGameFloatVisible(false)
+
+    setShowAssistant(true)
+    // setShowEditor(false)
+    trackEvent('open_assistant')
+  },[])
   const [collapsed, setCollapsed] = useAtom(chatInList)
+  const closeAssistant = useCallback(() => {
+    setShowAssistant(false)
+    trackEvent('close_assistant')
+  },[])
 
   return (
     <ConversationContext.Provider value={context}>
@@ -276,6 +288,9 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={t('Open Prompt Library')}>
               <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openPromptLibrary} />
             </Tooltip>
+            <Tooltip content={cx(t('GPTs'))}>
+              <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
+            </Tooltip>
           </div>
         </div>
 
@@ -319,6 +334,9 @@ const ConversationPanel: FC<Props> = (props) => {
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
       {showShareDialog && (
         <ShareDialog open={true} onClose={() => setShowShareDialog(false)} messages={props.messages} />
+      )}
+      {showAssistant && (
+          <PromptLabDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />
       )}
     </ConversationContext.Provider>
   )

@@ -9,6 +9,7 @@ import loadingImg from '~/assets/loading.png'
 import {useAtom} from "jotai/index";
 import {chatInList} from "~app/state";
 import React from "react";
+import PromptLab from "~app/components/PromptLibrary/PromptLab";
 
 interface Props {
   botId: BotId
@@ -22,13 +23,15 @@ const ChatMessageList: FC<Props> = (props) => {
 
     return (
         <div className={cx("overflow-hidden h-full", props.className)}>
-            <ScrollToBottom className={cx('overflow-auto h-full', collapsed?"hidden":"")}>
-                <div className={cx('flex flex-col gap-3 h-full mx-5')}>
-                    {props.messages.map((message, index) => {
-                        return <ChatMessageCard key={message.id} message={message} className={index === 0 ? 'mt-5' : undefined} />
-                    })}
-                </div>
-            </ScrollToBottom>
+        <ScrollToBottom className={cx('overflow-auto h-full', isGameMode?"hidden":"")}>
+            <div className={cx('flex flex-col gap-3 h-full mx-5')}>
+                {props.messages.length > 0 && props.messages.map((message, index) => {
+                    return <ChatMessageCard key={message.id} message={message} className={index === 0 ? 'mt-5' : undefined} />
+                })}
+                {props.messages.length <= 0 && <PromptLab />}
+            </div>
+        </ScrollToBottom>
+
             <div id="loading">
                 <div id="loading-wrapper">
                     <img src={loadingImg} alt="" />
