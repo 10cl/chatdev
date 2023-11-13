@@ -1,12 +1,17 @@
 import cx from 'classnames'
-import {FC, Suspense, useCallback, useMemo, useState} from 'react'
+import {FC, Suspense, useCallback, useMemo, useRef, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import clearIcon from '~/assets/icons/clear.svg'
+import chatModeIcon from '~/assets/icons/chatmode.svg'
+import gameIcon from '~/assets/icons/game.svg'
 import historyIcon from '~/assets/icons/history.svg'
 import libraryIcon from '~/assets/icons/library.svg'
 import editIcon from '~/assets/icons/edit.svg'
-import shareIcon from '~/assets/icons/share.svg'
+import htmlIcon from '~/assets/icons/html.svg'
+import closeIcon from '~/assets/icons/close.svg'
 import assistantIcon from '~/assets/icons/assistant.svg'
+import settingsIcon from '~/assets/icons/setting_top.svg'
+
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
 import { trackEvent } from '~app/plausible'
@@ -14,30 +19,28 @@ import { ChatMessageModel } from '~types'
 import { BotId, BotInstance } from '../../bots'
 import Button from '../Button'
 import HistoryDialog from '../History/Dialog'
-import ShareDialog from '../Share/Dialog'
+import PreViewFrameDialog from '../Share/PreViewFrameDialog'
 import SwitchBotDropdown from '../SwitchBotDropdown'
 import Tooltip from '../Tooltip'
 import ChatMessageInput from './ChatMessageInput'
 import ChatMessageList from './ChatMessageList'
 import LocalPrompts from './LocalPrompts'
 import store from 'store2'
-import {requestHostPermission} from "~app/utils/permissions";
-import {ChatError, ErrorCode} from "~utils/errors";
 import React, { useEffect  } from 'react';
 import GameButton from '../GameButtom';
 import {useAtom, useAtomValue} from "jotai/index";
 import {
-  chatInList, floatTipsOpen,
-  followArcThemeAtom, promptEdit,
+  gameModeEnable,
+  editorPromptTimesAtom,
+  floatTipsOpen,
+  promptEdit,
   promptLibraryDialogOpen,
   showEditorAtom,
-  sidebarRightCollapsedAtom
+  workFlowingDisableAtom,
+  showHistoryAtom,
+  showSettingsAtom,
+  showGptsDialogAtom, inputTextAtom,
 } from "~app/state";
-import {BeatLoader} from "react-spinners";
-import {loadLocalPrompts, Prompt, saveLocalPrompt} from "~services/prompts";
-import {Input} from "~app/components/Input";
-import AceEditor from "react-ace";
-import useSWR from "swr";
 
 import "ace-builds/src-noconflict/theme-github";
 
@@ -45,6 +48,13 @@ import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/ext-language_tools";
 import {toBase64} from "js-base64";
+import PromptLabDialog from "~app/components/Chat/PromptLabDialog";
+import loadingImg from "~assets/loading.png";
+import {GoBook} from "react-icons/go";
+import SettingsDialog from "~app/components/Settings/SettingsDialog";
+import useSWR from "swr";
+import {BeatLoader} from "react-spinners";
+import Markdown from "~app/components/Markdown";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -62,12 +72,22 @@ const ConversationPanel: FC<Props> = (props) => {
   const botInfo = CHATBOTS[props.botId]
   const mode = props.mode || 'full'
   const marginClass = 'mx-5'
-  const [showHistory, setShowHistory] = useState(false)
+  const [showHistory, setShowHistory] = useAtom(showHistoryAtom)
 
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+  const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
+  const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
 
-  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
 
+  const [isPreviewShow, setShowWebPreviewDialog] = useState(false)
+
+  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
+  const [inputText, setInputText] = useAtom(inputTextAtom)
+
+  const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
+  const [workFlowingDisable, setWorkFlowingDisable] = useAtom(workFlowingDisableAtom)
   function setTimer(props: Props){
     console.log("id:" + props.botId)
     setTimeout(function (){
@@ -136,6 +156,11 @@ const ConversationPanel: FC<Props> = (props) => {
     }
   }
 
+  const openHtmlDialog = useCallback(() => {
+    setShowWebPreviewDialog(true)
+    trackEvent('open_html_dialog')
+  }, [])
+
   const resetConversation = useCallback(() => {
     if (!props.generating) {
       props.resetConversation()
@@ -143,12 +168,13 @@ const ConversationPanel: FC<Props> = (props) => {
   }, [props])
 
   const openHistoryDialog = useCallback(() => {
+    setPromptEdit("")
     setShowHistory(true)
     trackEvent('open_history_dialog', { botId: props.botId })
   }, [props.botId])
 
   const openShareDialog = useCallback(() => {
-    setShowShareDialog(true)
+    setShowWebPreviewDialog(true)
     trackEvent('open_share_dialog', { botId: props.botId })
   }, [props.botId])
 
@@ -177,14 +203,14 @@ const ConversationPanel: FC<Props> = (props) => {
     }
   }
 
-  const [visible, setVisible] = useAtom(floatTipsOpen);
+  const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
   const [gameContent, setGameContent] = useState("");
   const [defaultPosition, setDefaultPosition] = useState({
     x: 32,
     y: 32
   })
   useEffect(() => {
-    setVisible(false)
+    setGameFloatVisible(false)
     const ele = document.getElementById('game-container') as HTMLElement;
     // ele.addEventListener('mouseenter', show)
     ele.addEventListener('mousemove', mouseMove)
@@ -197,14 +223,12 @@ const ConversationPanel: FC<Props> = (props) => {
   }, [])
 
   const show = () => {
-    setVisible(true)
+    setGameFloatVisible(true)
   }
 
   const hide = () => {
-    setVisible(false)
+    setGameFloatVisible(false)
   }
-  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
-  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
 
   const mouseMove = (e: MouseEvent) => {
     let offsetX = 0
@@ -225,7 +249,7 @@ const ConversationPanel: FC<Props> = (props) => {
       const prompts = store.get("prompts")
       const pointerover = store.get("pointerover")
       const pointerover_pos = store.get("pointerover_pos")
-      if (prompts !== undefined){
+      if (prompts !== null){
         if (pointerover){
           const promptKey = "Profile_" + store.get("pointerover_name")
           setPromptEdit(promptKey)
@@ -236,7 +260,7 @@ const ConversationPanel: FC<Props> = (props) => {
           setPromptEdit(promptKey)
           setGameContent(prompts[promptKey] != undefined ?prompts[promptKey]: store.get("pointerover_pos_name"))
         }
-        setVisible(pointerover || pointerover_pos)
+        setGameFloatVisible(pointerover || pointerover_pos)
         setDefaultPosition({ x, y });
       }
     }
@@ -245,8 +269,42 @@ const ConversationPanel: FC<Props> = (props) => {
   function setCollapsedAndUpdate() {
     trackEvent('switch_map_and_chat')
     setShowEditor(false)
-    setCollapsed((c) => !c)
+    setGameFloatVisible(false)
+    setGameModeEnable((c) => !c)
   }
+
+  function setWorkFlowingAndUpdate() {
+    setGameFloatVisible(false)
+
+    if (!window.confirm((workFlowingDisable?
+        t('Confirm whether to start your GPTs?'):
+        t('Confirm whether to exit the GPTs?')) as string)) {
+      return
+    }
+    trackEvent('open_prompt_flow_collapsed')
+    setWorkFlowingDisable((c) => !c)
+    if (workFlowingDisable){
+      store.set("flow_node", "")
+      store.set("flow_edge", "")
+    }
+  }
+
+  const openFlowEditor = useCallback(() => {
+    setGameFloatVisible(false)
+
+    // setEditorPrompt("Flow_Dag_Yaml")
+    setEditorPromptTimes(editorPromptTimes + 1)
+    setShowEditor(true)
+    setShowAssistant(false)
+    trackEvent('open_editor_prompt_flow')
+  },[])
+
+
+  const closeFlowEditor = useCallback(() => {
+    setShowEditor(false)
+    trackEvent('close_editor_prompt_flow')
+  },[])
+
 
   const openAssistant = useCallback(() => {
     setGameFloatVisible(false)
@@ -255,11 +313,23 @@ const ConversationPanel: FC<Props> = (props) => {
     // setShowEditor(false)
     trackEvent('open_assistant')
   },[])
-  const [collapsed, setCollapsed] = useAtom(chatInList)
+
+  const openSettings = useCallback(() => {
+    setShowSettings(true)
+    trackEvent('open_settings')
+  },[])
+
   const closeAssistant = useCallback(() => {
     setShowAssistant(false)
     trackEvent('close_assistant')
   },[])
+
+  const openPromptLibrary = useCallback(() => {
+    setPromptEdit("")
+    setIsPromptLibraryDialogOpen(true)
+    trackEvent('open_prompt_library')
+  }, [])
+
   function getLastMessage() {
     const errorMsg = props.messages[props.messages.length-1].error
     return errorMsg != undefined && errorMsg.message
@@ -287,21 +357,31 @@ const ConversationPanel: FC<Props> = (props) => {
           </div>
           <div className="flex flex-row items-center gap-2 shrink-0 cursor-pointer group">
             <div className="flex flex-row items-center gap-2">
-              <button
-                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", collapsed ? '' : 'button-rotate-180')}
-                  id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
-                  onClick={() => setCollapsedAndUpdate()}
-                  data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
-                <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
-              </button>
-              <label className="text-[13px] whitespace-nowrap text-light-text font-medium select-none"
-                     id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(collapsed ? t('Chat Mode') : t('Game Mode'))}</label>
+              <img src={gameIcon} className="w-5 h-5 cursor-pointer"/>
+
+              <Tooltip content={cx(isGameMode ? t('Chat Mode') : t('Game Mode'))}>
+                <button
+                    className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", isGameMode ? '' : 'button-rotate-180')}
+                    id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
+                    onClick={() => setCollapsedAndUpdate()}
+                    data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
+                  <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
+                </button>
+              </Tooltip>
+
+              <img src={chatModeIcon} className="w-5 h-5 cursor-pointer"/>
+
+              {/*<label className="text-[13px] whitespace-nowrap text-light-text font-medium select-none"*/}
+              {/*       id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(isGameMode ? t('Chat Mode') : t('Game Mode'))}</label>*/}
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">
-            <Tooltip content={t('Share Prompt Library')}>
-              <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />
-            </Tooltip>
+            {/*<Tooltip content={t('Share Prompt Library')}>*/}
+            {/*  <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />*/}
+            {/*</Tooltip>*/}
+            {false && <Tooltip content={t('Open Web Preview')}>
+              <img src={htmlIcon} className="w-5 h-5 cursor-pointer" onClick={openHtmlDialog} />
+            </Tooltip>}
             <Tooltip content={t('Clear conversation')}>
               <img src={clearIcon} className="w-5 h-5 cursor-pointer" onClick={resetConversation} />
             </Tooltip>
@@ -311,8 +391,23 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={t('Open Prompt Library')}>
               <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openPromptLibrary} />
             </Tooltip>
+            <Tooltip content={cx(workFlowingDisable ? t('Start') : t('Stop')) + " " + t('GPTs')}>
+              <button
+                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 flow-open')}
+                  id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
+                  onClick={() => setWorkFlowingAndUpdate()}
+                  data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
+                <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
+              </button>
+            </Tooltip>
+            <Tooltip content={cx(!showEditor ?"":t('Cancel')) + " " +  t('Edit') + " " + t('GPTs')}>
+              <img src={!showEditor?editIcon:closeIcon} className="w-5 h-5 cursor-pointer" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
+            </Tooltip>
             <Tooltip content={cx(t('GPTs'))}>
               <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
+            </Tooltip>
+            <Tooltip content={cx(t('Settings'))}>
+              <img src={settingsIcon} className="w-5 h-5 cursor-pointer" onClick={openSettings} />
             </Tooltip>
           </div>
         </div>
@@ -359,17 +454,21 @@ const ConversationPanel: FC<Props> = (props) => {
       </div>
       <div id="mouse-position-demo" className="mouse-position-demo">
         <GameButton
-            visible={visible}
+            botId={props.botId}
+            visible={gameFloatVisible}
             content={gameContent}
             defaultPosition={defaultPosition}
         />
       </div>
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
-      {showShareDialog && (
-        <ShareDialog open={true} onClose={() => setShowShareDialog(false)} messages={props.messages} />
+      {isPreviewShow && (
+        <PreViewFrameDialog open={true} onClose={() => setShowWebPreviewDialog(false)} messages={props.messages} />
       )}
       {showAssistant && (
           <PromptLabDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />
+      )}
+      {showSettings && (
+          <SettingsDialog open={true} onClose={() => setShowSettings(false)} />
       )}
     </ConversationContext.Provider>
   )

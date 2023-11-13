@@ -3,8 +3,8 @@ import { BotId } from './bots'
 import Layout from './components/Layout'
 import MultiBotChatPanel from './pages/MultiBotChatPanel'
 import PremiumPage from './pages/PremiumPage'
-import SettingPage from './pages/SettingPage'
 import SingleBotChatPanel from './pages/SingleBotChatPanel'
+import PreviewPage from "~app/pages/PreviewPage";
 
 const rootRoute = new RootRoute()
 
@@ -31,10 +31,10 @@ const chatRoute = new Route({
   component: ChatRoute,
 })
 
-const settingRoute = new Route({
+const previewPageRoute = new Route({
   getParentRoute: () => layoutRoute,
-  path: 'setting',
-  component: SettingPage,
+  path: 'preview',
+  component: PreviewPage,
 })
 
 const premiumRoute = new Route({
@@ -43,7 +43,7 @@ const premiumRoute = new Route({
   component: PremiumPage,
 })
 
-const routeTree = rootRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, settingRoute, premiumRoute])])
+const routeTree = rootRoute.addChildren([layoutRoute.addChildren([indexRoute, chatRoute, /*settingRoute,*/ premiumRoute, previewPageRoute])])
 
 const hashHistory = createHashHistory()
 const router = new ReactRouter({ routeTree, history: hashHistory })
