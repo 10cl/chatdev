@@ -34,9 +34,9 @@ export enum PoeClaudeModel {
 }
 
 export enum ClaudeMode {
-  Poe = 'poe',
-  API = 'api',
   Webapp = 'webapp',
+  API = 'api',
+  Poe = 'poe',
   OpenRouter = 'openrouter',
 }
 
@@ -89,6 +89,9 @@ export async function getUserConfig(): Promise<UserConfig> {
     result.chatgptWebappModelName = ChatGPTWebModel['GPT-3.5']
   } else if (result.chatgptWebappModelName === 'gpt-4-mobile') {
     result.chatgptWebappModelName = ChatGPTWebModel['GPT-4']
+  }
+  if (result.chatgptApiModel === 'gpt-3.5-turbo-16k') {
+    result.chatgptApiModel = 'gpt-3.5-turbo'
   }
   if (
     result.claudeApiModel !== ClaudeAPIModel['claude-2'] ||

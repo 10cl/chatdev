@@ -114,7 +114,6 @@ const ConversationPanel: FC<Props> = (props) => {
         isWorkFlowingDisable = false
       }
 
-      console.error("isGameMode: " + isGameMode + ", props: " + props.botId)
       setShowEditor(false)
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
         store.set("input_text_pending", input)
@@ -349,8 +348,8 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={props.bot.name || botInfo.name}>
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
-            {setTimer(props) && props.messages.length > 0 && !props.messages[props.messages.length-1].text && !props.messages[props.messages.length-1].error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
-            {props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
+            {isGameMode && setTimer(props) && props.messages.length > 0 && !props.messages[props.messages.length-1].text && !props.messages[props.messages.length-1].error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
+            {isGameMode && props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
             {mode === 'compact' && props.onSwitchBot && (
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
             )}
@@ -417,12 +416,12 @@ const ConversationPanel: FC<Props> = (props) => {
         <div className={cx("overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
           {inputText && setTimer(props)}
           <ChatMessageList botId={props.botId} messages={props.messages}/>
-          <div id="loading">
+          {isGameMode && <div id="loading">
             <div id="loading-wrapper">
               <img src={loadingImg} alt=""/>
               <span>Loading...</span>
             </div>
-          </div>
+          </div>}
           <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")}></div>
         </div>
 

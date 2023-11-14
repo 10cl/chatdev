@@ -1,18 +1,14 @@
 import cx from 'classnames'
-import {useAtom, useAtomValue} from "jotai/index";
+import {useAtom} from "jotai/index";
 import collapseIcon from '~/assets/icons/collapse.svg'
 import {
     editorPromptAtom,
     editorPromptTimesAtom,
-    followArcThemeAtom,
     showEditorAtom,
-    sidebarRightCollapsedAtom
+    seminarDisableAtom, inputTextAtom, promptVersionAtom
 } from '~app/state'
 import React, {MouseEvent as ReactMouseEvent, useCallback, useEffect, useState} from 'react';
-// @ts-ignore
 import ReactFlow, {
-    MiniMap,
-    Controls,
     Background,
     useNodesState,
     useEdgesState,
@@ -21,15 +17,25 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 import store from "store2";
-import ConnectionLine from "~app/components/Sidebar/ConnectionLine";
 import CustomEdge from "~app/components/Sidebar/CustomEdge";
-import useSWR from "swr";
-import {loadLocalPrompts} from "~services/prompts";
+import {
+    getPromptVersion,
+    loadLocalPrompts,
+    loadRemotePrompts, loadTheLatestPrompt,
+    Prompt, PromptVersion,
+    updateLocalPrompts,
+} from "~services/prompts";
 import {useTranslation} from "react-i18next";
 import {Node} from "@reactflow/core/dist/esm/types/nodes";
 import Tooltip from "~app/components/Tooltip";
 import editIcon from "~assets/icons/edit.svg";
 import {trackEvent} from "~app/plausible";
+import {Connection} from "@reactflow/core/dist/esm/types/general";
+import Dialog from "~app/components/Dialog";
+import Button from "~app/components/Button";
+import useSWR from "swr";
+import {importFromText} from "~app/utils/export";
+import {getVersion} from "~utils";
 
 function PromptFlow() {
     function updateFlow() {
@@ -51,15 +57,31 @@ function PromptFlow() {
         }
     }
     const { t } = useTranslation()
-    const welcomeStr = t('Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these prompt flows, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?')
-    const welcomeIntro = t("Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our Prompt Flow will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual Prompt Flow to turn your ideas into reality!")
-    const promptFlowOpen = t("Prompt Flow is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Prompt Flow defined on the right.")
-    const promptFlowClose = t("Prompt Flow is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
-    const promptFlowDone = t("The Prompt Flow has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
+    const welcomeStr = t('Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these GPTss, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?')
+    const welcomeIntro = t("Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our GPTs will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual GPTs to turn your ideas into reality!")
+    const promptFlowOpen = t("GPTs is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the GPTs defined on the right.")
+    const promptFlowClose = t("GPTs is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
+    const promptFlowDone = t("The GPTs has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
     const promptTaskIntroduce = t('Introduce yourself')
+    const promptsVersionQuery = useSWR('latest-prompts-version', () => getPromptVersion(), {suspense: true})
+    const [promptVersion, setPromptVersion] = useAtom(promptVersionAtom)
+
     useEffect(() => {
         const links = document.querySelectorAll('a');
-        loadLocalPrompts()
+        updateLocalPrompts()
+
+        let promptVersionLocal = store.get("prompt_version")
+        if (promptVersionLocal == null){
+            promptVersionLocal = getVersion()
+        }
+        const promptVersionRemote = promptsVersionQuery.data as PromptVersion
+        if (promptVersionRemote.version != "" && promptVersionRemote.version != promptVersionLocal){
+            setPromptVersion(promptVersionRemote.version)
+            loadTheLatestPrompt().then(r => {
+                importFromText(r.yaml)
+            })
+        }
+
         store.set("prompt_welcome", welcomeStr);
         store.set("prompt_task_introduce", promptTaskIntroduce);
         store.set("prompt_welcome_intro", welcomeIntro);
@@ -81,7 +103,7 @@ function PromptFlow() {
     }, []);
 
     function setCollapsedAndUpdate() {
-        setCollapsed((c) => !c)
+        setSeminarDisable((c) => !c)
 
         updateFlow()
         stopTimer()
@@ -93,7 +115,7 @@ function PromptFlow() {
     let flowEdge = ""
     let flowNode = ""
     let promptsCache = ""
-    // 开始定时器
+
     const startTimer = () => {
         const id = setInterval(() => {
             setCount((prevCount) => prevCount + 1);
@@ -102,9 +124,9 @@ function PromptFlow() {
             if (player_init !== undefined && player_init == 2){
                 store.set("player_init", 3)
                 updateFlow()
-                setCollapsed(false)
+                setSeminarDisable(false)
             }
-            if (prompts !== undefined && prompts['Flow_Dag_Yaml'] != promptsCache){
+            if (prompts !== null && prompts['Flow_Dag_Yaml'] != promptsCache){
                 promptsCache = prompts['Flow_Dag_Yaml']
                 updateFlow()
             }
@@ -132,6 +154,14 @@ function PromptFlow() {
                     })
                 );
             }
+
+            // exception tips
+            const exceptionNode = store.get("exception_nodes")
+            if (exceptionNode != null && exceptionNode != "") {
+                store.set("exception_nodes", "")
+                window.confirm(t('GPTs') + " Exception: " + exceptionNode)
+            }
+
         }, 1000);
 
         // @ts-ignore
@@ -155,10 +185,10 @@ function PromptFlow() {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-    // @ts-ignore
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+    const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
-    const [collapsed, setCollapsed] = useAtom(sidebarRightCollapsedAtom)
+    const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
+
     const [showEditor, setShowEditor] = useAtom(showEditorAtom)
     const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
     const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
@@ -188,25 +218,17 @@ function PromptFlow() {
         }
         store.set("chatdev_node_click_time", currentTime)
     }
-    const openFlowEditor = useCallback(() => {
-        setEditorPrompt("Flow_Dag_Yaml")
-        setEditorPromptTimes(editorPromptTimes + 1)
-        setShowEditor(!showEditor)
-        trackEvent('open_editor_prompt_flow')
-    },[])
 
     return (
         <aside
             className={cx(
                 'flex flex-col bg-primary-background bg-opacity-40 overflow-hidden',
-                collapsed ? 'items-center px-[15px]' : 'w-[430px] px-4',
+                seminarDisable ? 'items-center px-[15px]' : 'w-[430px] px-4',
             )}
         >
-            <img
-                src={collapseIcon}
-                className={cx('w-6 h-6 cursor-pointer my-5', collapsed ? 'self-end' : 'rotate-180')}
-                onClick={() => setCollapsedAndUpdate()}
-            />
+            <Tooltip content={'GPTs Flow'}>
+                <img src={collapseIcon} className={cx('w-6 h-6 cursor-pointer my-5', seminarDisable ? 'self-end' : 'rotate-180')} onClick={() => setCollapsedAndUpdate()} />
+            </Tooltip>
             <div className="flex flex-col gap-3 overflow-y-auto scrollbar-none">
 
             </div>
@@ -226,9 +248,6 @@ function PromptFlow() {
                     <Background/>
                 </ReactFlow>
             </div>
-            <Tooltip content={t('Edit') + t('Prompt Flow')}>
-                <img src={editIcon} className="w-6 h-6 cursor-pointer my-5" onClick={openFlowEditor} />
-            </Tooltip>
         </aside>
     )
 }

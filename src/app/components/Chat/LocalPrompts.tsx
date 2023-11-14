@@ -239,6 +239,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
             localPromptsQuery.mutate()
             // setEditorYamlTimes(editorYamlTimes + 1)
             setEditorPromptTimes(editorPromptTimes + 1)
+            location.reload()
         })
     }
 

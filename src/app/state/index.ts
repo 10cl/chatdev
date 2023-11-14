@@ -4,7 +4,7 @@ import { atomFamily } from 'jotai/utils'
 import { createBotInstance, BotId } from '~app/bots'
 import { getDefaultThemeColor } from '~app/utils/color-scheme'
 import { ChatMessageModel } from '~types'
-import { uuid } from '~utils'
+import {getVersion, uuid} from '~utils'
 
 type Param = { botId: BotId; page: string }
 
@@ -41,7 +41,7 @@ export const editorPromptTimesAtom = atomWithStorage<number>('editorPromptTimes'
 export const promptLibraryDialogOpen = atomWithStorage('promptLibraryDialogOpen', false)
 export const promptEdit = atomWithStorage('promptEdit', "")
 export const inputTextAtom = atomWithStorage('input_text', "")
-export const promptVersionAtom = atomWithStorage('prompt_version', "")
+export const promptVersionAtom = atomWithStorage('prompt_version', getVersion())
 export const floatTipsOpen = atomWithStorage('floatTipsOpen', false)
 
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')

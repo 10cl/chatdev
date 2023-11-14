@@ -20,7 +20,12 @@ interface ConversationContext {
 export class GradioBot extends AbstractBot {
   private conversationContext?: ConversationContext
 
-  constructor(public wsUrl: string, public model: string, public params: number[], public mode?: 'text' | 'html') {
+  constructor(
+    public wsUrl: string,
+    public model: string,
+    public params: number[],
+    public mode?: 'text' | 'html',
+  ) {
     super()
   }
 
@@ -104,7 +109,7 @@ export class GradioBot extends AbstractBot {
     try {
       await wsp.open()
     } catch (err) {
-      console.error('lmsys ws open error', err)
+      console.error('WS open error', err)
       throw new ChatError('Failed to establish websocket connection.', ErrorCode.NETWORK_ERROR)
     }
 
