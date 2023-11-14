@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import allInOneIcon from '~/assets/all-in-one.svg'
 import collapseIcon from '~/assets/icons/collapse.svg'
 import feedbackIcon from '~/assets/icons/feedback.svg'
+import discordIcon from '~/assets/icons/discord.svg'
 import githubIcon from '~/assets/icons/github.svg'
 import settingIcon from '~/assets/icons/setting.svg'
 import themeIcon from '~/assets/icons/theme.svg'
@@ -64,16 +65,16 @@ function Sidebar() {
         {!collapsed && <hr className="border-[#ffffff4d]" />}
         <div className={cx('flex mt-5 gap-[10px] mb-4', collapsed ? 'flex-col' : 'flex-row ')}>
           {!collapsed && (
-            <Tooltip content={t('Feedback')}>
-              <a href="https://github.com/10cl/chatdev/issues" target="_blank" rel="noreferrer">
-                <IconButton icon={feedbackIcon} />
-              </a>
-            </Tooltip>
+              <Tooltip content={t('Feedback')}>
+                <a href="https://github.com/10cl/chatdev/issues" target="_blank" rel="noreferrer">
+                  <IconButton icon={feedbackIcon} />
+                </a>
+              </Tooltip>
           )}
-          <Tooltip content={t('Settings')}>
-            <Link to="/setting">
-              <IconButton icon={settingIcon} />
-            </Link>
+          <Tooltip content={t('Discord')}>
+            <a href="https://discord.com/channels/977885982579884082/" target="_blank" rel="noreferrer">
+              <IconButton icon={discordIcon} />
+            </a>
           </Tooltip>
         </div>
       </div>
