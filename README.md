@@ -1,7 +1,7 @@
 <p align="center">
     <img src="./screenshots/chatgpt_architecture.svg">
 </p>
-<h1 align="center">ChatDev: Visualize Your AI Agent</h1>
+<h1 align="center">ChatDev IDE: Building Your AI Agent</h1>
 
 <div align="center">
 
@@ -17,7 +17,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 <a href="https://microsoftedge.microsoft.com/addons/detail/ceoneifbmcdiihmgfjeodiholmbpmibm?utm_source=github"><img src="./screenshots/edge-logo.png" width="160" alt="Get ChatDev for Microsoft Edge"></a>
 
 
-[Screenshot](#-screenshot) &nbsp;&nbsp;|&nbsp;&nbsp; [GameMode](#-game-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [ChatMode](#-chat-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [PromptIDE](#-prompt-ide) &nbsp;&nbsp;|&nbsp;&nbsp; [Bots](#-bots) &nbsp;&nbsp;|&nbsp;&nbsp; [Installation](#-installation) &nbsp;&nbsp;|&nbsp;&nbsp; [Changelog](#-changelog)
+[Screenshot](#-screenshot) &nbsp;&nbsp;|&nbsp;&nbsp; [GameMode](#-game-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [ChatMode](#-chat-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [PromptIDE](#-prompt-ide) &nbsp;&nbsp;|&nbsp;&nbsp; [Bots](#-bots) &nbsp;&nbsp;|&nbsp;&nbsp; [Installation](#-installation) &nbsp;&nbsp;
 
 [author-image]: https://img.shields.io/badge/author-10cl-blue.svg
 [author-url]: https://github.com/10cl
@@ -32,7 +32,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 
 </div>
 
-ChatDev is an integrated multiple large language model Chrome Extension, It consists of three parts: **Game Mode**、**Chat Mode** and **Prompt IDE**.
+ChatDev IDE is an integrated multiple large language model Chrome Extension, It consists of three parts: **Game Mode**、**Chat Mode** and **Prompt IDE**.
 
 you can personalize these NPCs, customize the location's prompt, and build your GPTs with the visualize prompt editor, run GPTs let NPCs Multi-Persona Self-Collaboration.
 
@@ -554,47 +554,6 @@ nodes:
 * Run `yarn install` to install dependencies.
 * Run `yarn build` to build the plugin.
 * Follow the steps in "Manual Installation" to load the `dist` folder into your browser.
-
-## 📜 Changelog
-* v1.2.2
-  * GPTs
-  * PromptIDE
-
-* v1.1.3
-
-  * Flow_Dag_Yaml prompt type Add config prompt type, that is, do not send this node to the large model, and directly return the path content for parsing (Add Planning_Task_Team_Org configuration of NPC participating in the meeting)
-  * Mouse over the markers (NPCs, furniture, etc.) to display prompt description and edit button
-  * Default speed increased from 0.5 to 1, and reduced to 0.5 when chatting with NPCs
-  * When starting a round table, automatically select the appropriate meeting address, draw the area of the meeting, and temporarily stop the player action.
-  * The round table automatically ends when the player leaves the round table area
-  * When you get close to an NPC, draw the area of the chat
-  * When the NPC is less than 400 away from the player, the current activity record is not output, the distance is less than 100 and the chat is automatically requested, and the chat is automatically ended when the NPC is out of the chat area (> 200)
-  * The icon in the upper left corner only keeps the button to control the volume, and cancelling the switch and one-click home function of the control prompt
-  * Reduce the location change of the mark point, and support the mark address can be customized prompt, the location is defined as "Position_base64(xxx)"
-  * Chat record storage is changed from localStorage to indexDb to prevent temporary over limit problems
-  * Fixed an issue where the time loop would return home
-  * Issue with modified air cannon messages
-* v1.1.1
-
-  * prompt flow double-click the editable node
-  * Import or export all configurations
-  * prompt library sharing
-* v1.1.0
-
-  * Support for multiple large language models
-  * Customization of user roles
-  * Support for custom prompts (actions, plans, etc.)
-  * New visual editing for custom Prompt Flow
-  * Support for switching between chat view and game view
-  * Predefined Prompt Flows, enabling one-sentence requests to automatically select NPCs, form teams, execute tasks, and gamify presentations
-  * Settings button for customizing APIs and selecting preferred models
-  * Fixed API issues with iFlytek Spark model
-* v1.0.1
-
-  * Added support for iFlytek Spark cognitive large language model
-* v1.0.0
-
-  * Initial release of the AI town plugin based on ChatGPT
 
 ## 🤝 Acknowledgments
 
