@@ -28,7 +28,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 [last-commit-image]: https://img.shields.io/github/last-commit/10cl/chatdev?label=last%20commit
 [last-commit-url]: https://github.com/10cl/chatdev/commits
 [discord-image]: https://img.shields.io/discord/977885982579884082?logo=discord
-[discord-url]: https://discord.com/channels/977885982579884082/
+[discord-url]: https://discord.gg/fdjWfgGPjb
 
 </div>
 

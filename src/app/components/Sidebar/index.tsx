@@ -72,7 +72,7 @@ function Sidebar() {
               </Tooltip>
           )}
           <Tooltip content={t('Discord')}>
-            <a href="https://discord.com/channels/977885982579884082/" target="_blank" rel="noreferrer">
+            <a href="https://discord.gg/fdjWfgGPjb" target="_blank" rel="noreferrer">
               <IconButton icon={discordIcon} />
             </a>
           </Tooltip>
