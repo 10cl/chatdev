@@ -237,9 +237,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     async function importYaml(){
         importPromptFlow().then(() => {
             localPromptsQuery.mutate()
-            // setEditorYamlTimes(editorYamlTimes + 1)
-            setEditorPromptTimes(editorPromptTimes + 1)
-            location.reload()
+            setEditorYamlTimes(editorYamlTimes + 1)
+            // setEditorPromptTimes(editorPromptTimes + 1)
         })
     }
 
@@ -251,9 +250,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importYaml} />
                 </div>
             </div>
-            <div className="overflow-auto h-full flex flex-cow ">
+            <div className="overflow-auto h-full flex flex-cow" key={editorYamlTimes}>
                 <AceEditor
-                    key={editorYamlTimes}
                     mode="yaml"
                     theme="github"
                     name="prompt"

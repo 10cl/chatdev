@@ -46,12 +46,6 @@ const PromptLabItem = (props: {
             setSeminarDisable(false)
             setWorkFlowingDisable(false)
             setEditorYamlTimes(editorYamlTimes + 1)
-            setEditorPromptTimes(editorPromptTimes + 1)
-            setTimeout(function (){
-                setEditorYamlTimes(0)
-                setEditorPromptTimes(0)
-            }, 500)
-
             alert('Imported GPTs successfully')
         })
     }, [props])
