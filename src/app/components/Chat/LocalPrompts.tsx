@@ -201,7 +201,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                 }
             }
         }
-        const sqlTablesCompleter = {
+        const promptTablesCompleter = {
             getCompletions: (
                 editor: Ace.Editor,
                 session: Ace.EditSession,
@@ -219,7 +219,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                 );
             },
         };
-        addCompleter(sqlTablesCompleter);
+        addCompleter(promptTablesCompleter);
     }, []);
 
     function onChangePrompt(value: string) {

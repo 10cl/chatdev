@@ -416,12 +416,12 @@ const ConversationPanel: FC<Props> = (props) => {
         <div className={cx("overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
           {inputText && setTimer(props)}
           <ChatMessageList botId={props.botId} messages={props.messages}/>
-          {isGameMode && <div id="loading">
+          <div id="loading">
             <div id="loading-wrapper">
               <img src={loadingImg} alt=""/>
               <span>Loading...</span>
             </div>
-          </div>}
+          </div>
           <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")}></div>
         </div>
 

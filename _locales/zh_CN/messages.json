@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev：可视化您的AI Agent。"
+    "message": "ChatDev IDE: 构建你的智能体"
   },
   "appDesc": {
-    "message": "个性化你的AI小镇 & PromptIDE & GPTs"
+    "message": "个性化你的AI小镇并通过提示词工程开发环境构建你的智能体。"
   }
 }

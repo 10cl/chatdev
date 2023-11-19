@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev: Promptフローを使用してAIエージェントを視覚化します。"
+    "message": "ChatDev IDE: あなたのAIエージェントを構築する"
   },
   "appDesc": {
-    "message": "AI Town＆PromptIDE＆GPTをカスタマイズする"
+    "message": "AIタウンを個性化し、PromptIDEを使用してあなたのGPTsを構築します。"
   }
 }

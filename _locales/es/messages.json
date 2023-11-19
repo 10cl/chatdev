@@ -1,8 +1,8 @@
 {
   "appName": {
-    "message": "ChatDev: Visualiza tu AI Agent."
+    "message": "ChatDev IDE: Construyendo tu Agente de IA"
   },
   "appDesc": {
-    "message":  "Personaliza tu AI Town & PromptIDE & GPTs"
+    "message":  "Personaliza tu Ciudad de IA y construye tus GPTs con PromptIDE."
   }
 }
