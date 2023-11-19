@@ -38,6 +38,8 @@ you can personalize these NPCs, customize the location's prompt, and build your 
 
 It accelerates prompt engineering through **JavaScript Support** that allows implementing complex prompting techniques.
 
+>The ability to chain together conversations across different agents within a browser is one of the most interesting things about the project, as all the other attempts to do so like autogen etc use huge amounts of API tokens. if you use the default Webapp Mode, you will spend *$0* tokens. (this just requires your browser to log in to the LLM's website then will use it through the extension.)
+
 ## 📷 Screenshot
 ![gpts_talk_business.png](./screenshots/gpts_talk_business.png)
 ![gpts_write_a_website.png.png](./screenshots/gpts_write_a_website.png)
