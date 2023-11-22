@@ -63,10 +63,10 @@ export function useChat(botId: BotId) {
 
         try {
             store.set("input_text_message", "")
-            for await (const text of resp) {
+            for await (const answer of resp) {
                 updateMessage(botMessageId, (message) => {
-                    message.text = text
-                    store.set("response_update_text", text)
+                    message.text = answer.text
+                    store.set("response_update_text", message.text)
                 })
             }
             store.set("input_text_message", "")
