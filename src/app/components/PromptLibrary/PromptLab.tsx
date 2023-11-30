@@ -2,7 +2,7 @@ import {Suspense, useCallback, useEffect, useMemo, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {BeatLoader} from 'react-spinners'
 import useSWR from 'swr'
-import {loadRemotePrompts, PromptLab} from '~services/prompts'
+import {getStore, loadRemotePrompts, PromptLab, setStore} from '~services/prompts'
 import {GoBook} from "react-icons/go";
 import {importFromText} from "~app/utils/export";
 import {useAtom} from "jotai/index";
@@ -36,17 +36,23 @@ const PromptLabItem = (props: {
     const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
     const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
     const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
+    const confirmTips = t('Are you sure you want to import the GPTs?')
+    const successTips = t('Imported GPTs successfully')
 
     const importToFlowYaml = useCallback(() => {
-        if (!window.confirm('Are you sure you want to import the GPTs?')) {
+        if (!window.confirm(confirmTips)) {
             return
         }
         importFromText(props.yaml).then(() => {
             setShowAssistant(false)
             setSeminarDisable(false)
             setWorkFlowingDisable(false)
-            setEditorYamlTimes(editorYamlTimes + 1)
-            alert('Imported GPTs successfully')
+
+            const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+            setEditorYamlTimes(editorYamlTimes)
+            setStore("editorYamlTimes", editorYamlTimes)
+
+            alert(successTips)
         })
     }, [props])
 

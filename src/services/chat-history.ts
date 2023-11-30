@@ -3,6 +3,7 @@ import Browser from 'webextension-polyfill'
 import { BotId } from '~app/bots'
 import { ChatMessageModel } from '~types'
 import store from "store2";
+import {getStore} from "~services/prompts";
 
 /**
  * conversations:$botId => Conversation[]
@@ -42,11 +43,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
   }
 
   function getValidMark(message: ChatMessageModel) {
-    let isGameMode = store.get("gameModeEnable")
-    if (isGameMode == null){
-      isGameMode = true
-    }
-
+    const isGameMode = getStore("gameModeEnable", true)
     if (message.mark != undefined){
       return message.mark
     }
@@ -55,7 +52,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
       return ""
     }
 
-    const playerPos = store.get("player_mark")
+    const playerPos = getStore("player_mark", "")
     if (playerPos != ""){
       return playerPos
     }
@@ -73,7 +70,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
 }
 
 export async function loadHistoryMessages(botId: BotId): Promise<ConversationWithMessages[]> {
-  const promptEditValue = store.get("promptEdit") == null?"":store.get("promptEdit")
+  const promptEditValue = getStore("prompt_edit", "")
   console.log("loadHistoryMessages: " + promptEditValue)
   const conversations = await loadHistoryConversations(botId)
   const messagesList = await Promise.all(conversations.map((c) => promptEditValue == "" ? loadConversationMessages(botId, c.id) : loadHistoryMessagesByMark(botId, c.id, promptEditValue)))

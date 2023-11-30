@@ -1,7 +1,7 @@
 import { fileOpen, fileSave } from 'browser-fs-access'
 import Browser from 'webextension-polyfill'
 import { trackEvent } from '~app/plausible'
-import {Prompt} from "~services/prompts";
+import {getStore, Prompt, setStore} from "~services/prompts";
 import store from "store2";
 import {uuid} from "~utils";
 
@@ -18,41 +18,49 @@ export async function exportData() {
 }
 
 export async function importData() {
-  const blob = await fileOpen({ extensions: ['.json'] })
-  const json = JSON.parse(await blob.text())
-  if (!json.sync || !json.local) {
-    throw new Error('Invalid data')
-  }
-  if (!window.confirm('Are you sure you want to import the GPTs?')) {
-    return
-  }
-  await Browser.storage.local.clear()
-  await Browser.storage.local.set(json.local)
-  await Browser.storage.sync.clear()
-  await Browser.storage.sync.set(json.sync)
-
-  if (json.localStorage) {
-    for (const [k, v] of Object.entries(json.localStorage as Record<string, string>)) {
-      localStorage.setItem(k, v)
+  try{
+      const blob = await fileOpen({ extensions: ['.json'] })
+      const json = JSON.parse(await blob.text())
+      if (!json.sync || !json.local) {
+        throw new Error('Invalid data')
+      }
+    if (!window.confirm('Are you sure you want to import data? This will overwrite your current data')) {
+      return
     }
-  }
+      await Browser.storage.local.clear()
+      await Browser.storage.local.set(json.local)
+      await Browser.storage.sync.clear()
+      await Browser.storage.sync.set(json.sync)
 
-  alert('Imported data successfully')
-  trackEvent('import_data')
-  location.reload()
+      if (json.localStorage) {
+        for (const [k, v] of Object.entries(json.localStorage as Record<string, string>)) {
+          localStorage.setItem(k, v)
+        }
+      }
+
+      alert('Imported data successfully')
+      trackEvent('import_data')
+      location.reload()
+    }catch (e) {
+      alert(e)
+    }
 }
 
 const functionPath = 'func:';
 const promptPath = 'path:';
 let targetPath = '';
 
+export async function exportGPTsAll() {
+  const prompts = getStore("prompts", {})
+  const blob = new Blob([JSON.stringify(prompts, null, 4)], {type: 'application/json'})
+  await fileSave(blob, {fileName: 'chatdev_gpts_all.json'})
+  trackEvent('export_gpts_all')
+}
+
 export async function exportPromptFlow() {
-  const prompts = store.get("prompts")
-  if (prompts == null){
-    return
-  }
+  const prompts = getStore("prompts", {})
   const promptFlowYaml = prompts['Flow_Dag_Yaml']
-  if (promptFlowYaml == "") {
+  if (promptFlowYaml == undefined) {
     return
   }
   const exportPrompts: { [key: string]: string } = {};
@@ -80,7 +88,7 @@ export async function exportPromptFlow() {
     }
   }
   const blob = new Blob([JSON.stringify(exportPrompts, null, 4)], {type: 'application/json'})
-  await fileSave(blob, {fileName: 'chatdev_prompt_flow.json'})
+  await fileSave(blob, {fileName: 'chatdev_gpts.json'})
   trackEvent('export_prompt_flow')
 }
 
@@ -88,20 +96,23 @@ function isPromptJsonContain(prompt: Prompt, prompts: Prompt[]): boolean {
   return prompts.some(p => p.title === prompt.title);
 }
 
-export async function importPromptFlow() {
+export async function importPromptFlow(confirmTips: string, successTips: string) {
   const blob = await fileOpen({ extensions: ['.json'] })
-  if (!window.confirm('Are you sure you want to import the GPTs?')) {
+  if (!window.confirm(confirmTips)) {
     return
   }
-  const json = JSON.parse(await blob.text())
-
-  importFromText(json)
-  alert('Imported GPTs successfully')
+  try {
+    const json = JSON.parse(await blob.text())
+    importFromText(json)
+    alert(successTips)
+  }catch (e) {
+    alert(e)
+  }
 }
 
 export async function importFromText(json: JSON){
   const user_prompts = [] as Prompt[]
-  const prompts = store.get("prompts")
+  const prompts = getStore("prompts", {})
   if (prompts != null){
     for (const [key, value] of Object.entries(prompts)) {
       const item = {

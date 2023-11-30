@@ -21,7 +21,7 @@ import Button from '../Button'
 import PromptCombobox, { ComboboxContext } from '../PromptCombobox'
 import PromptLibraryDialog from '../PromptLibrary/Dialog'
 import TextInput from './TextInput'
-import {promptEdit, promptLibraryDialogOpen} from "~app/state";
+import {promptLibraryDialogOpen} from "~app/state";
 import {useAtom} from "jotai/index";
 
 interface Props {
@@ -36,13 +36,12 @@ interface Props {
 
 const ChatMessageInput: FC<Props> = (props) => {
   const { t } = useTranslation()
-  const { placeholder = t('Use ↑ ↓ ← → control the player\'s movement, Enter here for communication') } = props
+  const { placeholder = t('Ensure you are logged in to the LLM website to access all features') } = props
 
   const [value, setValue] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
-  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
@@ -133,12 +132,6 @@ const ChatMessageInput: FC<Props> = (props) => {
     },
     [value],
   )
-
-  const openPromptLibrary = useCallback(() => {
-    setPromptEdit("")
-    setIsPromptLibraryDialogOpen(true)
-    trackEvent('open_prompt_library')
-  }, [])
 
   return (
     <form className={cx('flex flex-row items-center gap-3', props.className)} onSubmit={onFormSubmit} ref={formRef}>

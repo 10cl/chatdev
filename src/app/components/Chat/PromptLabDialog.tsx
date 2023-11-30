@@ -1,6 +1,7 @@
 import { ChatMessageModel } from '~types'
 import Dialog from '../Dialog'
 import PromptLab from "~app/components/PromptLibrary/PromptLab";
+import {useTranslation} from "react-i18next";
 
 interface Props {
     open: boolean
@@ -9,10 +10,11 @@ interface Props {
 }
 
 const PromptLabDialog = (props: Props) => {
+    const { t } = useTranslation()
 
     return (
         <Dialog
-            title="GPTs"
+            title={t('GPTs')}
             open={props.open}
             onClose={props.onClose}
             className="w-[800px] min-h-[400px]"

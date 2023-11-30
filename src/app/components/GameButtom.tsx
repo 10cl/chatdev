@@ -54,7 +54,7 @@ const GameButton = (props: IMousePositionModal) => {
           className="mouse-position-modal"
           style={{left: `${x}px`, top: `${y}px`, visibility: `${visible ? 'visible' : 'hidden'}`}}>
         <div className="mouse-position-modal-content">
-          <img src={("./assets/profile/" + (store.get("pointerover_name") == null? "Ryan_Park":store.get("pointerover_name")) + ".png")} className="w-5 h-5"/>{content}
+          <img src={("./assets/profile/" + getStore("pointerover_name", "Ryan_Park") + ".png")} className="w-5 h-5"/>{content}
           <div className="flex flex-row items-center float-right">
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-6 h-6 cursor-pointer float-right" onClick={openHistoryDialog}/>
