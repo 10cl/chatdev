@@ -416,7 +416,12 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={props.bot.name || botInfo.name}>
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
-            {isGameMode && setTimer(props) && props.messages.length > 0 && !props.messages[props.messages.length-1].text && !props.messages[props.messages.length-1].error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
+            {(isUrlReq||
+                (isGameMode
+                    && props.messages.length > 0
+                    && !props.messages[props.messages.length-1].text
+                    && !props.messages[props.messages.length-1].error))
+                && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
             {isGameMode && props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
             {mode === 'compact' && props.onSwitchBot && (
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
