@@ -11,13 +11,14 @@ import {trackEvent} from "~app/plausible";
 import {useAtom} from "jotai/index";
 import {
   editorPromptAtom,
-  editorPromptTimesAtom,
-  promptLibraryDialogOpen,
+  editorPromptTimesAtom, editorYamlAtom, editorYamlTimesAtom, floatTipsOpen, promptLibraryDialogOpen,
   showEditorAtom,
   showHistoryAtom
 } from "~app/state";
 import {BotId} from "~app/bots";
 import {loadHistoryMessagesByMark} from "~services/chat-history";
+import {getStore, setStore} from "~services/prompts";
+import {toBase64} from "js-base64";
 
 interface IMousePositionModal {
   visible: boolean;
@@ -35,10 +36,29 @@ const GameButton = (props: IMousePositionModal) => {
   const { t } = useTranslation()
 
   const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
+
+  const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
+  const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+  const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
+  const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
 
   const openFlowEditor = useCallback(() => {
-    // setEditorPrompt("Profile_" + store.get("pointerover_name"))
-    setIsPromptLibraryDialogOpen(true)
+    // setIsPromptLibraryDialogOpen(true)
+    setStore("real_yaml", getStore(("prompt_edit")))
+    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
+      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = "#" + getStore("pointer_tips", "TODO") + "\n" + getStore("prompts")["Action_YAML_Template"]
+    }
+    setEditorPrompt("Action_Prompt_Template");
+    // setEditorPrompt(getStore("prompt_edit"));
+    setShowEditor(true);
+    setStore("editor_show", true)
+    setGameFloatVisible(false)
+
+    const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+    setEditorYamlTimes(editorYamlTimes)
+    setStore("editorYamlTimes", editorYamlTimes)
+
     trackEvent('open_editor_profile')
   }, [])
 

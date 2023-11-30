@@ -148,24 +148,14 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
-      let isGameMode = store.get("gameModeEnable")
-      if (isGameMode == null){
-        isGameMode = true
-      }
-
-      let isWorkFlowingDisable = store.get("workFlowingDisable")
-      if (isWorkFlowingDisable == null){
-        isWorkFlowingDisable = false
-      }
-
+      const isGameMode = getStore("gameModeEnable", true)
+      const isWorkFlowingDisable = getStore("workFlowingDisable", false)
       setShowEditor(false)
+      setStore("editor_show", false)
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
-        store.set("input_text_pending", input)
-        store.set("start_page", props.botId)
-
-        setTimeout(function (){
-          updateSendMessage(props)
-        }, 500)
+        setStore("input_text_pending", input)
+        updateConfigValue({ startupPage: props.botId })
+        updateSendMessage(props)
       }/*Chat Mode*/else{
         props.onUserSendMessage(input as string, props.botId)
       }
@@ -235,7 +225,7 @@ const ConversationPanel: FC<Props> = (props) => {
   }, [props])
 
   const openHistoryDialog = useCallback(() => {
-    setPromptEdit("")
+    setStore("prompt_edit", "")
     setShowHistory(true)
     trackEvent('open_history_dialog', { botId: props.botId })
   }, [props.botId])
@@ -269,7 +259,7 @@ const ConversationPanel: FC<Props> = (props) => {
       return clientx - rect.top;
     }
   }
-
+  const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
   const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
   const [gameContent, setGameContent] = useState("");
   const [defaultPosition, setDefaultPosition] = useState({
@@ -278,26 +268,10 @@ const ConversationPanel: FC<Props> = (props) => {
   })
   useEffect(() => {
     setGameFloatVisible(false)
-    const ele = document.getElementById('game-container') as HTMLElement;
-    // ele.addEventListener('mouseenter', show)
-    ele.addEventListener('mousemove', mouseMove)
-    // ele.addEventListener('mouseleave', hide)
-    return () => {
-      // ele.removeEventListener('mouseenter', show)
-      ele.removeEventListener('mousemove', mouseMove)
-      // ele.removeEventListener('mouseleave', hide)
-    }
   }, [])
 
-  const show = () => {
-    setGameFloatVisible(true)
-  }
-
-  const hide = () => {
-    setGameFloatVisible(false)
-  }
-
-  const mouseMove = (e: MouseEvent) => {
+  const mouseMove: MouseEventHandler<HTMLDivElement> = (e) => {
+    console.log("mouseMove")
     let offsetX = 0
     let offsetY = 0
     if (window.innerWidth - 500 < getOffsetX(e)){
@@ -313,19 +287,19 @@ const ConversationPanel: FC<Props> = (props) => {
     const x = getOffsetX(e) + offsetX;
     const y = getOffsetY(e) + offsetY;
     if (y < window.innerHeight - 250){
-      const prompts = store.get("prompts")
-      const pointerover = store.get("pointerover")
-      const pointerover_pos = store.get("pointerover_pos")
+      const prompts = getStore("prompts", null)
+      const pointerover = getStore("pointerover", false)
+      const pointerover_pos = getStore("pointerover_pos", "")
       if (prompts !== null){
         if (pointerover){
-          const promptKey = "Profile_" + store.get("pointerover_name")
-          setPromptEdit(promptKey)
-          setGameContent(prompts[promptKey])
+          const promptKey = "Profile_" + getStore("pointerover_name", "")
+          setStore("prompt_edit", promptKey)
+          setGameContent(getStore("pointer_tips", ""))
 
         }else if (pointerover_pos){
-          const promptKey  = 'Position_' + toBase64(store.get("pointerover_pos_name"))
-          setPromptEdit(promptKey)
-          setGameContent(prompts[promptKey] != undefined ?prompts[promptKey]: store.get("pointerover_pos_name"))
+          const promptKey  = 'Position_' + toBase64(getStore("pointerover_pos_name", ""))
+          setStore("prompt_edit", promptKey)
+          setGameContent(getStore("pointer_tips", "TODO"))
         }
         setGameFloatVisible(pointerover || pointerover_pos)
         setDefaultPosition({ x, y });
@@ -333,14 +307,32 @@ const ConversationPanel: FC<Props> = (props) => {
     }
   }
 
-  function setCollapsedAndUpdate() {
+  function setModeChange() {
     trackEvent('switch_map_and_chat')
     setShowEditor(false)
+    setStore("editor_show", false)
     setGameFloatVisible(false)
-    setGameModeEnable((c) => !c)
+
+    const newState = !getStore("gameModeEnable", false)
+    setGameModeEnable(newState)
+    setStore("gameModeEnable", newState)
+    if (!newState){
+     /* const prompts = getStore("prompts", {});
+      if(prompts['Default_Flow_Dag_Yaml'] != undefined){
+        prompts['Flow_Dag_Yaml'] = prompts['Default_Flow_Dag_Yaml']
+        setStore("editor_yaml", "Default_Flow_Dag_Yaml")
+        setStore("prompts", prompts);
+      }*/
+    }else{
+      setStore("workFlowingDisable", false)
+      setWorkFlowingDisable(false)
+    }
   }
 
   function setWorkFlowingAndUpdate() {
+    if (isGameMode){
+      return
+    }
     setGameFloatVisible(false)
 
     if (!window.confirm((workFlowingDisable?
@@ -349,19 +341,35 @@ const ConversationPanel: FC<Props> = (props) => {
       return
     }
     trackEvent('open_prompt_flow_collapsed')
-    setWorkFlowingDisable((c) => !c)
-    if (workFlowingDisable){
-      store.set("flow_node", "")
-      store.set("flow_edge", "")
-    }
+
+    const newState = !getStore("workFlowingDisable", false)
+    setStore("workFlowingDisable", newState)
+    setWorkFlowingDisable(newState)
+
+    setStore("flow_node", "")
+    setStore("flow_edge", "")
+    setStore("response_type", "");
+
   }
 
   const openFlowEditor = useCallback(() => {
     setGameFloatVisible(false)
 
     // setEditorPrompt("Flow_Dag_Yaml")
+    setStore("real_yaml", getStore("editor_yaml", "Default_Flow_Dag_Yaml"))
+    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
+      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
+    }
+    setEditorPrompt("Action_Prompt_Template");
+
     setEditorPromptTimes(editorPromptTimes + 1)
     setShowEditor(true)
+    setStore("editor_show", true)
+
+    const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+    setEditorYamlTimes(editorYamlTimes)
+    setStore("editorYamlTimes", editorYamlTimes)
+
     setShowAssistant(false)
     trackEvent('open_editor_prompt_flow')
   },[])
@@ -369,6 +377,7 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const closeFlowEditor = useCallback(() => {
     setShowEditor(false)
+    setStore("editor_show", false)
     trackEvent('close_editor_prompt_flow')
   },[])
 
@@ -392,7 +401,7 @@ const ConversationPanel: FC<Props> = (props) => {
   },[])
 
   const openPromptLibrary = useCallback(() => {
-    setPromptEdit("")
+    setStore("prompt_edit", "")
     setIsPromptLibraryDialogOpen(true)
     trackEvent('open_prompt_library')
   }, [])
@@ -435,7 +444,7 @@ const ConversationPanel: FC<Props> = (props) => {
                 <button
                     className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", isGameMode ? '' : 'button-rotate-180')}
                     id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
-                    onClick={() => setCollapsedAndUpdate()}
+                    onClick={() => setModeChange()}
                     data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
                   <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
                 </button>
@@ -465,14 +474,14 @@ const ConversationPanel: FC<Props> = (props) => {
             </Tooltip>
             <Tooltip content={cx(workFlowingDisable ? t('Start') : t('Stop')) + " " + t('GPTs')}>
               <button
-                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 flow-open')}
+                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 ' + (isGameMode ? "":'flow-open'))}
                   id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
                   onClick={() => setWorkFlowingAndUpdate()}
                   data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
                 <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
               </button>
             </Tooltip>
-            <Tooltip content={cx(!showEditor ?"":t('Cancel')) + " " +  t('Edit') + " " + t('GPTs')}>
+            <Tooltip content={cx(showEditor ? t('Exit') : (t('Edit') + " " + t('GPTs')))}>
               <img src={!showEditor?editIcon:closeIcon} className="w-5 h-5 cursor-pointer" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
             </Tooltip>
             <Tooltip content={cx(t('GPTs'))}>
@@ -485,17 +494,17 @@ const ConversationPanel: FC<Props> = (props) => {
         </div>
 
         <LocalPrompts className={cx(showEditor?"":"hidden")} setShowEditor={setShowEditor}/>
+        <div className={"hidden"} key={changeTime}>{propsMessageCheck(props)}</div>
 
-        <div className={cx("overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
-          {inputText && setTimer(props)}
+        <div className={cx("promptgame overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
           <ChatMessageList botId={props.botId} messages={props.messages}/>
           <div id="loading">
             <div id="loading-wrapper">
               <img src={loadingImg} alt=""/>
-              <span>Loading...</span>
+              <span>{t('Ensure you are logged in to the LLM website to access all features, When using the default Webapp Mode, no tokens will be consumed.')}</span>
             </div>
           </div>
-          <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")}></div>
+          <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")} onMouseMove={mouseMove}></div>
         </div>
 
         <div className={cx('mt-3 flex flex-col', marginClass, mode === 'full' ? 'mb-3' : 'mb-[5px]')}>

@@ -29,14 +29,7 @@ function PremiumOnly() {
 }
 
 function SidePanelApp() {
-  const premiumState = usePremium()
-  if (premiumState.isLoading) {
-    return null
-  }
-  if (premiumState.activated) {
-    return <SidePanelPage />
-  }
-  return <PremiumOnly />
+  return <SidePanelPage />
 }
 
 const container = document.getElementById('app')!
