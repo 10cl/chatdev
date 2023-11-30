@@ -4,16 +4,12 @@ import { BeatLoader } from 'react-spinners'
 import useSWR from 'swr'
 import closeIcon from '~/assets/icons/close.svg'
 import { trackEvent } from '~app/plausible'
-import { Prompt, loadLocalPrompts, removeLocalPrompt, saveLocalPrompt } from '~services/prompts'
+import {Prompt, loadLocalPrompts, removeLocalPrompt, saveLocalPrompt, getStore, setStore} from '~services/prompts'
 import { uuid } from '~utils'
 import Button from '../Button'
 import { Input, Textarea } from '../Input'
 import Tabs, { Tab } from '../Tabs'
 import {GoBook} from "react-icons/go";
-import store from "store2";
-import {toBase64} from "js-base64";
-import {useAtom} from "jotai/index";
-import {floatTipsOpen, promptEdit} from "~app/state";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
   return (
@@ -115,29 +111,27 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   const { t } = useTranslation()
   const [formData, setFormData] = useState<Prompt | null>(null)
     const [profile, setProfile] = useState(false)
-    const [visible, setVisible] = useAtom(floatTipsOpen);
-    const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
 
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
     useEffect(() => {
         let prompt = null
-        if (promptEditValue.indexOf("Profile_") !== -1) {
+        if (getStore("prompt_edit").indexOf("Profile_") !== -1) {
             for (let i = 0; i < localPromptsQuery.data.length; i++) {
-                if (localPromptsQuery.data[i].title == promptEditValue) {
+                if (localPromptsQuery.data[i].title == getStore("prompt_edit")) {
                     prompt = localPromptsQuery.data[i];
                 }
             }
-        } else if (promptEditValue.indexOf("Position_") !== -1) {
+        } else if (getStore("prompt_edit").indexOf("Position_") !== -1) {
             for (let i = 0; i < localPromptsQuery.data.length; i++) {
-                if (localPromptsQuery.data[i].title == promptEditValue) {
+                if (localPromptsQuery.data[i].title == getStore("prompt_edit")) {
                     prompt = localPromptsQuery.data[i];
                 }
             }
             if (prompt == null){
-                prompt = { id: uuid(), title: promptEditValue, prompt: store.get("pointerover_pos_name") }
+                prompt = { id: uuid(), title: getStore("prompt_edit"), prompt: getStore("pointerover_pos_name", "") }
             }
         }
-        setPromptEdit("")
+        setStore("prompt_edit", "")
         if (prompt !== null) {
             setFormData(prompt)
             setProfile(true)
@@ -151,7 +145,7 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
       const existed = await saveLocalPrompt(prompt)
       localPromptsQuery.mutate()
       setFormData(null)
-      store.set("edit_" + prompt.title, true)
+      setStore("edit_" + prompt.title, true)
       trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
     },
     [localPromptsQuery],

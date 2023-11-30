@@ -8,6 +8,7 @@ import { uuid } from '~utils'
 import { ChatError } from '~utils/errors'
 import { BotId } from '../bots'
 import store from "store2"
+import {getStore, setStore} from "~services/prompts";
 
 export function useChat(botId: BotId) {
   const chatAtom = useMemo(() => chatFamily({ botId, page: 'singleton' }), [botId])
@@ -31,21 +32,11 @@ export function useChat(botId: BotId) {
       const botMessageId = uuid()
 
         function getValidMark() {
-            let isGameMode = store.get("gameModeEnable")
-            if (isGameMode == null) {
-                isGameMode = true
-            }
-
+            const isGameMode = getStore("gameModeEnable", true)
             if (!isGameMode) {
                 return ""
             }
-
-            const playerPos = store.get("player_mark")
-            if (playerPos != undefined && playerPos != "") {
-                return playerPos
-            }
-
-            return "";
+            return getStore("player_mark", "");
         }
       setChatState((draft) => {
         draft.messages.push({ id: uuid(), text: input, author: 'user', mark: getValidMark() }, { id: botMessageId, text: '', author: botId, mark: getValidMark()})
@@ -62,14 +53,14 @@ export function useChat(botId: BotId) {
       })
 
         try {
-            store.set("input_text_message", "")
+            setStore("input_text_message", "")
             for await (const answer of resp) {
                 updateMessage(botMessageId, (message) => {
                     message.text = answer.text
-                    store.set("response_update_text", message.text)
+                    setStore("response_update_text", message.text)
                 })
             }
-            store.set("input_text_message", "")
+            setStore("input_text_message", "")
         } catch (err: unknown) {
             if (!abortController.signal.aborted) {
                 abortController.abort()

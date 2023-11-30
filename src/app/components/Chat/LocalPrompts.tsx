@@ -4,20 +4,23 @@ import './main.css'
 import React from "react";
 import {useTranslation} from "react-i18next";
 import useSWR from "swr";
-import {loadLocalPrompts, Prompt, saveLocalPrompt, saveLocalPromptTitle} from "~services/prompts";
-import {trackEvent} from "~app/plausible";
+import {getStore, loadLocalPrompts, Prompt, saveLocalPrompt, saveLocalPromptTitle, setStore} from "~services/prompts";
 import AceEditor from "react-ace";
 import Button from "~app/components/Button";
 import {useAtom} from "jotai/index";
-import {editorPromptAtom, editorPromptTimesAtom, editorYamlTimesAtom, showEditorAtom} from "~app/state";
+import {editorPromptAtom, editorPromptTimesAtom, editorYamlTimesAtom} from "~app/state";
 import store from "store2";
 import {Ace, EditSession, Range} from "ace-builds";
 import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-javascript';
+import shareIcon from '~/assets/icons/share.svg'
 
 import Browser from "webextension-polyfill";
-import {BiExport, BiImport} from "react-icons/bi";
-import {exportData, exportPromptFlow, importData, importPromptFlow} from "~app/utils/export";
+import {BiExport, BiImport, BiShareAlt} from "react-icons/bi";
+import {exportData, exportGPTsAll, exportPromptFlow, importData, importPromptFlow} from "~app/utils/export";
+import {uuid} from "~utils";
+import Tooltip from "~app/components/Tooltip";
+import discordIcon from "~assets/icons/discord.svg";
 
 interface Props {
     setShowEditor: (show: boolean) => void;
@@ -31,24 +34,25 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
     const { t } = useTranslation()
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true})
+    const confirmTips = t('Are you sure you want to import the GPTs?')
+    const successTips = t('Imported GPTs successfully')
 
     async function savePrompt(prompt: Prompt) {
         const existed = await saveLocalPromptTitle(prompt)
         await localPromptsQuery.mutate()
-        store.set("edit_" + prompt.title, true)
-        trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
+        setStore("edit_" + prompt.title, true)
     }
 
     function getEditYaml() {
-        const prompts = store.get("prompts");
-        if (prompts !== null && prompts['Flow_Dag_Yaml']){
-            return prompts['Flow_Dag_Yaml']
+        const prompts = getStore("prompts", null);
+        if (prompts !== null && prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]){
+            return prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]
         }
         return "";
     }
 
     function getEditPrompt() {
-        const prompts = store.get("prompts");
+        const prompts = getStore("prompts", null);
         if (prompts !== null && prompts[editorPrompt]){
             return prompts[editorPrompt]
         }
@@ -57,16 +61,23 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
 
     function onChangeYaml(value: string) {
         let prompt = null
+        const title = getStore("real_yaml", "Default_Flow_Dag_Yaml")
 
         for (let i = 0; i < localPromptsQuery.data.length; i++) {
-            if (localPromptsQuery.data[i].title == "Flow_Dag_Yaml") {
+            if (localPromptsQuery.data[i].title == title) {
                 prompt = localPromptsQuery.data[i];
             }
         }
         if (prompt !== null){
             prompt.prompt = value
             savePrompt(prompt)
+        }else{
+            if (getStore("prompts", {})[title] != undefined){
+                savePrompt({id:uuid(), title: title, prompt: value})
+            }
         }
+        // ensure dag yaml update.
+        getStore("prompts", {})["Flow_Dag_Yaml"] += "\n"
     }
 
     type SelectionValue = {
@@ -96,7 +107,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         let targetPath = '';
         const functionPath = 'func:';
         const promptPath = 'path:';
-        const prompts = store.get("prompts")
+        const prompts = getStore("prompts", null)
         onChangeYaml(document.$lines.join("\n"))
         for (let i = 0; i < document.$lines.length; i++) {
             const line = document.$lines[i];
@@ -193,9 +204,9 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
             { name: 'Ryan Park', description: 'NPC' },
             { name: 'Maria Lopez', description: 'NPC' },
         ];
-        const prompts = store.get("prompts")
+        const prompts = getStore("prompts", null)
         if (prompts != null){
-            for (const [key, value] of Object.entries(store.get("prompts"))) {
+            for (const [key, value] of Object.entries(getStore("prompts", {}))) {
                 if (key.indexOf("Position_") === -1){
                     sqlTables.push({ name: key, description: "path" });
                 }
@@ -223,31 +234,43 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     }, []);
 
     function onChangePrompt(value: string) {
+        const title = editorPrompt
         let prompt = null
         for (let i = 0; i < localPromptsQuery.data.length; i++) {
-            if (localPromptsQuery.data[i].title == editorPrompt) {
+            if (localPromptsQuery.data[i].title == title) {
                 prompt = localPromptsQuery.data[i] as Prompt
             }
         }
         if (prompt !== null){
             prompt.prompt = value
             savePrompt(prompt)
+        }else{
+            if (getStore("prompts", {})[title] != undefined){
+                savePrompt({id:uuid(), title: title, prompt: value})
+            }
         }
     }
     async function importYaml(){
-        importPromptFlow().then(() => {
+        importPromptFlow(confirmTips, successTips).then(() => {
             localPromptsQuery.mutate()
-            setEditorYamlTimes(editorYamlTimes + 1)
-            // setEditorPromptTimes(editorPromptTimes + 1)
+            const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+            setEditorYamlTimes(editorYamlTimes)
+            setStore("editorYamlTimes", editorYamlTimes)
         })
     }
 
     return (
-        <div className="overflow-auto h-full flex flex-col ">
+        <div className="overflow-auto h-full flex flex-col promptide">
             <div className="flex items-left mx-10 margin-5">
                 <div className="flex flex-row gap-3">
-                    <Button size="small" text={t('Export')} icon={<BiExport />} onClick={exportPromptFlow} />
+                    <Button size="small" text={t('Export ALL')} icon={<BiExport />} onClick={exportGPTsAll} />
+                    <Button size="small" text={t('Export Current')} icon={<BiExport />} onClick={exportPromptFlow} />
                     <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importYaml} />
+                    <Tooltip content={t('Share')}>
+                        <a href="https://github.com/10cl/chatdev/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=" target="_blank" rel="noreferrer">
+                            <Button size="small" text={t('Share')} icon={<BiShareAlt />} />
+                        </a>
+                    </Tooltip>
                 </div>
             </div>
             <div className="overflow-auto h-full flex flex-cow" key={editorYamlTimes}>

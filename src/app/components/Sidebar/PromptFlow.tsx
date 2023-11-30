@@ -5,7 +5,7 @@ import {
     editorPromptAtom,
     editorPromptTimesAtom,
     showEditorAtom,
-    seminarDisableAtom, inputTextAtom, promptVersionAtom
+    seminarDisableAtom, promptVersionAtom, gameModeEnable, editorYamlAtom
 } from '~app/state'
 import React, {MouseEvent as ReactMouseEvent, useCallback, useEffect, useState} from 'react';
 import ReactFlow, {
@@ -19,10 +19,10 @@ import 'reactflow/dist/style.css';
 import store from "store2";
 import CustomEdge from "~app/components/Sidebar/CustomEdge";
 import {
-    getPromptVersion,
+    getPromptVersion, getStore,
     loadLocalPrompts,
     loadRemotePrompts, loadTheLatestPrompt,
-    Prompt, PromptVersion,
+    Prompt, PromptVersion, setStore,
     updateLocalPrompts,
 } from "~services/prompts";
 import {useTranslation} from "react-i18next";
@@ -36,145 +36,69 @@ import Button from "~app/components/Button";
 import useSWR from "swr";
 import {importFromText} from "~app/utils/export";
 import {getVersion} from "~utils";
-
 function PromptFlow() {
-    function updateFlow() {
-        if (store.get("flow_edges", "") !== undefined && store.get("flow_edges", "") !== "") {
 
-            setNodes((prevNodes) => prevNodes.filter((node) => node.id === ''));
-            const nodesFlows = store.get("flow_nodes")
-            // for (let i = 0; i < nodesFlows.length; i++) {
-            //   setNodes((prevNodes) => [...prevNodes, nodesFlows[i]]);
-            // }
-            setNodes(() => [...nodesFlows]);
-
-            setEdges((prevNodes) => prevNodes.filter((node) => node.id === ''));
-            const edgesFlows = store.get("flow_edges")
-            // for (let i = 0; i < edgesFlows.length; i++) {
-            //   setEdges((prevNodes) => [...prevNodes, edgesFlows[i]]);
-            // }
-            setEdges(() => [...edgesFlows]);
-        }
+    interface DevInfoPersist {
+        prompts: any;
+        player_pos: string;
+        player_name: string;
+        player_init: string;
+        workFlowingDisable: boolean;
+        gameModeEnable: boolean;
+        flow_edges: any;
+        flow_nodes: any;
+        version: string;
+        prompt_version: string;
+        real_yaml: string;
     }
+
+    interface DevInfo {
+        prompts: any;
+        prompt_welcome: any;
+        prompt_task_introduce: any;
+        prompt_welcome_intro: any;
+        prompt_flow_open: any;
+        prompt_flow_close: any;
+        prompt_flow_done: any;
+        response_type: string;
+        input_text: string;
+        input_text_pending: string;
+        flow_node: any;
+        flow_edge: any;
+        input_text_message: string;
+        player_pos: string;
+        i18nextLng: string;
+        player_name: string;
+        player_init: any;
+        workFlowingDisable: boolean;
+        response_update_text: string;
+        gameModeEnable: boolean;
+        flow_edges: any;
+        flow_nodes: any;
+        version: string;
+        prompt_version: string;
+        real_yaml: string;
+        editor_show: boolean;
+    }
+
+    interface Window {
+        dev_info?: DevInfo;
+    }
+
     const { t } = useTranslation()
-    const welcomeStr = t('Welcome to our extension ChatDev! Here, you can explore the chat capabilities of multiple large models and create custom workflows using the visual prompt workflow editor. Through these GPTss, you can generate stunning in-game demos in real-time and ultimately achieve the results you desire. In the game, we may need to address you. How would you like us to call you?')
-    const welcomeIntro = t("Welcome, {player_name}! We are thrilled to have you on board. When you open the right sidebar and input your requirements, our GPTs will allocate your requirements to the CEO, CTO, Product Manager, and Tester. They will collectively discuss them in a virtual roundtable meeting, gradually transforming your requirements into a feasible business plan. You can approach any NPC to continue the discussion or edit the visual GPTs to turn your ideas into reality!")
+    const welcomeStr = t('Welcome ChatDev IDE!  Here,  You can explore the map, interact with existing GPTs, or customize your GPTs.  first of all, How would you like us to call you?')
+    const welcomeIntro = t("Welcome, {player_name}! You can now use the arrow keys to control the game character to start exploring the map, and ensure you are logged in to the LLM website to access all features")
     const promptFlowOpen = t("GPTs is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the GPTs defined on the right.")
     const promptFlowClose = t("GPTs is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
     const promptFlowDone = t("The GPTs has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
     const promptTaskIntroduce = t('Introduce yourself')
     const promptsVersionQuery = useSWR('latest-prompts-version', () => getPromptVersion(), {suspense: true})
     const [promptVersion, setPromptVersion] = useAtom(promptVersionAtom)
-
-    useEffect(() => {
-        const links = document.querySelectorAll('a');
-        updateLocalPrompts()
-
-        let promptVersionLocal = store.get("prompt_version")
-        if (promptVersionLocal == null){
-            promptVersionLocal = getVersion()
-        }
-        const promptVersionRemote = promptsVersionQuery.data as PromptVersion
-        if (promptVersionRemote.version != "" && promptVersionRemote.version != promptVersionLocal){
-            setPromptVersion(promptVersionRemote.version)
-            loadTheLatestPrompt().then(r => {
-                importFromText(r.yaml)
-            })
-        }
-
-        store.set("prompt_welcome", welcomeStr);
-        store.set("prompt_task_introduce", promptTaskIntroduce);
-        store.set("prompt_welcome_intro", welcomeIntro);
-        store.set("prompt_flow_open", promptFlowOpen);
-        store.set("prompt_flow_close", promptFlowClose);
-        store.set("prompt_flow_done", promptFlowDone);
-        const player_init = store.get("player_init");
-        if(player_init !== undefined && player_init < 2){
-            store.set("player_init", 0)
-        }
-        links.forEach((link) => {
-            if (link.href.includes('react')) {
-                link.style.display = 'none';
-            }
-        });
-        stopTimer()
-        startTimer()
-        updateFlow()
-    }, []);
-
-    function setCollapsedAndUpdate() {
-        setSeminarDisable((c) => !c)
-
-        updateFlow()
-        stopTimer()
-        startTimer()
-    }
-
+    const [timerId, setTimerId] = useState<number | null>(null);
     const [count, setCount] = useState(0);
     const [intervalId, setIntervalId] = useState(null);
     let flowEdge = ""
     let flowNode = ""
-    let promptsCache = ""
-
-    const startTimer = () => {
-        const id = setInterval(() => {
-            setCount((prevCount) => prevCount + 1);
-            const prompts = store.get("prompts")
-            const player_init = store.get("player_init");
-            if (player_init !== undefined && player_init == 2){
-                store.set("player_init", 3)
-                updateFlow()
-                setSeminarDisable(false)
-            }
-            if (prompts !== null && prompts['Flow_Dag_Yaml'] != promptsCache){
-                promptsCache = prompts['Flow_Dag_Yaml']
-                updateFlow()
-            }
-            if (store.get("flow_edge") && store.get("flow_edge", "") !== flowEdge) {
-                flowEdge = store.get("flow_edge", "")
-
-                setEdges((prevNodes) =>
-                    prevNodes.map((node) =>
-                        node.id === flowEdge ? {...node, animated: true} : {...node, animated: false}
-                    )
-                );
-
-            }
-            if (store.get("flow_node") && store.get("flow_node") !== flowNode){
-                flowNode = store.get("flow_node")
-                setNodes((nds) =>
-                    nds.map((node) => {
-                        if (node.id === store.get("flow_node").id) {
-                            // it's important that you create a new object here
-                            // in order to notify react flow about the change
-                            node.style = {...node.style, backgroundColor: nodeBg};
-                        }
-
-                        return node;
-                    })
-                );
-            }
-
-            // exception tips
-            const exceptionNode = store.get("exception_nodes")
-            if (exceptionNode != null && exceptionNode != "") {
-                store.set("exception_nodes", "")
-                window.confirm(t('GPTs') + " Exception: " + exceptionNode)
-            }
-
-        }, 1000);
-
-        // @ts-ignore
-        setIntervalId(id);
-    };
-
-    // 停止定时器
-    const stopTimer = () => {
-        if (intervalId) {
-            clearInterval(intervalId);
-            setIntervalId(null);
-        }
-    };
 
     const initialNodes = [
         {id: '1', position: {x: 0, y: 0}, data: {label: '1'}},
@@ -191,42 +115,215 @@ function PromptFlow() {
 
     const [showEditor, setShowEditor] = useAtom(showEditorAtom)
     const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
+
     const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
 
     const edgeTypes: EdgeTypes = {
         default: CustomEdge,
     };
-
     const threshold = 500;
-
     const [nodeBg, setNodeBg] = useState('#bbd9e9');
+    let devInfoPersist
+
+    function handlePersistentStorage() {
+        const win = window as Window
+        if (win.dev_info != undefined){
+            devInfoPersist = {
+                prompts: win.dev_info.prompts,
+                player_pos: win.dev_info.player_pos,
+                player_name: win.dev_info.player_name,
+                player_init: win.dev_info.player_init,
+                workFlowingDisable: win.dev_info.workFlowingDisable,
+                gameModeEnable: win.dev_info.gameModeEnable,
+                flow_edges: win.dev_info.flow_edges,
+                flow_nodes: win.dev_info.flow_nodes,
+                version: win.dev_info.version,
+                prompt_version: win.dev_info.prompt_version,
+                real_yaml: win.dev_info.real_yaml
+            } as DevInfoPersist
+            store.set("dev_info", devInfoPersist)
+        }
+    }
+
+    const startTimer = () => {
+        const id = setInterval(() => {
+            setCount((prevCount) => prevCount + 1);
+            const prompts = getStore("prompts", {})
+            const player_init = getStore("player_init", 0)
+
+            if (player_init == 2){
+                setStore("player_init", 3)
+                updateFlow()
+                setSeminarDisable(false)
+            }else if (prompts['Flow_Dag_Yaml'] != getStore("flow_yaml", undefined)){
+                setStore("flow_yaml", prompts['Flow_Dag_Yaml'])
+                updateFlow()
+            }
+
+            if (getStore("flow_edge", "") !== flowEdge) {
+                flowEdge = getStore("flow_edge", "")
+                setEdges((prevNodes) =>
+                    prevNodes.map((node) =>
+                        node.id === flowEdge ? {...node, animated: true} : {...node, animated: false}
+                    )
+                );
+            }
+
+            if (getStore("flow_node") && getStore("flow_node") !== flowNode){
+                flowNode = getStore("flow_node")
+                setNodes((nds) =>
+                    nds.map((node) => {
+                        if (node.id === getStore("flow_node").id) {
+                            // it's important that you create a new object here
+                            // in order to notify react flow about the change
+                            node.style = {...node.style, backgroundColor: nodeBg};
+                        }
+
+                        return node;
+                    })
+                );
+            }
+
+            // exception tips
+            const exceptionNode = getStore("exception_nodes")
+            if (exceptionNode != null && exceptionNode != "") {
+                setStore("exception_nodes", "")
+                window.confirm(t('GPTs') + " Exception: " + exceptionNode)
+            }
+
+            handlePersistentStorage()
+
+        }, 1000);
+        // @ts-ignore
+        setTimerId(id);
+        return () => {
+            if (timerId) {
+                clearInterval(timerId);
+            }
+        };
+    };
+
     const onNodeClick = (event: ReactMouseEvent, node: Node) => {
         const currentTime = new Date().getTime();
-        const lastClickTime = store.get("chatdev_node_click_time")
+        const lastClickTime = getStore("chatdev_node_click_time")
         if (lastClickTime !== null && lastClickTime !== undefined) {
             const timeInterval = currentTime - lastClickTime;
             if (timeInterval < threshold) {
                 // @ts-ignore
-                if (node.source && node.source.path) {
-                    // @ts-ignore
-                    setEditorPrompt(node.source.path);
+                const promptKey = node.source ? node.source.path : "";
+                if (promptKey != "") {
+                    // setStore("real_yaml", getStore("editor_yaml", "Default_Flow_Dag_Yaml"))
+                    setEditorPrompt(promptKey);
+                    // setEditorYaml(getStore("editor_yaml", "Default_Flow_Dag_Yaml"));
+
                     setEditorPromptTimes(editorPromptTimes + 1);
                     setShowEditor(true);
+                    setStore("editor_show", true)
                     trackEvent('open_editor_node');
                 }
             }
         }
-        store.set("chatdev_node_click_time", currentTime)
+        setStore("chatdev_node_click_time", currentTime)
+    }
+
+    useEffect(() => {
+        const links = document.querySelectorAll('a')
+
+        const win = window as Window
+
+        let devInfoPersist = store.get("dev_info") as DevInfoPersist
+        if (devInfoPersist == null){
+            devInfoPersist = {} as DevInfoPersist
+        }
+        let cacheDevInfo = win.dev_info
+        if (cacheDevInfo == undefined){
+            cacheDevInfo = {} as DevInfo
+        }
+        win.dev_info = {
+            prompts: devInfoPersist.prompts == undefined ? {} : devInfoPersist.prompts,
+            prompt_welcome: cacheDevInfo.prompt_welcome !== undefined ? cacheDevInfo.prompt_welcome : welcomeStr,
+            prompt_task_introduce: cacheDevInfo.prompt_task_introduce !== undefined ? cacheDevInfo.prompt_task_introduce : promptTaskIntroduce,
+            prompt_welcome_intro: cacheDevInfo.prompt_welcome_intro !== undefined ? cacheDevInfo.prompt_welcome_intro : welcomeIntro,
+            prompt_flow_open: cacheDevInfo.prompt_flow_open !== undefined ? cacheDevInfo.prompt_flow_open : promptFlowOpen,
+            prompt_flow_close: cacheDevInfo.prompt_flow_close !== undefined ? cacheDevInfo.prompt_flow_close : promptFlowClose,
+            prompt_flow_done: cacheDevInfo.prompt_flow_done !== undefined ? cacheDevInfo.prompt_flow_done : promptFlowDone,
+            response_type: cacheDevInfo.response_type !== undefined ? cacheDevInfo.response_type : "",
+            input_text: cacheDevInfo.input_text !== undefined ? cacheDevInfo.input_text : "",
+            input_text_pending: cacheDevInfo.input_text_pending !== undefined ? cacheDevInfo.input_text_pending : "",
+            flow_node: cacheDevInfo.flow_node !== undefined ? cacheDevInfo.flow_node : {},
+            flow_edge: cacheDevInfo.flow_edge !== undefined ? cacheDevInfo.flow_edge : {},
+            input_text_message: cacheDevInfo.input_text_message !== undefined ? cacheDevInfo.input_text_message : "",
+            player_pos: cacheDevInfo.player_pos !== undefined ? cacheDevInfo.player_pos : devInfoPersist.player_pos,
+            i18nextLng: store.get("i18nextLng") == null ? "en" : store.get("i18nextLng"),
+            player_name: cacheDevInfo.player_name !== undefined ? cacheDevInfo.player_name : (devInfoPersist.player_name == undefined ? "Bob" : devInfoPersist.player_name),
+            player_init: cacheDevInfo.player_init !== undefined ? cacheDevInfo.player_init : (devInfoPersist.player_init == undefined ? 0 : devInfoPersist.player_init),
+            workFlowingDisable: cacheDevInfo.workFlowingDisable !== undefined ? cacheDevInfo.workFlowingDisable : (devInfoPersist.workFlowingDisable == undefined ? false : devInfoPersist.workFlowingDisable),
+            response_update_text: cacheDevInfo.response_update_text !== undefined ? cacheDevInfo.response_update_text : "",
+            gameModeEnable: cacheDevInfo.gameModeEnable !== undefined ? cacheDevInfo.gameModeEnable : (devInfoPersist.gameModeEnable == undefined ? true : devInfoPersist.gameModeEnable),
+            flow_edges: cacheDevInfo.flow_edges !== undefined ? cacheDevInfo.flow_edges : devInfoPersist.flow_edges,
+            flow_nodes: cacheDevInfo.flow_nodes !== undefined ? cacheDevInfo.flow_nodes : devInfoPersist.flow_nodes,
+            version: cacheDevInfo.version !== undefined ? cacheDevInfo.version : (devInfoPersist.version == undefined ? getVersion() : devInfoPersist.version),
+            prompt_version: cacheDevInfo.prompt_version !== undefined ? cacheDevInfo.prompt_version : (devInfoPersist.prompt_version == undefined ? getVersion() : devInfoPersist.prompt_version),
+            real_yaml: cacheDevInfo.real_yaml !== undefined ? cacheDevInfo.real_yaml : (devInfoPersist.real_yaml == undefined ? "Default_Flow_Dag_Yaml" : devInfoPersist.real_yaml),
+            editor_show: showEditor
+        };
+        const player_init = getStore("player_init", 0);
+        if(player_init < 2){
+            setStore("player_init", 0)
+        }
+
+        updateLocalPrompts()
+
+        const promptVersionLocal = getStore("prompt_version", getVersion())
+        const promptVersionRemote = promptsVersionQuery.data as PromptVersion
+        if (promptVersionRemote.version != "" && promptVersionRemote.version != promptVersionLocal){
+            setPromptVersion(promptVersionRemote.version)
+            setStore("prompt_version", promptVersionRemote.version)
+            loadTheLatestPrompt().then(r => {
+                importFromText(r.yaml)
+            })
+        }
+        links.forEach((link) => {
+            if (link.href.includes('react')) {
+                link.style.display = 'none';
+            }
+        });
+        startTimer()
+        updateFlow()
+    }, []);
+
+    function setCollapsedAndUpdate() {
+        setSeminarDisable((c) => !c)
+        updateFlow()
+    }
+
+    function updateFlow() {
+        if (getStore("flow_edges", "") !== undefined && getStore("flow_edges", "") !== "") {
+
+            setNodes((prevNodes) => prevNodes.filter((node) => node.id === ''));
+            const nodesFlows = getStore("flow_nodes")
+            // for (let i = 0; i < nodesFlows.length; i++) {
+            //   setNodes((prevNodes) => [...prevNodes, nodesFlows[i]]);
+            // }
+            setNodes(() => [...nodesFlows]);
+
+            setEdges((prevNodes) => prevNodes.filter((node) => node.id === ''));
+            const edgesFlows = getStore("flow_edges")
+            // for (let i = 0; i < edgesFlows.length; i++) {
+            //   setEdges((prevNodes) => [...prevNodes, edgesFlows[i]]);
+            // }
+            setEdges(() => [...edgesFlows]);
+        }
     }
 
     return (
         <aside
             className={cx(
                 'flex flex-col bg-primary-background bg-opacity-40 overflow-hidden',
-                seminarDisable ? 'items-center px-[15px]' : 'w-[430px] px-4',
+                seminarDisable ? 'items-center px-[15px]' : 'w-[330px] px-4',
             )}
         >
-            <Tooltip content={'GPTs Flow'}>
+            <Tooltip content={t('Visualization of GPTs structure')}>
                 <img src={collapseIcon} className={cx('w-6 h-6 cursor-pointer my-5', seminarDisable ? 'self-end' : 'rotate-180')} onClick={() => setCollapsedAndUpdate()} />
             </Tooltip>
             <div className="flex flex-col gap-3 overflow-y-auto scrollbar-none">

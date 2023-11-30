@@ -7,6 +7,7 @@ import { ChatError, ErrorCode } from '~utils/errors'
 import Button, { Props as ButtonProps } from '../Button'
 import MessageBubble from './MessageBubble'
 import store from "store2"
+import {setStore} from "~services/prompts";
 const ActionButton: FC<ButtonProps> = (props) => {
   return <Button {...props} size="small" className="drop-shadow-lg" color="primary" />
 }
@@ -54,7 +55,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
   const { t } = useTranslation()
 
   if (error.code === ErrorCode.BING_UNAUTHORIZED) {
-    store.set("input_text_message", t('Login at bing.com'))
+    setStore("input_text_message", t('Login at bing.com'))
 
     return (
       <a href="https://bing.com" target="_blank" rel="noreferrer">
@@ -63,7 +64,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.POE_UNAUTHORIZED) {
-    store.set("input_text_message", t('Login at poe.com'))
+    setStore("input_text_message", t('Login at poe.com'))
 
     return (
       <a href="https://poe.com" target="_blank" rel="noreferrer">
@@ -72,7 +73,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.XUNFEI_UNAUTHORIZED) {
-    store.set("input_text_message", t('Login at xfyun.cn'))
+    setStore("input_text_message", t('Login at xfyun.cn'))
 
     return (
       <a href="https://xinghuo.xfyun.cn" target="_blank" rel="noreferrer">
@@ -88,7 +89,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.GPT4_MODEL_WAITLIST) {
-    store.set("input_text_message", t('Join the waitlist'))
+    setStore("input_text_message", t('Join the waitlist'))
 
     return (
       <a href="https://openai.com/waitlist/gpt-4-api" target="_blank" rel="noreferrer">
@@ -97,7 +98,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.CHATGPT_AUTH) {
-    store.set("input_text_message", t('Login to ChatGPT'))
+    setStore("input_text_message", t('Login to ChatGPT'))
 
     return (
       <a href="https://chat.openai.com" target="_blank" rel="noreferrer">
@@ -113,17 +114,17 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.CHATGPT_CLOUDFLARE || error.code === ErrorCode.CHATGPT_UNAUTHORIZED) {
-    store.set("input_text_message", 'ChatGPT Auth Error')
+    setStore("input_text_message", 'ChatGPT Auth Error')
 
     return <ChatGPTAuthErrorAction />
   }
   if (error.code === ErrorCode.CONVERSATION_LIMIT) {
-    store.set("input_text_message", "Conversation limit!")
+    setStore("input_text_message", "Conversation limit!")
 
     return <ActionButton color="primary" text="Restart" size="small" onClick={() => conversation?.reset()} />
   }
   if (error.code === ErrorCode.BARD_EMPTY_RESPONSE) {
-    store.set("input_text_message", "Visit bard.google.com")
+    setStore("input_text_message", "Visit bard.google.com")
 
     return (
       <a href="https://bard.google.com" target="_blank" rel="noreferrer">
@@ -132,7 +133,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.BING_CAPTCHA) {
-    store.set("input_text_message", t('Verify') + " bard.google.com")
+    setStore("input_text_message", t('Verify') + " bard.google.com")
 
     return (
       <a href="https://www.bing.com/turing/captcha/challenge" target="_blank" rel="noreferrer">
@@ -141,7 +142,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.LMSYS_SESSION_EXPIRED) {
-    store.set("input_text_message", t('Refresh session'))
+    setStore("input_text_message", t('Refresh session'))
 
     return (
       <a href="https://chat.lmsys.org" target="_blank" rel="noreferrer">
@@ -150,7 +151,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.CHATGPT_INSUFFICIENT_QUOTA) {
-    store.set("input_text_message", t('This usually mean you need to add a payment method to your OpenAI account, checkout: '))
+    setStore("input_text_message", t('This usually mean you need to add a payment method to your OpenAI account, checkout: '))
 
     return (
       <p className="ml-2 text-secondary-text text-sm">
@@ -165,7 +166,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     error.code === ErrorCode.NETWORK_ERROR ||
     (error.code === ErrorCode.UNKOWN_ERROR && error.message.includes('Failed to fetch'))
   ) {
-    store.set("input_text_message", t('Please check your network connection'))
+    setStore("input_text_message", t('Please check your network connection'))
 
     return (
       <div>
@@ -174,7 +175,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
     )
   }
   if (error.code === ErrorCode.POE_MESSAGE_LIMIT) {
-    store.set("input_text_message", t('This is a limitation set by poe.com'))
+    setStore("input_text_message", t('This is a limitation set by poe.com'))
 
     return <p className="ml-2 text-secondary-text text-sm">{t('This is a limitation set by poe.com')}</p>
   }
