@@ -69,7 +69,7 @@ function CommunityPrompts() {
     const promptsQuery = useSWR('community-prompts', () => loadRemotePrompts(), {suspense: true})
 
     return (
-        <>
+        <>{promptsQuery.data.length > 0 && promptsQuery.data[0] && promptsQuery.data[0].title ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
                 {promptsQuery.data.map((promptLab, index) => (
                     <PromptLabItem
@@ -79,7 +79,11 @@ function CommunityPrompts() {
                         yaml={promptLab.yaml}
                     />
                 ))}
+            </div>): (
+            <div className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-3 text-center text-sm mt-5 text-primary-text">
+                You have no prompts.
             </div>
+        )}
         </>
     )
 }
