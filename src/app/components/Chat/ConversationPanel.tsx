@@ -213,14 +213,13 @@ const ConversationPanel: FC<Props> = (props) => {
     }
 
     //  game update
-    if(store.get("workFlowingDisable") != null){
-      setWorkFlowingDisable(store.get("workFlowingDisable"))
-    }
+    setWorkFlowingDisable(getStore("workFlowingDisable", true))
 
-    if (store.get("task_refresh") == true){
+    if (getStore("task_refresh", false)){
+      store.set("task_html", getStore("task_html", ""))
       setShowWebPreviewDialog(true)
       trackEvent('open_web_preview', { botId: botId })
-      store.set("task_refresh", false)
+      setStore("task_refresh", false)
     }
   }
 
