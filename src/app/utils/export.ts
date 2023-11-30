@@ -143,7 +143,19 @@ export async function importFromText(json: JSON){
   user_prompts.forEach(item => {
     prompt_dict[item.title] = item.prompt;
   });
-  store.set("prompts", prompt_dict);
+
+  if(prompt_dict['Flow_Dag_Yaml'] !== undefined) {
+    // prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
+
+    if (getStore("editor_show", false)) {
+        prompt_dict[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
+    } else {
+        prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
+    }
+    prompt_dict['Flow_Dag_Yaml'] = ""
+  }
+
+  setStore("prompts", prompt_dict);
 
   await Browser.storage.local.set({ prompts: user_prompts });
 
