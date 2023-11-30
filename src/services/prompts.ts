@@ -1,14 +1,9 @@
 import i18next from 'i18next'
 import { ofetch } from 'ofetch'
 import Browser from 'webextension-polyfill'
-import store from "store2";
-import promptsLocal from '~/assets/prompts.json'
-import chatdev_prompt_flow from '~/assets/chatdev_prompt_flow.json'
+import chatdev_prompt_flow from '~/assets/chatdev_gpts_all.json'
 import {getVersion, uuid} from "~utils";
 import {trackEvent} from "~app/plausible";
-import {useCallback} from "react";
-import {importFromText} from "~app/utils/export";
-import {SWRResponse} from "swr";
 
 export interface Prompt {
   id: string
@@ -29,7 +24,12 @@ export interface PromptVersion {
   intro: string
 }
 
+interface Window {
+  dev_info?: any;
+}
+
 export async function loadLocalPrompts() {
+  await updateLocalPrompts()
   const { prompts: value } = await Browser.storage.local.get('prompts')
   return (value || []) as Prompt[]
 }
@@ -40,13 +40,12 @@ function isPromptJsonContain(prompt: Prompt, prompts: Prompt[]): boolean {
 }
 
 export async function updateLocalPrompts()  {
-  const prePrompts = store.get("prompts");
+  const prePrompts = getStore("prompts", {});
+  if (prePrompts['Action_Target_Dialogue_Npc'] == undefined || getVersion() !== getStore("version", "")) {
 
-  if (prePrompts === undefined || prePrompts === null || prePrompts === "" || getVersion() !== store.get("version")) {
     const user_prompts = [] as Prompt[]
-    const prompts = store.get("prompts")
-    if (prompts != null){
-      for (const [key, value] of Object.entries(prompts)) {
+    if (prePrompts != null){
+      for (const [key, value] of Object.entries(prePrompts)) {
         const item = {
           id: uuid(),
           title: key,
@@ -55,20 +54,6 @@ export async function updateLocalPrompts()  {
         user_prompts.push(item)
       }
     }
-
-    const prompts_json = promptsLocal.map(item => ({ ...item, id: uuid() }));
-    prompts_json.forEach(item => {
-      if (!isPromptJsonContain(item, user_prompts)) {
-        user_prompts.push(item)
-      }else{
-        if (store.get("edit_" + item.title) == true) {
-          // console.log("edit_" + item.title);
-        }else{
-          const index = user_prompts.findIndex(findItem => findItem.title === item.title);
-          user_prompts[index].prompt = item.prompt
-        }
-      }
-    });
 
     // handle for chatdev_prompt_flow
     for (const [key, value] of Object.entries(chatdev_prompt_flow)) {
@@ -91,12 +76,11 @@ export async function updateLocalPrompts()  {
     user_prompts.forEach(item => {
       prompt_dict[item.title] = item.prompt;
     });
-    store.set("prompts", prompt_dict);
-
+    setStore("prompts", prompt_dict);
+    console.log("updateLocalPrompts")
     await Browser.storage.local.set({ prompts: user_prompts });
-    store.set("version", getVersion());
+    setStore("version", getVersion());
     trackEvent('update_prompt_flow')
-
   }
 }
 export async function saveLocalPromptTitle(prompt: Prompt) {
@@ -119,7 +103,7 @@ export async function saveLocalPromptTitle(prompt: Prompt) {
   ((prompts || []) as Prompt[]).forEach(item => {
     prompt_dict[item.title] = item.prompt;
   });
-  store.set("prompts", prompt_dict);
+  setStore("prompts", prompt_dict);
 
   await Browser.storage.local.set({ prompts })
 
@@ -145,7 +129,7 @@ export async function saveLocalPrompt(prompt: Prompt) {
   ((prompts || []) as Prompt[]).forEach(item => {
     prompt_dict[item.title] = item.prompt;
   });
-  store.set("prompts", prompt_dict);
+  setStore("prompts", prompt_dict);
 
   await Browser.storage.local.set({ prompts })
 
@@ -161,12 +145,12 @@ export async function removeLocalPrompt(id: string) {
   ((prompts_value || []) as Prompt[]).forEach(item => {
     prompt_dict[item.title] = item.prompt;
   });
-  store.set("prompts", prompt_dict)
+  setStore("prompts", prompt_dict)
 }
 
 export async function loadRemotePrompts() {
   return ofetch<PromptLab[]>('https://chatdev.toscl.com/api/community-prompts', {
-    params: { language: i18next.language, languages: i18next.languages },
+    params: { language: i18next.language, languages: i18next.languages, version: getVersion() },
   }).catch((err) => {
     console.error('Failed to load remote prompts', err)
     return []
@@ -189,4 +173,34 @@ export async function loadTheLatestPrompt() {
     console.error('Failed to load remote prompts', err)
     return {} as PromptLab
   })
+}
+
+export async function loadTheLatestPrompt2(url : string) {
+  return ofetch<string>(url, {
+    params: { language: i18next.language, languages: i18next.languages },
+  }).catch((err) => {
+    alert('Failed to load remote html:' + err)
+    return ""
+  })
+}
+
+export function setStore(key:any, value:any){
+  const win = window as Window
+  if (win.dev_info === undefined){
+    win.dev_info = {}
+  }
+  win.dev_info[key] = value
+}
+
+export function getStore(key:any, value?:any){
+  const win = window as Window
+
+  if (win.dev_info === undefined){
+    win.dev_info = {}
+  }
+  const result =  win.dev_info[key]
+  if (result === undefined || result === null){
+    return value
+  }
+  return result
 }

@@ -1,5 +1,5 @@
 import cx from 'classnames'
-import {FC, Suspense, useCallback, useMemo, useRef, useState} from 'react'
+import {FC, MouseEventHandler, Suspense, useCallback, useMemo, useRef, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import clearIcon from '~/assets/icons/clear.svg'
 import chatModeIcon from '~/assets/icons/chatmode.svg'
@@ -33,13 +33,12 @@ import {
   gameModeEnable,
   editorPromptTimesAtom,
   floatTipsOpen,
-  promptEdit,
   promptLibraryDialogOpen,
   showEditorAtom,
   workFlowingDisableAtom,
   showHistoryAtom,
   showSettingsAtom,
-  showGptsDialogAtom, inputTextAtom,
+  showGptsDialogAtom, messageTimesTimesAtom, editorYamlTimesAtom, editorYamlAtom, editorPromptAtom,
 } from "~app/state";
 
 import "ace-builds/src-noconflict/theme-github";
@@ -55,6 +54,10 @@ import SettingsDialog from "~app/components/Settings/SettingsDialog";
 import useSWR from "swr";
 import {BeatLoader} from "react-spinners";
 import Markdown from "~app/components/Markdown";
+import {getStore, loadTheLatestPrompt2, setStore} from "~services/prompts";
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
+import {UserConfig} from "~services/user-config";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -83,18 +86,59 @@ const ConversationPanel: FC<Props> = (props) => {
   const [isPreviewShow, setShowWebPreviewDialog] = useState(false)
 
   const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
-  const [promptEditValue, setPromptEdit] = useAtom(promptEdit)
-  const [inputText, setInputText] = useAtom(inputTextAtom)
+  const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
+
+  const [changeTime, setChangeTime] = useAtom(messageTimesTimesAtom)
+  const [timerId, setTimerId] = useState<number | null>(null);
 
   const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
   const [workFlowingDisable, setWorkFlowingDisable] = useAtom(workFlowingDisableAtom)
-  function setTimer(props: Props){
-    console.log("id:" + props.botId)
-    setTimeout(function (){
-      updateSendMessage(props)
-    }, 5000)
+  const [userConfig, setUserConfig] = useState<UserConfig | undefined>(undefined)
+  const [isUrlReq, setUrlReq] = useState(false)
+
+  const updateConfigValue = useCallback(
+      (update: Partial<UserConfig>) => {
+        setUserConfig({ ...userConfig!, ...update })
+      },
+      [userConfig],
+  )
+
+  function propsMessageCheck(props: Props){
+    updateSendMessage(props)
     return true;
   }
+
+  function isURL(str: string) {
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+    return urlPattern.test(str);
+  }
+
+  useEffect(() => {
+    console.log("init")
+    const id = setInterval(() => {
+      const response_type = getStore("response_type", "")
+      if (response_type == "url"){
+        setStore("response_update_text", getStore("response_update_text", "") + ".")
+      }
+
+      const value = getStore("input_text", "")
+      if (value != "") {
+        console.log("input text null")
+        const messageTimes = getStore("messageTimes", 0) + 1
+        setChangeTime(messageTimes)
+        setStore("messageTimes", messageTimes)
+      }
+
+    }, 1000)
+    // @ts-ignore
+    setTimerId(id);
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+      }
+    };
+  }, [props])
+
 
   const context: ConversationContextValue = useMemo(() => {
     return {
@@ -129,14 +173,39 @@ const ConversationPanel: FC<Props> = (props) => {
     [props],
   )
 
-  function updateSendMessage(sendProp: Props) {
+  async function updateSendMessage(sendProp: Props) {
     const botId = sendProp.botId
-    const value = store.get("input_text") ? store.get("input_text") : ""
+    const value = getStore("input_text", "")
     if (value != "") {
       console.log("timer sendMessage " + botId)
+      setStore("input_text", "")
+      if(isURL(value)){
+        const url = value as string
+        const urlObj = new URL(url);
+        if (!(await requestHostPermission(urlObj.protocol + '//*.' + urlObj.hostname + "/"))) {
+          alert("Please allow the host permission to use this feature.")
+        }
 
-      sendProp.onUserSendMessage(value, botId)
-      store.set("input_text", "")
+        setStore("response_update_text", "⌛")
+        setStore("response_type", "url")
+        setUrlReq(true)
+        loadTheLatestPrompt2(url).then(html => {
+            setStore("response_type", "")
+            setStore("response_update_text", html)
+            console.log("html:" + html)
+
+            setTimeout(function (){
+              setUrlReq(false)
+              const messageTimes = getStore("messageTimes", 0) + 1
+              setChangeTime(messageTimes)
+              setStore("messageTimes", messageTimes)
+            }, 3000)
+
+            // sendProp.onUserSendMessage(html, botId)
+        })
+      }else{
+        sendProp.onUserSendMessage(value, botId)
+      }
     }
 
     if (isPromptLibraryDialogOpen){
