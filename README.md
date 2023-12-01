@@ -42,7 +42,7 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
 
 ## 📷 Screenshot
 ![gpts_talk_business.png](./screenshots/gpts_talk_business.png)
-![gpts_write_a_website.png.png](./screenshots/gpts_write_a_website.png)
+![gpts_write_a_website.png.png](./screenshots/chatdev.gif)
 
 ## 📢 TLDR
 * GameMode: in the AI Town Social Simulation, you can customize these NPCs & location mark.
