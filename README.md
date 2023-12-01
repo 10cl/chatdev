@@ -32,13 +32,13 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 
 </div>
 
-ChatDev IDE is an integrated multiple large language model Chrome Extension, It consists of three parts: **Game Mode**、**Chat Mode** and **Prompt IDE**.
 
-you can personalize these NPCs, customize the location's prompt, and build your GPTs with the visualize prompt editor, run GPTs let NPCs Multi-Persona Self-Collaboration.
+ChatDev IDE is an tools for building your ai agent, Whether it's NPCs in games or powerful agent tools, you can design what you want for this platform.
 
 It accelerates prompt engineering through **JavaScript Support** that allows implementing complex prompting techniques.
 
->The ability to chain together conversations across different agents within a browser is one of the most interesting things about the project, as all the other attempts to do so like autogen etc use huge amounts of API tokens. if you use the default Webapp Mode, you will spend *$0* tokens. (this just requires your browser to log in to the LLM's website then will use it through the extension.)
+[https://youtu.be/O0gC2Sxm0EQ?feature=shared](https://youtu.be/O0gC2Sxm0EQ?feature=shared)
+
 
 ## 📷 Screenshot
 ![gpts_talk_business.png](./screenshots/gpts_talk_business.png)
