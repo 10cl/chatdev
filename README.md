@@ -33,7 +33,7 @@ English &nbsp;&nbsp;|&nbsp;&nbsp; [Indonesia](README_IN.md) &nbsp;&nbsp;|&nbsp;&
 </div>
 
 
-ChatDev IDE is an tools for building your ai agent, Whether it's NPCs in games or powerful agent tools, you can design what you want for this platform.
+ChatDev IDE is a tools for building your AI agent, Whether it's NPCs in games or powerful agent tools, you can design what you want for this platform.
 
 It accelerates prompt engineering through **JavaScript Support** that allows implementing complex prompting techniques.
 
@@ -42,7 +42,7 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
 
 ## 📷 Screenshot
 ![gpts_talk_business.png](./screenshots/gpts_talk_business.png)
-![gpts_write_a_website.png.png](./screenshots/chatdev.gif)
+![chatdev.gif](./screenshots/chatdev.gif)
 
 ## 📢 TLDR
 * GameMode: in the AI Town Social Simulation, you can customize these NPCs & location mark.
@@ -55,187 +55,15 @@ This is the most exciting part, all the roles you can customize, you can design 
 In Game Mode, you can choose your favorite large model on the left, on the map, control the NPC's actions through the direction keys or mouse, when you are close to the NPC or reach the marked position, the NPC will actively trigger the cold start response, or actively enter your chat content in the input box below.
 the game is based on a simulated AI town social environment, you can get close to the NPC or walk to a specific location, through the input and NPC to communicate or chat with yourself in a specific location.
 
-- **Location Prompt**: Let the player chat with himself by describing the prompt of the marked location
-- **Npc Role Prompt**: Let the player chat with NPC by describing the prompt of NPC, to achieve the purpose of self-introduction between the player and NPC.
-- **Memory**: Your chat will be stored locally, and you can view the historical chat records of the marked location or NPC by hovering the mouse.
-- **GPTs**: Import GPTs from the community or customize Prompt Flow in PromptIDE to achieve new GPTs, run GPTs to let NPCs achieve multi-person self-collaboration to complete tasks
-
 ### Social Simulation
 ![social_simulation.png](./screenshots/social_simulation.png)
 
 This is a simulated AI town social environment, consisting of 25 NPCs with independent consciousness and a controlled player, the map size is 180x100, and the size of a single grid is defined as 32. 25 NPCs have predefined daily life trajectories. You can get close to the NPC for chat input by customizing the NPC's prompt description, or you can customize your prompt description for the marked location and chat with yourself when you walk to the marked location.
 When the distance between the player and the NPC <100, the NPC will trigger the active greeting according to the predefined role description. When the distance between the player and the NPC >200, the chat area will be automatically ended.
 
-### Location Prompt
-When you move your mouse to a marked location, the prompt description of the current mark will pop up. You can click the "Edit" button to describe the prompt of the location you specified. When you are close to this mark or directly talk at this location, the prompt will be used as background knowledge and you will have a dialogue.
-
-![location_prompt.png](./screenshots/location_prompt_edit.png)
-
-Except for the custom prompt for the marked location, you also need a fixed form of prompt combination to generate a complete prompt, so that the large model can understand our intentions.
-For example, when you control the NPC to a specified mark location, we need to tell the large model what you want to do. At this time, we need a fixed prompt, such as our predefined "Action_Influence_Env_Changed". The role of this prompt is to tell the large model that the player's position has changed. We will combine the content of this prompt with your custom prompt for the marked position to generate a complete prompt and give it to the large model. The large model will then output an effective response to you.
-
-#### Location Action Prompt
-Action prompt is a predefined prompt, which is triggered when the player reaches the marked position. The predefined prompt and the prompt description of the marked position are combined to form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-##### Action_Influence_Env_Changed
-This is a predefined prompt, which is triggered when the player **reaches the marked position**. The predefined prompt and the prompt description of the marked position are combined to form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-Currently defined as:
-```text
-You are a mark on the game map, and this is your description:
-####################
-{player_position}
-####################
-I just arrived here. current time is {now_time}, this is where I usually record conversations and plan future events. 
-please ask me a short question To get what conversation or project would you like to record.
-
-1. no need to output your analysis process
-2. Output language: {lang}
-
-Now, your prompt:
-```
-
-- `{lang}` is a common variable, which represents the language environment of the current browser, such as "zh", "en", "ja", etc.
-- `{history}` is a common variable, which represents the input history of the player at the marked position.
-- `{player_name}` is a common variable, which represents the name of the current player. You have replied to the player's name when you first entered ChatDev.
-- `{player_position}` is a common variable, which represents the marked position of the current player. The content filled in is your custom prompt for the marked position.
-- `{now_time}` is a common variable, which represents the current time, such as "2021-08-01 12:00:00".
-
-you can refer to the implementation of your own prompt by utilizing the common variables above.
-
-##### Action_Target_Dialogue_Env
-This is a predefined prompt, which is triggered when the player **inputs at the marked position**, the input content and the current defined prompt and the prompt description of the marked position form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-Currently defined as:
-```text
-You are a mark on the game map, and this is your description:
-####################
-{player_position}
-####################
-Current time is {now_time}, we are chatting. I say: >>>>{input_text}<<<<
-
-1. no need to output your analysis process
-2. Output language: {lang}
-
-Now, your prompt:
-```
-
-- `{input_text}` is a common variable, which represents the content you input in the input box.
-- `{player_position}` is a common variable, which represents the marked position of the current player. The content filled in is your custom prompt for the marked position.
-- `{now_time}` is a common variable, which represents the current time, such as "2021-08-01 12:00:00".
-- `{lang}` is a common variable, which represents the language environment of the current browser, such as "zh", "en", "ja", etc.
-
->Requirements: 1. Concise: because this is a chat scene, you can require the large model to be as concise as possible
-
-### Npc Prompt
-There are a total of **25** NPCs in the AI town. The behavior trajectories of these NPCs are predefined, but you can input chat by controlling the player to approach the NPC.
-
-You can customize the NPC's prompt description (Profile) to the NPC, when you approach the NPC, the NPC will actively ask through our predefined `Action_Influence_Npc_Near`, when you enter the content chat, the NPC will use our predefined `Action_Target_Dialogue_Npc` as the NPC role and chat with you.
-
-#### Profile
-You can move the mouse to the NPC character to view the self-introduction of the character, or you can click the "Edit" button to describe the self-introduction of the character you specified. When you are close to this character, the self-introduction will be used as background knowledge and you will have a dialogue.
-
-![profile.png](./screenshots/profile_edit.png)
-
-##### Profile_Hailey_Johnson
-
-##### Profile_Tom_Moreno
-
-##### Profile_Eddy_Lin
-
-##### Profile_John_Lin
-
-##### Profile_Yuriko_Yamamoto
-
-##### Profile_Sam_Moore
-
-##### Profile_Mei_Lin
-
-##### Profile_Adam_Smith
-
-##### Profile_Giorgio_Rossi
-
-##### Profile_Carlos_Gomez
-
-##### Profile_Wolfgang_Schulz
-
-##### Profile_Jennifer_Moore
-
-##### Profile_Klaus_Mueller
-
-##### Profile_Ayesha_Khan
-
-##### Profile_Isabella_Rodriguez
-
-##### Profile_Abigail_Chen
-
-##### Profile_Carmen_Ortiz
-
-##### Profile_Francisco_Lopez
-
-##### Profile_Jane_Moreno
-
-##### Profile_Latoya_Williams
-
-##### Profile_Arthur_Burton
-
-##### Profile_Rajiv_Patel
-
-##### Profile_Tamara_Taylor
-
-##### Profile_Ryan_Park
-
-##### Profile_Maria_Lopez
-
-
-#### NPC Action Prompt
-Action prompt is a predefined prompt, which is triggered when the player reaches the NPC. The predefined prompt and the NPC's prompt description are combined to form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-##### Action_Influence_Npc_Near
-This is a predefined prompt, which is triggered when the player **approaches the NPC**. The predefined prompt and the NPC's prompt description are combined to form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-Currently defined as:
-```text
-The following is your personal introduction:
-####################
-{npc_intro}
-####################
-
-Current time is {now_time}
-
-I just met you, what you might say?
-1. If there is no more context to indicate that they are meeting for the first time, Introduce yourself and regular chat greeting
-2. no need to output your analysis process
-3. Output language: {lang}
-```
-
-- `{npc_intro}` is a common variable, which represents the NPC's custom prompt description.
-- `{npc_activity}` is a common variable, which represents the NPC's activity, such as "sleeping", "eating", "working", etc.
-- `{history}` is a common variable, which represents the historical input record of chatting with the current NPC.
-- `{now_time}` is a common variable, which represents the current time, such as "2021-08-01 12:00:00".
-- `{lang}` is a common variable, which represents the language environment of the current browser, such as "zh", "en", "ja", etc.
-
-##### Action_Target_Dialogue_Npc
-This is a predefined prompt, which is triggered when the player **inputs near the NPC**, the input content and the current defined prompt and the NPC's prompt description form a complete prompt, which is provided to the large model, and the large model outputs an effective response to you.
-
-Currently defined as:
-```text
-The following is your personal introduction:
-####################
-{npc_intro}
-####################
-Current time is {now_time}, we are chatting.
-I say: >>>>{input_text}<<<<. what you might say?
-1. no need to output your analysis process
-2. Output language: {lang}
-```
-
-- `{npc_intro}` is a common variable, which represents the NPC's custom prompt description.
-- `{input_text}` is a common variable, which represents the content you input in the input box.
-- `{now_time}` is a common variable, which represents the current time, such as "2021-08-01 12:00:00".
-- `{lang}` is a common variable, which represents the language environment of the current browser, such as "zh", "en", "ja", etc.
-
->Requirements: 1. Concise: because this is a chat scene, you can require the large model to be as concise as possible
+### customize your own map
+![custom_map](./screenshots/custom_map.png)
+Drag chatdev/src/assets/ex_assets/chatdev_main_map.json to TILED app.
 
 ### GPTs
 GPTs is a large language model, you can import GPTs from the community or customize Prompt Flow in PromptIDE to achieve new GPTs, run GPTs to let NPCs achieve multi-person self-collaboration to complete tasks.
@@ -288,75 +116,79 @@ While how LLMs work may be elusive to many developers, how LLM apps work is not 
 By observing many internal use cases, we learned that deeper insight into the detail of the execution is critical. Establishing a systematic method for tracking interactions with external systems is one of design priority. Consequently, We adopted an unconventional approach - prompt flow has a YAML file describing how function calls (we call them Tools) are executed and connected into a Directed Acyclic Graph (DAG).
 
 ### Flows
+A flow in PromptFlow is a DAG (Directed Acyclic Graph) of prompts/functions, referred to as nodes.
+These nodes are connected via input/output dependencies and are executed based on the topology by the PromptFlow executor.
+A flow is represented as a YAML file and can be visualized using our IDE.
 
-A flow in PromptFlow is a DAG (Directed Acyclic Graph) of prompts/functions, referred to as nodes. These nodes are connected via input/output dependencies and are executed based on the topology by the PromptFlow executor. A flow is represented as a YAML file and can be visualized using our IDE. Here is an example:
+Here is an example:
 
-* **outputs**
+#### Write GPTs/Agent
+Indicates the definition of the current node's output content. `${TestModification}` references the node's name,
+signifying that the current node's output is the output of the `TestModification` node (`output` variable).
+This is a standard format, you need to ensure that 'desc' nodes are used to describe your GPTs in the map, define 'reference' under 'outputs' nodes to represent the most total nodes, and make all nodes connected.
 
 ```yaml
+# Required
+desc: 'your GPTs description' # In the game map, mouse over the description displayed by GPTs
+
+# Required
 outputs:
   overview:
-    reference: ${TestModification}
-```
+    reference: ${Chatting} # Final node
 
-Indicates the definition of the current node's output content. `${TestModification}` references the node's name, signifying that the current node's output is the output of the `TestModification` node (`output` variable).
-
-* **roles (optional)**
-
-```yaml
-roles:
-  - name: "Chief Product Officer"
-    npc: "Mei Lin"
-    source:
-      path: Role_Chief_Product_Officer
-```
-
-An optional field defining the execution role for the current node. It includes the role's name, an optional NPC for visualization, and the definition of the role's prompt content.
-
-* **nodes**
-
-```yaml
+# The definition of a single node supports the text type and url type. The following is an example of the text type
 nodes:
-  - name: DemandUnderstand
+  - name: Chatting
+    type: prompt
     source:
-      path: Planning_Prompt_Enhance
-      func: Func_Prompt_Enhance
+      path: Action_Prompt_Template # path of prompt.
+    inputs:
+      input_text: ${inputs.input_text} # `${inputs.input}` represents the complete content entered in the input box.
+      intro: 'xxx'
+```
+in the prompt:
+{intro} will replace by 'xxx'
+{input_text} will replace by the content what you entered in the input box.
+
+- The full GPTs summarizing Twitter content are below：
+```yaml
+desc: 'summary elonmusk latest twitter'
+
+outputs:
+  overview:
+    reference: ${summary_twitter}
+
+nodes:
+  - name: elonmusk
+    speak: 'get elonmusk latest twitter' # speak represents the content of the game character displayed in the map, which does not result in a large amount of html displayed
+    type: url
+    source:
+      path: 'https://chatdev.toscl.com/rattibha/user/elonmusk'
+      func: Func_twitter # Optionally, func defines the path of the JavaScript used to parse the returned html content
     inputs:
       task: ${inputs.input_text}
 
-  - name: task_company
+  - name: summary_twitter
     source:
-      path: Planning_Task_Company
+      path: Planning_Prompt_Twitter
     inputs:
-      assistant_role: "Chief Product Officer"
-      task: ${DemandUnderstand.output}
+      info: ${elonmusk.output} # `${elonmusk.output}` is a reference to the return content of the elonmusk node.
+      task: ${inputs.input_text}
 ```
 
-The crucial part of the entire PromptFlow, defining roles, content, and handling of return content. Nodes specify task execution roles, content, and the processing of returned content.
+#### Write prompt
+in the yaml, `source.path` for write prompt. select the highlighted section which is represented as prompt/function then you can edit it.
+For example, defining `task` as an input variable in `inputs`, for example: `task: ${elonmusk.output}`,
+`${elonmusk.output}` will replaces the string: `{task}` in the prompt.
 
-### JavaScript Support
+#### Write Func
+in the yaml, `source.func` for write JavaScript, this is optional.
+the scope of a node object is global for `window`, so you can use any js code in `func`.
+JQuery is also preset here, you can directly process your text by using `$`.
+for example, you can use: `new DOMParser()` or `$('div#xml')`.
+use `node.xxx`: represents a variable that references the current node, eg: `node.output`
+use `node_name.xxx`: represents a variable that references another node
 
-JavaScript is a powerful language used for implementing complex prompting techniques in PromptFlow. It enables developers to implement intricate prompting techniques and rich analytics for visualizing PromptFlow outputs.
-
-* **Variable Scope**
-
-  * **Input Variables (inputs node):** `source.path` represents a custom prompt with unknown variables like `{xxx}`. For example, defining `task` as an input variable: `${DemandUnderstand.output}` replaces `{task}` in the prompt with `${DemandUnderstand.output}`.
-
-    * `task: ${inputs.input}`: Using a generic input local variable. `${inputs.input}` represents the complete content entered in the input box.
-    * `xxx: ${node_name.variable}`: Defining your input variable `xxx`, `${node_name.variable}` references a local variable in another node.
-  * **Output Variables:**
-
-    * `output`: Represents the complete content returned by a large model. Referenced in other nodes as `node_name.output`.
-    * `func`: Custom local variables defined in the `JavaScript` script of a node.
-  * **Variable Scope:** Local to the current node. Define variables using `let` or `const`.
-
-* **Exception Handling**
-
-  * Manually throw exceptions in `func` using `throw new Error("xxx")`, where `xxx` is a custom prompt. When a node encounters an exception, it will output the exception information to the console.
-
-  * Manually throwing exceptions allows you to identify and fix issues in your code during execution.
-
->**Important Note:** Avoid using `console.log("xxx")` for logging, as `console` is not a global variable in the node's context.
 
 ### Export & Import
 You can export your prompt flow to a json file and import it to another devices.
@@ -364,155 +196,6 @@ it contains all the information about your prompt flow, including the prompt, th
 
 ### GPTs Example
 Our examples should also give you an idea how to use that:
-
-#### Roles
-```yaml
-
-roles:
-  - name: "Chief Product Officer"
-    npc: "Mei Lin"
-    source:
-      path: Role_Chief_Product_Officer
-  - name: "Counselor"
-    npc: "Jennifer Moore"
-    source:
-      path: Role_Counselor
-  - name: "Chief Technology Officer"
-    npc: "Ryan Park"
-    source:
-      path: Role_Chief_Technology_Officer
-  - name: "Chief Human Resource Officer"
-    source:
-      path: Role_Chief_Human_Resource_Officer
-  - name: "Programmer"
-    source:
-      path: Role_Programmer
-  - name: "Code Reviewer"
-    source:
-      path: Role_Code_Reviewer
-  - name: "Software Test Engineer"
-    source:
-      path: Role_Software_Test_Engineer
-  - name: "Chief Creative Officer"
-    source:
-      path: Role_Chief_Creative_Officer
-```
-
-##### Role_Chief_Product_Officer
-
-##### Role_Counselor
-
-##### Role_Chief_Technology_Officer
-
-##### Role_Chief_Human_Resource_Officer
-
-##### Role_Programmer
-
-##### Role_Code_Reviewer
-
-##### Role_Software_Test_Engineer
-
-##### Role_Chief_Creative_Officer
-
-#### Prompt Flow
-```yaml
-nodes:
-  - name: DemandUnderstand
-    source:
-      path: Planning_Prompt_Enhance
-      func: Func_Prompt_Enhance
-    inputs:
-      task: ${inputs.input_text}
-
-  - name: Coding
-    role: "Chief Technology Officer"
-    source:
-      path: Planning_Coding
-      func: Func_Coding
-    inputs:
-      assistant_role: "Programmer"
-      gui: ${DemandUnderstand.gui}
-      ideas: ${DemandUnderstand.ideas}
-      language: ${DemandUnderstand.language}
-      modality: ${DemandUnderstand.modality}
-      task: ${DemandUnderstand.task}
-
-  - name: CodeComplete
-    role: "Chief Technology Officer"
-    source:
-      path: Planning_CodeComplete
-      func: Func_Coding
-    inputs:
-      assistant_role: "Programmer"
-      unimplemented_file: ${Coding.unimplemented_file}
-      codes: ${Coding.output}
-      language: ${DemandUnderstand.language}
-      modality: ${DemandUnderstand.modality}
-      task: ${DemandUnderstand.task}
-
-  - name: CodeReviewComment
-    role: "Programmer"
-    source:
-      path: Planning_CodeReviewComment
-    inputs:
-      assistant_role: "Code Reviewer"
-      codes: ${CodeComplete.output}
-      ideas: ${DemandUnderstand.ideas}
-      language: ${DemandUnderstand.language}
-      modality: ${DemandUnderstand.modality}
-      task: ${DemandUnderstand.task}
-
-  - name: CodeReviewModification
-    role: "Programmer"
-    source:
-      path: Planning_CodeReviewModification
-      func: Func_Coding
-    inputs:
-      assistant_role: "Code Reviewer"
-      comments: ${CodeReviewComment.output}
-      codes: ${CodeComplete.output}
-      ideas: ${DemandUnderstand.ideas}
-      language: ${DemandUnderstand.language}
-      modality: ${DemandUnderstand.modality}
-      task: ${DemandUnderstand.task}
-
-  - name: TestErrorSummary
-    role: "Software Test Engineer"
-    source:
-      path: Planning_TestErrorSummary
-    inputs:
-      assistant_role: "Programmer"
-      test_reports: "js & css should inline in index.html"
-      codes: ${CodeReviewModification.output}
-      language: ${DemandUnderstand.language}
-
-  - name: TestModification
-    role: "Software Test Engineer"
-    source:
-      path: Planning_TestModification
-      func: Func_Coding
-    inputs:
-      assistant_role: "Programmer"
-      error_summary: ${TestErrorSummary.output}
-      test_reports: ${TestErrorSummary.output}
-      codes: ${CodeReviewModification.output}
-      language: ${DemandUnderstand.language}
-```
-
-
-##### Planning_Prompt_Enhance
-
-##### Planning_Coding
-
-##### Planning_CodeComplete
-
-##### Planning_CodeReviewComment
-
-##### Planning_CodeReviewModification
-
-##### Planning_TestErrorSummary
-
-##### Planning_TestModification
 
 
 ## 🤖 Bots
@@ -544,7 +227,7 @@ nodes:
 
 ### 2. Manual Installation
 
-1. Download `chatdev1.2.2.zip` from the Releases page.
+1. Download `chatdev1.3.0.zip` from the Releases page.
 2. Extract the files.
 3. In Chrome/Edge, open the extensions page (`chrome://extensions` or `edge://extensions`).
 4. Enable developer mode.
