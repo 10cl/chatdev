@@ -197,6 +197,288 @@ it contains all the information about your prompt flow, including the prompt, th
 ### GPTs Example
 Our examples should also give you an idea how to use that:
 
+#### Chatting with NPC
+- YAML
+```yaml
+desc: "Chatting with NPC"
+
+inputs:
+  input_text:
+    type: string
+    default: "Hello"
+  auto: true
+
+outputs:
+  overview:
+    reference: ${ChattingWith_Eddy_Lin}
+
+nodes:
+  - name: ChattingWith_Eddy_Lin
+    source:
+      path: Action_Target_Dialogue_Npc
+    inputs:
+      input_text: ${inputs.input_text}
+      intro: "Name: Eddy Lin, Age: 19
+Innate tendency: curious, analytical, musical
+Learned tendency: Eddy Lin is a student at Oak Hill College studying music theory and composition. He loves to explore different musical styles and is always looking for ways to expand his knowledge.
+Currently: Eddy Lin is working on a composition project for his college class. He is also taking classes to learn more about music theory.
+Lifestyle: Eddy Lin goes to bed around 11pm, awakes up around 7amam, eats dinner around 5pm."
+```
+
+- Action_Target_Dialogue_Npc
+```text
+{intro}
+
+current time is {now_time}, we are chatting.
+I say to you: {input_text}. what you might say?
+1. no need to output your analysis process
+2. Output language: {lang}
+```
+
+#### Chatting with Twitter
+- YAML
+```yaml
+desc: "Chat with BillGates"
+
+inputs:
+  input_text:
+    type: string
+    default: "What have I been doing lately"
+  auto: true
+
+
+outputs:
+  overview:
+    type: string
+    reference: ${ask_twitter}
+
+nodes:
+  - name: get_BillGates_twitter
+    speak: "get BillGates latest twitter"
+    type: url
+    source:
+      path: "https://chatdev.toscl.com/rattibha/user/BillGates"
+      func: Func_twitter
+    inputs:
+      task: ${inputs.input_text}
+
+
+  - name: ask_twitter
+    source:
+      path: Planning_Prompt_Twitter
+    inputs:
+      info: ${get_BillGates_twitter.output}
+      task: ${inputs.input_text}
+```
+
+- Func_twitter
+```js
+const xmlText = node.output
+const parser = new DOMParser();
+const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+node.output = ""
+const items = xmlDoc.querySelectorAll('item');
+items.forEach(item => {
+  const description = item.querySelector('description').textContent;
+  const pubDate = item.querySelector('pubDate').textContent;
+  const temp = node.output + description + " \n publish time: " + pubDate + "\n"
+  if(temp.length <= 4000){
+    node.output += temp
+    console.log("length：" + node.output.length);
+  }
+});
+console.log("length：" + node.output.length);
+```
+
+- Planning_Prompt_Twitter
+```text
+Here's what i tweeted recently:
+########
+{info}
+########
+Please answer my question with as simple as possible based on the above.
+now, I say: {task}
+```
+
+#### Chatting with Any Url
+- YAML
+```yaml
+desc: "url text body extraction"
+
+outputs:
+  overview:
+    reference: ${ask_textbody}
+
+nodes:
+  - name: get_url_text_extract
+    type: url
+    source:
+      path: "https://chatdev.toscl.com/"
+      func: FUNC_Text_Extraction
+    inputs:
+      task: ${inputs.input_text}
+
+  - name: ask_textbody
+    source:
+      path: Planning_Text_Ask
+    inputs:
+      info: ${get_url_text_extract.output}
+      task: ${inputs.input_text}
+```
+
+- FUNC_Text_Extraction
+use `Readability` to extract text from html.
+```js
+console.log("text extraction")
+const parser = new DOMParser();
+const doc = parser.parseFromString(node.output, "text/html");
+
+var article = new Readability(doc).parse();
+console.log(article);
+node.output = article.textContent
+```
+
+- Planning_Prompt_Twitter
+```text
+Here's what i tweeted recently:
+########
+{info}
+########
+Please answer my question with as simple as possible based on the above.
+now, I say: {task}
+```
+
+#### Generate a website in one sentence
+```yaml
+desc: "single GPTs - generated web pages - multi-role collaborative presentation"
+
+outputs:
+  overview:
+    type: html
+    reference: ${TestModification}
+
+roles:
+  - name: "Chief Product Officer"
+    npc: "Mei Lin"
+    source:
+      path: Role_Chief_Product_Officer
+  - name: "Counselor"
+    npc: "Jennifer Moore"
+    source:
+      path: Role_Counselor
+  - name: "Chief Technology Officer"
+    npc: "Ryan Park"
+    source:
+      path: Role_Chief_Technology_Officer
+  - name: "Chief Human Resource Officer"
+    npc: "Adam Smith"
+    source:
+      path: Role_Chief_Human_Resource_Officer
+  - name: "Programmer"
+    npc: "Carmen Ortiz"
+    source:
+      path: Role_Programmer
+  - name: "Code Reviewer"
+    npc: "Francisco Lopez"
+    source:
+      path: Role_Code_Reviewer
+  - name: "Software Test Engineer"
+    npc: "Latoya Williams"
+    source:
+      path: Role_Software_Test_Engineer
+  - name: "Chief Creative Officer"
+    npc: "Klaus Mueller"
+    source:
+      path: Role_Chief_Creative_Officer
+
+nodes:
+  - name: DemandUnderstand
+    speak: "Optimize your demand..."
+    source:
+      path: Planning_Prompt_Enhance
+      func: Func_Prompt_Enhance
+    inputs:
+      task: ${inputs.input_text}
+
+  - name: Coding
+    role: "Chief Technology Officer"
+    source:
+      path: Planning_Coding
+      func: Func_Coding
+    inputs:
+      assistant_role: "Programmer"
+      gui: ${DemandUnderstand.gui}
+      ideas: ${DemandUnderstand.ideas}
+      language: ${DemandUnderstand.language}
+      modality: ${DemandUnderstand.modality}
+      task: ${DemandUnderstand.task}
+
+  - name: CodeComplete
+    role: "Chief Technology Officer"
+    speak: "code complete..."
+    source:
+      path: Planning_CodeComplete
+      func: Func_Coding
+    inputs:
+      assistant_role: "Programmer"
+      unimplemented_file: ${Coding.unimplemented_file}
+      codes: ${Coding.output}
+      language: ${DemandUnderstand.language}
+      modality: ${DemandUnderstand.modality}
+      task: ${DemandUnderstand.task}
+
+  - name: CodeReviewComment
+    speak: "code review..."
+    role: "Programmer"
+    source:
+      path: Planning_CodeReviewComment
+    inputs:
+      assistant_role: "Code Reviewer"
+      codes: ${CodeComplete.output}
+      ideas: ${DemandUnderstand.ideas}
+      language: ${DemandUnderstand.language}
+      modality: ${DemandUnderstand.modality}
+      task: ${DemandUnderstand.task}
+
+  - name: CodeReviewModification
+    speak: "code review modification..."
+    role: "Programmer"
+    source:
+      path: Planning_CodeReviewModification
+      func: Func_Coding
+    inputs:
+      assistant_role: "Code Reviewer"
+      comments: ${CodeReviewComment.output}
+      codes: ${CodeComplete.output}
+      ideas: ${DemandUnderstand.ideas}
+      language: ${DemandUnderstand.language}
+      modality: ${DemandUnderstand.modality}
+      task: ${DemandUnderstand.task}
+
+  - name: TestErrorSummary
+    speak: "test summary..."
+    role: "Software Test Engineer"
+    source:
+      path: Planning_TestErrorSummary
+    inputs:
+      assistant_role: "Programmer"
+      test_reports: "js & css should inline in index.html"
+      codes: ${CodeReviewModification.output}
+      language: ${DemandUnderstand.language}
+
+  - name: TestModification
+    speak: "test modification complete..."
+    role: "Software Test Engineer"
+    source:
+      path: Planning_TestModification
+      func: Func_Coding
+    inputs:
+      assistant_role: "Programmer"
+      error_summary: ${TestErrorSummary.output}
+      test_reports: ${TestErrorSummary.output}
+      codes: ${CodeReviewModification.output}
+      language: ${DemandUnderstand.language}
+```
 
 ## 🤖 Bots
 
@@ -239,9 +521,3 @@ Our examples should also give you an idea how to use that:
 * Run `yarn install` to install dependencies.
 * Run `yarn build` to build the plugin.
 * Follow the steps in "Manual Installation" to load the `dist` folder into your browser.
-
-## 🤝 Acknowledgments
-
-We sincerely thank the following projects for providing inspiration and reference: [generative_agents](https://github.com/joonspk-research/generative_agents)、[chathub](https://github.com/chathub-dev/chathub)
-
-Whether you want to explore the wonders of different large language models or create your own virtual town life, ChatDev will be your reliable assistant. Install it now and start exploring!
