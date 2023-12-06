@@ -11,9 +11,9 @@
 [![last commit][last-commit-image]][last-commit-url]
 [![discord][discord-image]][discord-url]
 
-[英语](README.md) &nbsp;&nbsp;|&nbsp;&nbsp; [印度尼西亚语](README_IN.md) &nbsp;&nbsp;|&nbsp;&nbsp; 简体中文 &nbsp;&nbsp;|&nbsp;&nbsp; [繁体中文](README_ZH-TW.md) &nbsp;&nbsp;|&nbsp;&nbsp; [日本语](README_JA.md)
+[英语](README.md) &nbsp;&nbsp;|&nbsp;&nbsp; 简体中文 &nbsp;&nbsp;|&nbsp;&nbsp; 
 
-<a href="https://chrome.google.com/webstore/detail/chatdev-visualize-your-ai/dopllopmmfnghbahgbdejnkebfcmomej?utm_source=github"><img src="./screenshots/chrome-logo.png" width="200" alt="为Chromium获取ChatDev"></a>
+<a href="https://chromewebstore.google.com/detail/chatdev-ide-%E6%9E%84%E5%BB%BA%E4%BD%A0%E7%9A%84%E6%99%BA%E8%83%BD%E4%BD%93/dopllopmmfnghbahgbdejnkebfcmomej?hl=zh"><img src="./screenshots/chrome-logo.png" width="200" alt="为Chromium获取ChatDev"></a>
 <a href="https://microsoftedge.microsoft.com/addons/detail/ceoneifbmcdiihmgfjeodiholmbpmibm?utm_source=github"><img src="./screenshots/edge-logo.png" width="160" alt="为Microsoft Edge获取ChatDev"></a>
 
 
@@ -32,15 +32,16 @@
 
 </div>
 
-ChatDev IDE 是一个集成了多个大型语言模型的浏览器扩展程序，它由三部分组成：**游戏模式**、**聊天模式**和**Prompt IDE**。
+ChatDev IDE是一个用于构建AI代理的工具，无论是在游戏中的NPC还是强大的代理工具，您都可以在这个平台上设计您想要的内容。
 
-您可以个性化游戏中的NPC，自定义位置的提示词，并使用可视化的GPTs编辑器构建您的GPTs，让NPC多角色自我协作。
+它通过支持JavaScript实现了**JavaScript Support**，从而加速了提示工程。
 
-它通过**JavaScript支持**从而让你可以实现更复杂的AI Agent流程。
+[https://www.bilibili.com/video/BV1eN411L7LF/](https://www.bilibili.com/video/BV1eN411L7LF/) 
 
 ## 📷 截图
-![gpts_talk_business.png](./screenshots/gpts_talk_business.png)
-![gpts_write_a_website.png.png](./screenshots/gpts_write_a_website.png)
+![gpts_talk_business.png](./screenshots/gpts_talk_business.png) 
+![chatdev.gif](./screenshots/chatdev.gif)
+
 
 ## 📢 简介
 * 游戏模式：在AI镇社会模拟中，您可以自定义这些NPC和位置标记。
@@ -53,195 +54,16 @@ ChatDev IDE 是一个集成了多个大型语言模型的浏览器扩展程序�
 在游戏模式中，您可以在左侧选择您喜欢的大型模型，在地图上，通过方向键或鼠标控制NPC的动作，当您靠近NPC或到达标记位置时，NPC会主动触发冷启动响应，或在下方输入框中主动输入您的聊天内容。
 游戏基于模拟的AI镇社会环境，您可以靠近NPC或走到特定位置，通过输入与NPC交流或在特定位置与自己聊天。
 
-- **位置提示**：通过描述标记位置的提示让玩家与自己聊天
-- **NPC角色提示**：通过描述NPC的提示让玩家与NPC聊天，实现玩家与NPC之间的自我介绍。
-- **记忆**：您的聊天将被本地存储，您可以通过悬停鼠标查看标记位置或NPC的历史聊天记录。
-- **GPTs**：从社区导入GPTs或在PromptIDE中自定义Prompt Flow以实现新的GPT，运行GPT让NPC实现多人自我协作完成任务
-
 ### 社会模拟
 ![social_simulation.png](./screenshots/social_simulation.png)
 
 这是一个模拟的AI镇社会环境，由25个具有独立意识的NPC和一个受控玩家组成，地图大小为180x100，单个网格的大小定义为32。25个NPC有预定义的日常生活轨迹。您可以通过自定义NPC的提示描述来接近NPC进行聊天输入，或者您可以为标记位置自定义您的提示描述，并在您走到标记位置时与自己聊天。
 当玩家与NPC的距离<100时，NPC将根据预定义的角色描述触发主动问候。当玩家与NPC的距离>200时，聊天区域将自动结束。
-
-### 位置提示
 当您将鼠标移动到标记位置时，当前标记的提示描述将弹出。您可以点击“编辑”按钮来描述您指定的位置的提示。当您靠近这个标记或直接在这个位置交谈时，提示将被用作背景知识，并且您将进行对话。
 
-![location_prompt.png](./screenshots/location_prompt_edit.png)
+### 自定义您自己的地图
 
-除了为标记位置自定义提示外，您还需要一个固定形式的提示组合来生成完整的提示，以便大型模型可以理解我们的意图。
-例如，当您控制NPC到达指定标记位置时，我们需要告诉大型模型您想要做什么。这时我们需要一个固定的提示，比如我们预定义的“Action_Influence_Env_Changed”。这个提示的作用是告诉大型模型玩家的位置已改变。我们会将这个提示的内容与您为标记位置自定义的提示结合起来，生成一个完整的提示并交给大型模型。大型模型将输出有效的响应给您。
-
-#### 位置动作提示
-动作提示是一个预定义的提示，当玩家到达标记位置时触发。预定义的提示和标记位置的提示描述结合起来形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-##### Action_Influence_Env_Changed
-这是一个预定义的提示，当玩家**到达标记位置**时触发。预定义的提示和标记位置的提示描述结合起来形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-目前定义为：
-```text
-您是游戏地图上的一个标记，这是您的描述：
-####################
-{player_position}
-####################
-我刚到这里。当前时间是{now_time}，这是我通常记录对话和计划未来事件的地方。 
-请问我一个简短的问题以获取您想记录的对话或项目。
-
-1. 不需要输出您的分析过程
-2. 输出语言：{lang}
-
-现在，您的提示：
-```
-
-* `{lang}` 是一个通用变量，代表当前浏览器的语言环境，比如"zh"、"en"、"ja"等。
-* `{history}` 是一个通用变量，代表玩家在标记位置的输入历史。
-* `{player_name}` 是一个通用变量，代表当前玩家的名字。您在第一次进入ChatDev时已经回复了玩家的名字。
-* `{player_position}` 是一个通用变量，代表当前玩家的标记位置。填充的内容是您为标记位置自定义的提示。
-* `{now_time}` 是一个通用变量，代表当前时间，比如"2021-08-01 12:00:00"。
-
-您可以利用上述通用变量来实施您自己的提示。
-
-##### Action_Target_Dialogue_Env
-
-这是一个预定义的提示，当玩家**在标记位置输入内容**时触发，输入内容和当前定义的提示以及标记位置的提示描述形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-目前定义为：
-
-```text
-您是游戏地图上的一个标记，这是您的描述：
-####################
-{player_position}
-####################
-当前时间是{now_time}，我们正在聊天。我说：>>>>{input_text}<<<<
-
-1. 不需要输出您的分析过程
-2. 输出语言：{lang}
-
-现在，您的提示：
-```
-
-* `{input_text}` 是一个通用变量，代表您在输入框中输入的内容。
-* `{player_position}` 是一个通用变量，代表当前玩家的标记位置。填充的内容是您为标记位置自定义的提示。
-* `{now_time}` 是一个通用变量，代表当前时间，比如"2021-08-01 12:00:00"。
-* `{lang}` 是一个通用变量，代表当前浏览器的语言环境，比如"zh"、"en"、"ja"等。
-
-> 要求：1. 简洁：因为这是一个聊天场景，您可以要求大型模型尽可能简洁
-
-### NPC提示
-
-AI镇中总共有**25**个NPC。这些NPC的行为轨迹是预定义的，但您可以通过控制玩家接近NPC输入聊天。
-
-您可以自定义NPC的提示描述（Profile）给NPC，当您接近NPC时，NPC会通过我们预定义的`Action_Influence_Npc_Near`主动提问，当您输入内容聊天时，NPC会使用我们预定义的`Action_Target_Dialogue_Npc`作为NPC角色与您聊天。
-
-#### 个人档案
-
-您可以将鼠标移动到NPC角色上查看角色的自我介绍，或者您可以点击“编辑”按钮来描述您指定的角色的自我介绍。当您靠近这个角色时，自我介绍将被用作背景知识，并且您将进行对话。
-
-![profile.png](./screenshots/profile_edit.png)
-
-##### Profile_Hailey_Johnson
-
-##### Profile_Tom_Moreno
-
-##### Profile_Eddy_Lin
-
-##### Profile_John_Lin
-
-##### Profile_Yuriko_Yamamoto
-
-##### Profile_Sam_Moore
-
-##### Profile_Mei_Lin
-
-##### Profile_Adam_Smith
-
-##### Profile_Giorgio_Rossi
-
-##### Profile_Carlos_Gomez
-
-##### Profile_Wolfgang_Schulz
-
-##### Profile_Jennifer_Moore
-
-##### Profile_Klaus_Mueller
-
-##### Profile_Ayesha_Khan
-
-##### Profile_Isabella_Rodriguez
-
-##### Profile_Abigail_Chen
-
-##### Profile_Carmen_Ortiz
-
-##### Profile_Francisco_Lopez
-
-##### Profile_Jane_Moreno
-
-##### Profile_Latoya_Williams
-
-##### Profile_Arthur_Burton
-
-##### Profile_Rajiv_Patel
-
-##### Profile_Tamara_Taylor
-
-##### Profile_Ryan_Park
-
-##### Profile_Maria_Lopez
-
-#### NPC动作提示
-
-动作提示是一个预定义的提示，当玩家到达NPC时触发。预定义的提示和NPC的提示描述结合起来形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-##### Action_Influence_Npc_Near
-
-这是一个预定义的提示，当玩家**接近NPC**时触发。预定义的提示和NPC的提示描述结合起来形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-目前定义为：
-
-```text
-以下是您的个人介绍：
-####################
-{npc_intro}
-####################
-
-当前时间是{now_time}
-
-我刚遇见你，你可能会说什么？
-1. 如果没有更多的上下文表明他们是第一次见面，请自我介绍和常规聊天问候
-2. 不需要输出您的分析过程
-3. 输出语言：{lang}
-```
-
-* `{npc_intro}` 是一个通用变量，代表NPC的自定义提示描述。
-* `{npc_activity}` 是一个通用变量，代表NPC的活动，比如"睡觉"、"吃饭"、"工作"等。
-* `{history}` 是一个通用变量，代表与当前NPC聊天的历史输入记录。
-* `{now_time}` 是一个通用变量，代表当前时间，比如"2021-08-01 12:00:00"。
-* `{lang}` 是一个通用变量，代表当前浏览器的语言环境，比如"zh"、"en"、"ja"等。
-
-##### Action_Target_Dialogue_Npc
-
-这是一个预定义的提示，当玩家**在NPC附近输入内容**时触发，输入内容和当前定义的提示以及NPC的提示描述形成一个完整的提示，提供给大型模型，大型模型输出有效的响应给您。
-
-目前定义为：
-
-```text
-以下是您的个人介绍：
-####################
-{npc_intro}
-####################
-当前时间是{now_time}，我们正在聊天。
-我说：>>>>{input_text}<<<<。你可能会说什么？
-1. 不需要输出您的分析过程
-2. 输出语言：{lang}
-```
-
-* `{npc_intro}` 是一个通用变量，代表NPC的自定义提示描述。
-* `{input_text}` 是一个通用变量，代表您在输入框中输入的内容。
-* `{now_time}` 是一个通用变量，代表当前时间，比如"2021-08-01 12:00:00"。
-* `{lang}` 是一个通用变量，代表当前浏览器的语言环境，比如"zh"、"en"、"ja"等。
-
-> 要求：1. 简洁：因为这是一个聊天场景，您可以要求大型模型尽可能简洁
+![custom_map](./screenshots/custom_map.png) 将`chatdev/src/assets/ex_assets/chatdev_main_map.json`拖到 `TILED` 应用程序中。
 
 ### GPTs
 
@@ -290,93 +112,268 @@ Prompt流是一套旨在简化LLM为基础的AI应用的端到端开发周期的
 左边的编辑器是PromptFlow的YAML文件，其中`path`和`func`被高亮显示，表示引用了自定义的Prompt。您可以移动鼠标并点击`path`或`func`上的节点，右侧将显示您在节点上自定义的Prompt。最右侧的折叠界面是可视化的Prompt Flow。您也可以通过双击节点来编辑节点的Prompt内容。 当您在左侧修改YAML文件时，右侧的可视化Prompt Flow将实时更新。
 
 
-### PromptFow可视化
+### PromptFlow 可视化
 
-对许多开发者而言，大型语言模型（LLMs）的工作原理可能难以捉摸，但LLM应用程序的工作原理则相对明了——它们本质上涉及到一系列对外部服务（如LLM、数据库/搜索引擎）的调用，或者是中间数据处理，所有这些都被整合在一起。因此，LLM应用程序只不过是函数调用的有向无环图（DAGs）。这些DAGs是prompt flow中的流程。 通过观察许多内部用例，我们了解到深入了解执行细节至关重要。建立一种系统的方法来跟踪与外部系统的交互是设计的优先事项。因此，我们采用了一种非传统的方法——prompt flow有一个YAML文件，描述了函数调用（我们称之为工具）是如何被执行并连接成一个有向无环图（DAG）的。
+尽管大多数开发者可能对LLMs的工作方式感到难以理解，但LLM应用程序的工作方式并不复杂 - 它们基本上涉及一系列对外部服务的调用，如LLMs/数据库/搜索引擎，或者涉及中间数据处理，所有这些都通过连接在一起。因此，LLM应用程序只是函数调用的有向无环图（DAG）。这些DAGs是prompt flow中的流程。
+
+通过观察许多内部用例，我们了解到深入了解执行细节是至关重要的。建立一种系统跟踪与外部系统交互的方法是设计的优先级之一。因此，我们采用了一种非常规的方法 - prompt flow有一个YAML文件，描述了函数调用（我们称之为Tools）如何执行并连接成有向无环图（DAG）。
 
 ### 流程
 
-PromptFlow中的一个流程是一个由提示/函数组成的DAG（有向无环图），被称为节点。这些节点通过输入/输出依赖连接，并根据拓扑结构由PromptFlow执行器执行。一个流程以YAML文件的形式表示，并可以使用我们的IDE进行可视化。这里有一个例子：
+PromptFlow中的流程是由提示/函数的DAG（有向无环图）组成，称为节点。
 
-* **输出**
+这些节点通过输入/输出依赖关系连接，并根据拓扑结构由PromptFlow执行器执行。
+
+流程表示为YAML文件，并可以在我们的IDE中进行可视化。
+
+以下是一个示例：
+
+#### 编写GPTs/Agent
+
+表示当前节点输出内容的定义。`${TestModification}` 引用节点的名称，表示当前节点的输出是 `TestModification` 节点（`output` 变量）的输出。这是一种标准格式，您需要确保在地图中使用 'desc' 节点来描述您的GPTs，定义 'outputs' 节点下的 'reference'，以表示最终节点，并确保所有节点都连接在一起。
 
 ```yaml
+# 必需
+desc: '您的GPTs描述' # 在游戏地图中，将鼠标悬停在GPTs显示的描述上
+
+# 必需
 outputs:
   overview:
-    reference: ${TestModification}
-```
+    reference: ${Chatting} # 最终节点
 
-表示当前节点输出内容的定义。`${TestModification}`引用节点的名称，表明当前节点的输出是`TestModification`节点的输出（`output`变量）。
-
-* **角色（可选）**
-
-```yaml
-roles:
-  - name: "首席产品官"
-    npc: "Mei Lin"
-    source:
-      path: Role_Chief_Product_Officer
-```
-
-一个可选字段，定义当前节点的执行角色。它包括角色的名称，一个可选的NPC用于可视化，以及角色提示内容的定义。
-
-* **节点**
-
-```yaml
+# 单个节点的定义支持文本类型和URL类型。以下是文本类型的示例
 nodes:
-  - name: DemandUnderstand
+  - name: Chatting
+    type: prompt
     source:
-      path: Planning_Prompt_Enhance
-      func: Func_Prompt_Enhance
+      path: Action_Prompt_Template # prompt的路径
+    inputs:
+      input_text: ${inputs.input_text} # `${inputs.input}` 代表输入框中输入的完整内容。
+      intro: 'xxx'
+```
+
+在提示中：
+
+* `{intro}` 将被 'xxx' 替换
+    
+* `{input_text}` 将被输入框中输入的内容替换
+    
+* 完整的概括Twitter内容的GPTs如下：
+    
+
+```yaml
+desc: '概括elonmusk最新的Twitter'
+
+outputs:
+  overview:
+    reference: ${summary_twitter}
+
+nodes:
+  - name: elonmusk
+    speak: '获取elonmusk最新的Twitter' # speak代表地图中显示的游戏角色的内容，不会导致大量HTML显示
+    type: url
+    source:
+      path: 'https://chatdev.toscl.com/rattibha/user/elonmusk'
+      func: Func_twitter # 可选地，func定义了用于解析返回的HTML内容的JavaScript的路径
     inputs:
       task: ${inputs.input_text}
 
-  - name: task_company
+  - name: summary_twitter
     source:
-      path: Planning_Task_Company
+      path: Planning_Prompt_Twitter
     inputs:
-      assistant_role: "首席产品官"
-      task: ${DemandUnderstand.output}
+      info: ${elonmusk.output} # `${elonmusk.output}` 是对elonmusk节点返回内容的引用
+      task: ${inputs.input_text}
 ```
 
-整个PromptFlow的关键部分，定义角色、内容和返回内容的处理。节点指定任务执行角色、内容以及返回内容的处理。
+#### 编写提示
 
-### JavaScript 支持
+在YAML中，`source.path` 用于编写提示。选择要表示为提示/函数的突出部分，然后可以进行编辑。
 
-JavaScript是PromptFlow中用于实现复杂提示技术的强大语言。它使开发人员能够实现复杂的提示技术和丰富的分析，以可视化PromptFlow输出。
+例如，在 `inputs` 中将 `task` 定义为输入变量，例如：`task: ${elonmusk.output}`，`${elonmusk.output}` 将替换提示中的字符串：`{task}`。
 
-* **变量范围**
+#### 编写Func
 
-  * **输入变量（inputs节点）：** `source.path`表示一个包含未知变量如`{xxx}`的自定义提示。例如，定义`task`为输入变量：`${DemandUnderstand.output}`会用`${DemandUnderstand.output}`替换提示中的`{task}`。
-
-    * `task: ${inputs.input}`：使用通用输入局部变量。`${inputs.input}`代表输入框中输入的完整内容。
-    * `xxx: ${node_name.variable}`：定义你的输入变量`xxx`，`${node_name.variable}`引用另一个节点中的局部变量。
-  * **输出变量：**
-
-    * `output`：代表大型模型返回的完整内容。在其他节点中被引用为`node_name.output`。
-    * `func`：在节点的`JavaScript`脚本中定义的自定义局部变量。
-  * **变量范围：** 限于当前节点。使用`let`或`const`定义变量。
-
-* **异常处理**
-
-  * 在`func`中手动抛出异常，使用`throw new Error("xxx")`，其中`xxx`是一个自定义提示。当节点遇到异常时，它将把异常信息输出到控制台。
-
-  * 手动抛出异常允许你在执行过程中识别和修复代码中的问题。
-
-
-> **重要提示：** 避免使用`console.log("xxx")`进行日志记录，因为`console`不是节点上下文中的全局变量。
+在YAML中，`source.func` 用于编写JavaScript，这是可选的。 节点对象的范围对于 `window` 是全局的，因此您可以在 `func` 中使用任何JS代码。 JQuery也在此预设，您可以直接使用 `$` 处理文本，例如，您可以使用 `new DOMParser()` 或 `$('div#xml')`。 使用 `node.xxx`：表示引用当前节点的变量，例如：`node.output` 使用 `node_name.xxx`：表示引用另一个节点的变量
 
 ### 导出与导入
 
-你可以将你的prompt flow导出为json文件，并将其导入到其他设备。 它包含了你的prompt flow的所有信息，包括提示、JavaScript函数和YAML文件。
+您可以将您的提示流导出为JSON文件，并导入到另一个设备中。它包含有关提示流的所有信息，包括提示、JavaScript函数和YAML文件。
 
-### GPTs 示例
+### GPTs示例
 
-我们的示例还应该给你一个如何使用它的想法：
+我们的示例还应该给您一个如何使用它的想法：
 
-#### 角色
+#### 与NPC聊天
+
+* YAML
 
 ```yaml
+desc: "与NPC聊天"
+
+inputs:
+  input_text:
+    type: string
+    default: "你好"
+  auto: true
+
+outputs:
+  overview:
+    reference: ${ChattingWith_Eddy_Lin}
+
+nodes:
+  - name: ChattingWith_Eddy_Lin
+    source:
+      path: Action_Target_Dialogue_Npc
+    inputs:
+      input_text: ${inputs.input_text}
+      intro: "姓名：Eddy Lin，年龄：19岁
+天赋倾向：好奇，分析，音乐
+学到的倾向：Eddy Lin是Oak Hill College的学生，学习音乐理论和作曲。他喜欢探索不同的音乐风格，并始终寻找扩展知识的方法。
+当前情况：Eddy Lin正在为大学课程进行作曲项目。他还在上课学习更多关于音乐理论的知识。
+生活方式：Eddy Lin晚上11点左右上床睡觉，早上7点左右起床，晚上5点左右吃晚饭。"
+```
+
+* Action_Target_Dialogue_Npc
+
+```text
+{intro}
+
+现在是 {now_time}，我们正在聊天。
+我对你说：{input_text}。你可能会说什么？
+1. 无需输出您的分析过程
+2. 输出语言：{lang}
+```
+
+#### 与Twitter聊天
+
+* YAML
+
+```yaml
+desc: "与BillGates聊天"
+
+inputs:
+  input_text:
+    type: string
+    default: "我最近在做什么"
+  auto: true
+
+outputs:
+  overview:
+    type: string
+    reference: ${ask_twitter}
+
+nodes:
+  - name: get_BillGates_twitter
+    speak: "获取BillGates最新的Twitter"
+    type: url
+    source:
+      path: "https://chatdev.toscl.com/rattibha/user/BillGates"
+      func: Func_twitter
+    inputs:
+      task: ${inputs.input_text}
+
+  - name: ask_twitter
+    source:
+      path: Planning_Prompt_Twitter
+    inputs:
+      info: ${get_BillGates_twitter.output}
+      task: ${inputs.input_text}
+```
+
+* Func_twitter
+
+```js
+const xmlText = node.output
+const parser = new DOMParser();
+const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+node.output = ""
+const items = xmlDoc.querySelectorAll('item');
+items.forEach(item => {
+  const description = item.querySelector('description').textContent;
+  const pubDate = item.querySelector('pubDate').textContent;
+  const temp = node.output + description + " \n 发布时间：" + pubDate + "\n"
+  if(temp.length <= 4000){
+    node.output += temp
+    console.log("长度：" + node.output.length);
+  }
+});
+console.log("长度：" + node.output.length);
+```
+
+* Planning_Prompt_Twitter
+
+```text
+这是我最近发推的内容：
+########
+{info}
+########
+请根据上面的内容尽量简单地回答我的问题。
+现在，我说：{task}
+```
+
+#### 与任意URL聊天
+
+* YAML
+
+```yaml
+desc: "url文本正文提取"
+
+outputs:
+  overview:
+    reference: ${ask_textbody}
+
+nodes:
+  - name: get_url_text_extract
+    type: url
+    source:
+      path: "https://chatdev.toscl.com/"
+      func: FUNC_Text_Extraction
+    inputs:
+      task: ${inputs.input_text}
+
+  - name: ask_textbody
+    source:
+      path: Planning_Text_Ask
+    inputs:
+      info: ${get_url_text_extract.output}
+      task: ${inputs.input_text}
+```
+
+* FUNC_Text_Extraction
+
+使用 `Readability` 从HTML中提取文本。
+
+```js
+console.log("提取文本")
+const parser = new DOMParser();
+const doc = parser.parseFromString(node.output, "text/html");
+
+var article = new Readability(doc).parse();
+console.log(article);
+node.output = article.textContent
+```
+
+* Planning_Prompt_Twitter
+
+```text
+这是我最近发推的内容：
+########
+{info}
+########
+请根据上面的内容尽量简单地回答我的问题。
+现在，我说：{task}
+```
+
+#### 一句话生成一个网站
+
+```yaml
+desc: "单个GPTs - 生成网页 - 多角色协作呈现"
+
+outputs:
+  overview:
+    type: html
+    reference: ${TestModification}
 
 roles:
   - name: "首席产品官"
@@ -392,43 +389,29 @@ roles:
     source:
       path: Role_Chief_Technology_Officer
   - name: "首席人力资源官"
+    npc: "Adam Smith"
     source:
       path: Role_Chief_Human_Resource_Officer
   - name: "程序员"
+    npc: "Carmen Ortiz"
     source:
       path: Role_Programmer
   - name: "代码审查员"
+    npc: "Francisco Lopez"
     source:
       path: Role_Code_Reviewer
   - name: "软件测试工程师"
+    npc: "Latoya Williams"
     source:
       path: Role_Software_Test_Engineer
   - name: "首席创意官"
+    npc: "Klaus Mueller"
     source:
       path: Role_Chief_Creative_Officer
-```
 
-##### Role_Chief_Product_Officer
-
-##### Role_Counselor
-
-##### Role_Chief_Technology_Officer
-
-##### Role_Chief_Human_Resource_Officer
-
-##### Role_Programmer
-
-##### Role_Code_Reviewer
-
-##### Role_Software_Test_Engineer
-
-##### Role_Chief_Creative_Officer
-
-#### Prompt Flow
-
-```yaml
 nodes:
   - name: DemandUnderstand
+    speak: "优化您的需求..."
     source:
       path: Planning_Prompt_Enhance
       func: Func_Prompt_Enhance
@@ -450,6 +433,7 @@ nodes:
 
   - name: CodeComplete
     role: "首席技术官"
+    speak: "代码完成..."
     source:
       path: Planning_CodeComplete
       func: Func_Coding
@@ -462,6 +446,7 @@ nodes:
       task: ${DemandUnderstand.task}
 
   - name: CodeReviewComment
+    speak: "代码审查..."
     role: "程序员"
     source:
       path: Planning_CodeReviewComment
@@ -474,6 +459,7 @@ nodes:
       task: ${DemandUnderstand.task}
 
   - name: CodeReviewModification
+    speak: "代码审查修改..."
     role: "程序员"
     source:
       path: Planning_CodeReviewModification
@@ -488,41 +474,17 @@ nodes:
       task: ${DemandUnderstand.task}
 
   - name: TestErrorSummary
+    speak: "测试总结..."
     role: "软件测试工程师"
     source:
       path: Planning_TestErrorSummary
     inputs:
       assistant_role: "程序员"
-      test_reports: "js & css 应该内嵌在 index.html 中"
-      codes: ${CodeReviewModification.output}
-      language: ${DemandUnderstand.language}
-
-  - name: TestModification
-    role: "软件测试工程师"
-    source:
-      path: Planning_TestModification
-      func: Func_Coding
-    inputs:
-      assistant_role: "程序员"
-      error_summary: ${TestErrorSummary.output}
-      test_reports: ${TestErrorSummary.output}
+      test_reports: "js & css应该内联在index.html中"
       codes: ${CodeReviewModification.output}
       language: ${DemandUnderstand.language}
 ```
 
-##### Planning_Prompt_Enhance
-
-##### Planning_Coding
-
-##### Planning_CodeComplete
-
-##### Planning_CodeReviewComment
-
-##### Planning_CodeReviewModification
-
-##### Planning_TestErrorSummary
-
-##### Planning_TestModification
 
 ## 🤖 机器人
 
@@ -553,7 +515,7 @@ nodes:
 
 ### 2. 手动安装
 
-1. 从发布页面下载`chatdev1.2.2.zip`。
+1. 从发布页面下载`chatdev1.3.0.zip`。
 2. 解压文件。
 3. 在Chrome/Edge中，打开扩展页面（`chrome://extensions` 或 `edge://extensions`）。
 4. 启用开发者模式。
