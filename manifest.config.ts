@@ -24,7 +24,6 @@ export default defineManifest(async (env) => {
       'https://*.xfyun.cn/',
       'https://bard.google.com/',
       'https://*.chatdev.toscl.com/',
-      'https://*.duckduckgo.com/',
       'https://*.poe.com/',
       'https://*.anthropic.com/',
       'https://*.claude.ai/',

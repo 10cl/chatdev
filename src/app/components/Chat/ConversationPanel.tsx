@@ -382,7 +382,10 @@ const ConversationPanel: FC<Props> = (props) => {
   },[])
 
 
-  const openAssistant = useCallback(() => {
+  const openAssistant = useCallback(async () => {
+    if (!(await requestHostPermission('https://*.chatdev.toscl.com/'))) {
+      throw new ChatError('Missing chatdev.toscl.com permission', ErrorCode.MISSING_HOST_PERMISSION)
+    }
     setGameFloatVisible(false)
 
     setShowAssistant(true)

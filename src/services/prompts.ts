@@ -4,6 +4,8 @@ import Browser from 'webextension-polyfill'
 import chatdev_prompt_flow from '~/assets/chatdev_gpts_all.json'
 import {getVersion, uuid} from "~utils";
 import {trackEvent} from "~app/plausible";
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
 
 export interface Prompt {
   id: string
@@ -157,23 +159,23 @@ export async function loadRemotePrompts() {
   })
 }
 
-export async function getPromptVersion() {
-  return ofetch<PromptVersion>('https://chatdev.toscl.com/api/prompt_version', {
-    params: { language: i18next.language, languages: i18next.languages },
-  }).catch((err) => {
-    console.error('Failed to load remote prompts', err)
-    return {} as PromptVersion
-  })
-}
-
-export async function loadTheLatestPrompt() {
-  return ofetch<PromptLab>('https://chatdev.toscl.com/api/prompts', {
-    params: { language: i18next.language, languages: i18next.languages },
-  }).catch((err) => {
-    console.error('Failed to load remote prompts', err)
-    return {} as PromptLab
-  })
-}
+// export async function getPromptVersion() {
+//   return ofetch<PromptVersion>('https://chatdev.toscl.com/api/prompt_version', {
+//     params: { language: i18next.language, languages: i18next.languages },
+//   }).catch((err) => {
+//     console.error('Failed to load remote prompts', err)
+//     return {} as PromptVersion
+//   })
+// }
+//
+// export async function loadTheLatestPrompt() {
+//   return ofetch<PromptLab>('https://chatdev.toscl.com/api/prompts', {
+//     params: { language: i18next.language, languages: i18next.languages },
+//   }).catch((err) => {
+//     console.error('Failed to load remote prompts', err)
+//     return {} as PromptLab
+//   })
+// }
 
 export async function loadTheLatestPrompt2(url : string) {
   return ofetch<string>(url, {
