@@ -116,6 +116,13 @@ const SettingPage = () => {
         </div>
         <div>
           <p className="font-bold mb-1 text-lg">{t('Export/Import All Data')}</p>
+          <p className="mb-3 opacity-80">{t('Your Name')}</p>
+          <div className="flex flex-row gap-3">
+            <Input className="w-full" name="player_name" id="player_name" defaultValue={getStore("player_name", "ChatDev")} />
+          </div>
+        </div>
+        <div>
+          <p className="font-bold mb-1 text-lg">{t('Export/Import All Data')}</p>
           <p className="mb-3 opacity-80">{t('Data includes all your settings, chat histories, and local prompts')}</p>
           <div className="flex flex-row gap-3">
             <Button size="small" text={t('Export')} icon={<BiExport />} onClick={exportData} />

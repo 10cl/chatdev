@@ -28,11 +28,13 @@ export const seminarDisableAtom = atomWithStorage('sidebarRightCollapsed', true)
 
 /* import */
 export const workFlowingDisableAtom = atomWithStorage('workFlowingDisable', false)
+export const fpHashAtom = atomWithStorage('fpHash', "")
 export const gameModeEnable = atomWithStorage('gameModeEnable', true)
 export const themeColorAtom = atomWithStorage('themeColor', getDefaultThemeColor())
 export const followArcThemeAtom = atomWithStorage('followArcTheme', false)
 export const showEditorAtom = atomWithStorage('showEditor', false)
 export const showGptsDialogAtom = atomWithStorage('showGptsDialog', false)
+export const showShareAtom = atomWithStorage('showShare', false)
 export const showHistoryAtom = atomWithStorage('showHistory', false)
 export const showSettingsAtom = atomWithStorage('showSettings', true)
 export const editorPromptAtom = atomWithStorage('editorPrompt', "Action_Prompt_Template")

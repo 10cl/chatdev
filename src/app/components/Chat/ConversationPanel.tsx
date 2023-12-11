@@ -38,8 +38,15 @@ import {
   workFlowingDisableAtom,
   showHistoryAtom,
   showSettingsAtom,
-  showGptsDialogAtom, messageTimesTimesAtom, editorYamlTimesAtom, editorYamlAtom, editorPromptAtom,
+  showGptsDialogAtom,
+  messageTimesTimesAtom,
+  editorYamlTimesAtom,
+  editorYamlAtom,
+  editorPromptAtom,
+  showShareAtom,
+  fpHashAtom, seminarDisableAtom,
 } from "~app/state";
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import "ace-builds/src-noconflict/theme-github";
 
@@ -54,10 +61,14 @@ import SettingsDialog from "~app/components/Settings/SettingsDialog";
 import useSWR from "swr";
 import {BeatLoader} from "react-spinners";
 import Markdown from "~app/components/Markdown";
-import {getStore, loadTheLatestPrompt2, setStore} from "~services/prompts";
+import {getStore, loadRemoteUrl, loadYaml, setStore} from "~services/prompts";
 import {requestHostPermission} from "~app/utils/permissions";
 import {ChatError, ErrorCode} from "~utils/errors";
 import {UserConfig} from "~services/user-config";
+import ShareGPTView from "~app/components/Share/ShareGPTView";
+import ShareGPTDialog from "~app/components/Share/ShareGPTDialog";
+import {useNavigate} from "@tanstack/react-router";
+import {importFromText} from "~app/utils/export";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -80,10 +91,12 @@ const ConversationPanel: FC<Props> = (props) => {
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
   const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
+  const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
 
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
 
   const [isPreviewShow, setShowWebPreviewDialog] = useState(false)
+  const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
 
   const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
   const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
@@ -95,6 +108,8 @@ const ConversationPanel: FC<Props> = (props) => {
   const [workFlowingDisable, setWorkFlowingDisable] = useAtom(workFlowingDisableAtom)
   const [userConfig, setUserConfig] = useState<UserConfig | undefined>(undefined)
   const [isUrlReq, setUrlReq] = useState(false)
+  const [fpHash, setFpHash] = useAtom(fpHashAtom);
+  const navigate = useNavigate()
 
   const updateConfigValue = useCallback(
       (update: Partial<UserConfig>) => {
@@ -112,9 +127,71 @@ const ConversationPanel: FC<Props> = (props) => {
     const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
     return urlPattern.test(str);
   }
+  const confirmTips = t('Are you sure you want to import the GPTs?')
+  const successTips = t('Imported GPTs successfully')
+
+  const importToFlowYaml = useCallback(() => {
+    setStore("real_yaml", getStore("editor_yaml", "Default_Flow_Dag_Yaml"))
+    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
+      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
+    }
+
+    openFlowEditor()
+
+    if (!window.confirm(confirmTips)) {
+      return
+    }
+
+    loadYaml(getStore("share_current", "")).then(promptYaml => {
+      try {
+        closeFlowEditor()
+        importFromText(JSON.parse(promptYaml.yaml)).then(() => {
+          setShowAssistant(false)
+          setSeminarDisable(false)
+          setWorkFlowingDisable(false)
+          alert(successTips)
+          openFlowEditor()
+
+          const botId = props.botId as BotId
+          navigate({ to: '/chat/$botId', params: { botId } })
+        })
+      }catch (e) {
+        alert(e)
+      }
+    })
+  }, [props])
 
   useEffect(() => {
     console.log("init")
+    // setShowEditor(false)
+    // setShowAssistant(false)
+    // setShowSettings(false)
+    // setShowShareView(false)
+
+    const setFp = async () => {
+      const fp = await FingerprintJS.load();
+
+      const { visitorId } = await fp.get();
+      setStore("fp", visitorId)
+      setFpHash(visitorId)
+    };
+    if (fpHash != ""){
+      setStore("fp", fpHash)
+    }else{
+      setFp();
+    }
+
+    const regex = /(?:\?|&)share=([^&]+)/;
+    const match = window.location.href.match(regex);
+    if (match) {
+      const shareValue = match[1];
+      if(!getStore("share_" + shareValue)){
+        setStore("share_" + shareValue, true)
+        setStore("share_current", shareValue)
+        importToFlowYaml()
+      }
+    }
+
     const id = setInterval(() => {
       const response_type = getStore("response_type", "")
       if (response_type == "url"){
@@ -148,10 +225,18 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
+      // if in editor, send message as the GPTs.
+      if (getStore("editor_show")){
+        setShowEditor(false)
+        setStore("editor_show", false)
+        setGameModeEnable(false)
+        setStore("gameModeEnable", false)
+        setStore("workFlowingDisable", false)
+        setWorkFlowingDisable(false)
+      }
+
       const isGameMode = getStore("gameModeEnable", true)
       const isWorkFlowingDisable = getStore("workFlowingDisable", false)
-      setShowEditor(false)
-      setStore("editor_show", false)
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
         setStore("input_text_pending", input)
         updateConfigValue({ startupPage: props.botId })
@@ -179,7 +264,7 @@ const ConversationPanel: FC<Props> = (props) => {
         setStore("response_update_text", "⌛")
         setStore("response_type", "url")
         setUrlReq(true)
-        loadTheLatestPrompt2(url).then(html => {
+        loadRemoteUrl(url).then(html => {
             setStore("response_type", "")
             setStore("response_update_text", html)
             console.log("html:" + html)
@@ -547,6 +632,9 @@ const ConversationPanel: FC<Props> = (props) => {
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
       {isPreviewShow && (
         <PreViewFrameDialog open={true} onClose={() => setShowWebPreviewDialog(false)} messages={props.messages} />
+      )}
+      {shareViewShow && (
+          <ShareGPTDialog open={true} onClose={() => setShowShareView(false)} messages={props.messages} />
       )}
       {showAssistant && (
           <PromptLabDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />

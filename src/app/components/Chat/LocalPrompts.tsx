@@ -8,7 +8,7 @@ import {getStore, loadLocalPrompts, Prompt, saveLocalPrompt, saveLocalPromptTitl
 import AceEditor from "react-ace";
 import Button from "~app/components/Button";
 import {useAtom} from "jotai/index";
-import {editorPromptAtom, editorPromptTimesAtom, editorYamlTimesAtom} from "~app/state";
+import {editorPromptAtom, editorPromptTimesAtom, editorYamlTimesAtom, showShareAtom} from "~app/state";
 import store from "store2";
 import {Ace, EditSession, Range} from "ace-builds";
 import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
@@ -21,6 +21,8 @@ import {exportData, exportGPTsAll, exportPromptFlow, importData, importPromptFlo
 import {uuid} from "~utils";
 import Tooltip from "~app/components/Tooltip";
 import discordIcon from "~assets/icons/discord.svg";
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
 
 interface Props {
     setShowEditor: (show: boolean) => void;
@@ -36,6 +38,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true})
     const confirmTips = t('Are you sure you want to import the GPTs?')
     const successTips = t('Imported GPTs successfully')
+    const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
 
     async function savePrompt(prompt: Prompt) {
         const existed = await saveLocalPromptTitle(prompt)
@@ -259,6 +262,13 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         })
     }
 
+    async function shareGpts() {
+        if (!(await requestHostPermission('https://*.chatdev.toscl.com/'))) {
+            throw new ChatError('Missing chatdev.toscl.com permission', ErrorCode.MISSING_HOST_PERMISSION)
+        }
+        setShowShareView(true)
+    }
+
     return (
         <div className="overflow-auto h-full flex flex-col promptide">
             <div className="flex items-left mx-10 margin-5">
@@ -267,9 +277,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     <Button size="small" text={t('Export Current')} icon={<BiExport />} onClick={exportPromptFlow} />
                     <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importYaml} />
                     <Tooltip content={t('Share')}>
-                        <a href="https://github.com/10cl/chatdev/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=" target="_blank" rel="noreferrer">
-                            <Button size="small" text={t('Share')} icon={<BiShareAlt />} />
-                        </a>
+                        <Button size="small" text={t('Share')} icon={<BiShareAlt />} onClick={shareGpts} />
                     </Tooltip>
                 </div>
             </div>

@@ -2,7 +2,7 @@ import {Suspense, useCallback, useEffect, useMemo, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {BeatLoader} from 'react-spinners'
 import useSWR from 'swr'
-import {getStore, loadRemotePrompts, PromptLab, setStore} from '~services/prompts'
+import {getStore, loadRemotePrompts, loadYaml, PromptLab, setStore} from '~services/prompts'
 import {GoBook} from "react-icons/go";
 import {importFromText} from "~app/utils/export";
 import {useAtom} from "jotai/index";
@@ -28,7 +28,8 @@ const ActionButton = (props: { text: string; onClick: () => void }) => {
 const PromptLabItem = (props: {
     title: string
     intro: string
-    yaml: JSON
+    author: string
+    share: string
 }) => {
     const {t} = useTranslation()
     const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
@@ -43,17 +44,27 @@ const PromptLabItem = (props: {
         if (!window.confirm(confirmTips)) {
             return
         }
-        importFromText(props.yaml).then(() => {
-            setShowAssistant(false)
-            setSeminarDisable(false)
-            setWorkFlowingDisable(false)
+        loadYaml(props.share).then(promptYaml => {
+            try {
+                importFromText(JSON.parse(promptYaml.yaml)).then(() => {
+                    setShowAssistant(false)
+                    setSeminarDisable(false)
+                    setWorkFlowingDisable(false)
 
-            const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
-            setEditorYamlTimes(editorYamlTimes)
-            setStore("editorYamlTimes", editorYamlTimes)
+                    const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+                    setEditorYamlTimes(editorYamlTimes)
+                    setStore("editorYamlTimes", editorYamlTimes)
 
-            alert(successTips)
+                    alert(successTips)
+                })
+            }catch (e) {
+                alert(e)
+            }
         })
+    }, [props])
+
+    const detailShow = useCallback(() => {
+
     }, [props])
 
     return (
@@ -63,6 +74,11 @@ const PromptLabItem = (props: {
                 <p title={props.title}
                    className="truncate text-sm font-semibold text-primary-text italic pl-1">{props.title}</p>
                 <div className="text-primary-text line-clamp-1 prompt-intro">{props.intro}</div>
+            </div>
+            <div className="flex flex-row gap-1">
+                <a target="_blank" href={"https://chatdev.toscl.com/s/" + props.share} rel="noreferrer">
+                    <ActionButton text={t('detail')} onClick={detailShow}/>
+                </a>
             </div>
             <div className="flex flex-row gap-1">
                 <ActionButton text={t('Import')} onClick={importToFlowYaml}/>
@@ -82,7 +98,8 @@ function CommunityPrompts() {
                         key={index}
                         title={promptLab.title}
                         intro={promptLab.intro}
-                        yaml={promptLab.yaml}
+                        author={promptLab.author}
+                        share={promptLab.share}
                     />
                 ))}
             </div>): (

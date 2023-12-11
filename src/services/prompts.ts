@@ -17,7 +17,16 @@ export interface PromptLab {
   id: string
   title: string
   intro: string
-  yaml: JSON
+  author: string
+  share: string
+}
+
+export interface PromptYAML {
+  id: string
+  title: string
+  intro: string
+  author: string
+  yaml: string
 }
 
 export interface PromptVersion {
@@ -151,11 +160,19 @@ export async function removeLocalPrompt(id: string) {
 }
 
 export async function loadRemotePrompts() {
-  return ofetch<PromptLab[]>('https://chatdev.toscl.com/api/community-prompts', {
-    params: { language: i18next.language, languages: i18next.languages, version: getVersion() },
+  return ofetch<PromptLab[]>('https://chatdev.toscl.com/api/get_communities', {
+    params: { language: i18next.language, languages: i18next.languages, version: getVersion(), fp: getStore("fp", "") },
   }).catch((err) => {
     console.error('Failed to load remote prompts', err)
     return []
+  })
+}
+export async function loadYaml(share: string) {
+  return ofetch<PromptYAML>('https://chatdev.toscl.com/api/get_yaml/' + share, {
+    params: { language: i18next.language, languages: i18next.languages, version: getVersion() },
+  }).catch((err) => {
+    console.error('Failed to load remote prompts', err)
+    return {} as PromptYAML
   })
 }
 
@@ -177,7 +194,7 @@ export async function loadRemotePrompts() {
 //   })
 // }
 
-export async function loadTheLatestPrompt2(url : string) {
+export async function loadRemoteUrl(url : string) {
   return ofetch<string>(url, {
     params: { language: i18next.language, languages: i18next.languages },
   }).catch((err) => {

@@ -35,6 +35,10 @@ export default defineManifest(async (env) => {
         matches: ['https://chat.openai.com/*'],
         js: ['src/content-script/chatgpt-inpage-proxy.ts'],
       },
+      {
+        "matches": ['https://chatdev.toscl.com/*'],
+        "js": ["src/content-script/chatdev-inpage.ts"]
+      }
     ],
     commands: {
       'open-app': {

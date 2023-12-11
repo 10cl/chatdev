@@ -1,9 +1,12 @@
-import { FC, useCallback, useState } from 'react'
+import React, { FC, useCallback, useState } from 'react'
 import { trackEvent } from '~app/plausible'
 import { ChatMessageModel } from '~types'
 import Button from '../Button'
-import { Input } from '../Input'
+import {Input, Textarea} from '../Input'
 import { uploadToShareGPT } from './sharegpt'
+import Tooltip from "~app/components/Tooltip";
+import htmlIcon from "~assets/icons/html.svg";
+import {useTranslation} from "react-i18next";
 
 interface Props {
   messages: ChatMessageModel[]
@@ -14,35 +17,69 @@ const ShareGPTView: FC<Props> = ({ messages }) => {
   const [resultId, setResultId] = useState<string | undefined>(undefined)
   const [copied, setCopied] = useState(false)
 
-  const upload = useCallback(async () => {
-    setUploading(true)
-    trackEvent('share_chat_sharegpt')
-    try {
-      const id = await uploadToShareGPT(messages)
-      setResultId(id)
-    } finally {
-      setUploading(false)
-    }
-  }, [messages])
+  // const upload = useCallback(async () => {
+  //   setUploading(true)
+  //   trackEvent('share_gpts')
+  //   try {
+  //     const id = await uploadToShareGPT(messages)
+  //     setResultId(id)
+  //   } finally {
+  //     setUploading(false)
+  //   }
+  // }, [messages])
 
   const copy = useCallback(() => {
-    navigator.clipboard.writeText(`https://shareg.pt/${resultId}`)
+    navigator.clipboard.writeText(`https://chatdev.toscl.com/s/${resultId}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 500)
   }, [resultId])
+  const { t } = useTranslation()
+
+  const upload = useCallback(
+      async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const formdata = new FormData(e.currentTarget)
+        const json = Object.fromEntries(formdata.entries())
+        if (json.title && json.intro) {
+          setUploading(true)
+          trackEvent('share_gpts')
+          try {
+            // `title`, `intro`, `author`, `yaml`
+            const share = await uploadToShareGPT(json)
+            setResultId(share)
+          } finally {
+            setUploading(false)
+          }
+        }
+      },
+      [messages],
+  )
 
   return (
-    <div className="p-5 flex flex-col items-center justify-center gap-5 h-full">
-      <p className="w-[400px] text-center text-primary-text">
-        This will upload this conversation to <b>sharegpt.com</b> and generate a link to share <b>publicly</b>.
+    <div className="p-5 flex flex-col gap-5 h-full">
+      <p className="text-center text-primary-text">
+        This will generate a share link for this GPTs.
       </p>
       {resultId ? (
-        <div className="flex flex-row items-center gap-3 w-[300px]">
-          <Input value={`https://shareg.pt/${resultId}`} readOnly className="grow" />
+        <div className="flex flex-row gap-3">
+          <Input value={`https://chatdev.toscl.com/s/${resultId}`} readOnly className="grow" />
           <Button size="small" color="primary" text={copied ? 'Copied' : 'Copy'} onClick={copy} />
         </div>
       ) : (
-        <Button text="Share" color="primary" onClick={upload} isLoading={uploading} />
+          <form className="flex flex-col gap-2 w-full" onSubmit={upload}>
+            <div className="w-full">
+              <span className="text-sm font-semibold block mb-1 text-primary-text">Title:</span>
+              <Input className="w-full" name="title" defaultValue=""/>
+            </div>
+            <div className="w-full">
+              <span className="text-sm font-semibold block mb-1 text-primary-text">Description:</span>
+              <Textarea className="w-full" name="intro"/>
+            </div>
+            <div className="flex flex-row gap-3">
+              <Button text="Share" size="small" color="primary" type="submit" isLoading={uploading}/>
+            </div>
+          </form>
       )}
     </div>
   )

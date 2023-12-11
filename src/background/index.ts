@@ -16,6 +16,19 @@ async function openAppPage() {
   await Browser.tabs.create({ url: `app.html${hash}` })
 }
 
+async function openSharePage(share: string) {
+  const tabs = await Browser.tabs.query({})
+  const url = Browser.runtime.getURL('app.html')
+  const tab = tabs.find((tab) => tab.url?.startsWith(url))
+  if (tab) {
+    await Browser.tabs.update(tab.id, { active: true })
+    return
+  }
+  const {startupPage} = await getUserConfig()
+  const hash = `#/chat/${startupPage}?share=` + share;
+  await Browser.tabs.create({url: `app.html${hash}`})
+}
+
 Browser.action.onClicked.addListener(() => {
   openAppPage()
 })
@@ -31,5 +44,11 @@ Browser.commands.onCommand.addListener(async (command) => {
   console.debug(`Command: ${command}`)
   if (command === 'open-app') {
     openAppPage()
+  }
+})
+
+Browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  if (request.action == "openExtension") {
+    openSharePage(request.share)
   }
 })
