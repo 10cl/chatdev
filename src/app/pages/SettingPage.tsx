@@ -1,4 +1,4 @@
-import {FC, useCallback, useEffect, useState} from 'react'
+import React, {FC, useCallback, useEffect, useState} from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import { BiExport, BiImport } from 'react-icons/bi'
@@ -32,6 +32,9 @@ import PagePanel from '../components/Page'
 import {BotId} from "~app/bots";
 import {useAtom} from "jotai/index";
 import {showSettingsAtom} from "~app/state";
+import {Input} from "~app/components/Input";
+import {getStore, setStore} from "~services/prompts";
+import store from "store2";
 
 const BING_STYLE_OPTIONS = [
   { name: 'Precise', value: BingConversationStyle.Precise },
@@ -71,6 +74,10 @@ const SettingPage = () => {
   )
 
   const save = useCallback(async () => {
+    const player_name = document.getElementById('player_name') as HTMLInputElement
+    setStore("player_name", player_name?.value)
+    store.set("player_name", player_name?.value)
+
     let apiHost = userConfig?.openaiApiHost
     if (apiHost) {
       apiHost = apiHost.replace(/\/$/, '')
@@ -101,6 +108,12 @@ const SettingPage = () => {
   return (
     <PagePanel title={`${t('Settings')} (v${getVersion()})`}>
       <div className="flex flex-col gap-5 mt-3">
+        <div>
+          <p className="font-bold mb-1 text-lg">{t('Your Name')}</p>
+          <div className="flex flex-row gap-3">
+            <Input className="w-full" name="player_name" id="player_name" defaultValue={getStore("player_name", "ChatDev")} />
+          </div>
+        </div>
         <div>
           <p className="font-bold mb-1 text-lg">{t('Export/Import All Data')}</p>
           <p className="mb-3 opacity-80">{t('Data includes all your settings, chat histories, and local prompts')}</p>
