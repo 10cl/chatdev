@@ -59,7 +59,7 @@ export async function exportGPTsAll() {
 
 export async function exportPromptFlow() {
   const prompts = getStore("prompts", {})
-  const promptFlowYaml = prompts['Flow_Dag_Yaml']
+  const promptFlowYaml = prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]
   if (promptFlowYaml == undefined) {
     return
   }
@@ -111,6 +111,9 @@ export async function importPromptFlow(confirmTips: string, successTips: string)
 }
 
 export async function importFromText(json: JSON){
+  if (json == null){
+    return
+  }
   const user_prompts = [] as Prompt[]
   const prompts = getStore("prompts", {})
   if (prompts != null){
@@ -153,6 +156,7 @@ export async function importFromText(json: JSON){
         prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
     }
     prompt_dict['Flow_Dag_Yaml'] = ""
+    setStore("yaml_update", true)
   }
 
   setStore("prompts", prompt_dict);

@@ -18,10 +18,9 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import store from "store2";
 import CustomEdge from "~app/components/Sidebar/CustomEdge";
-import {
-    getPromptVersion, getStore,
+import {getStore,
     loadLocalPrompts,
-    loadRemotePrompts, loadTheLatestPrompt,
+    loadRemotePrompts,
     Prompt, PromptVersion, setStore,
     updateLocalPrompts,
 } from "~services/prompts";
@@ -92,8 +91,8 @@ function PromptFlow() {
     const promptFlowClose = t("GPTs is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
     const promptFlowDone = t("The GPTs has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
     const promptTaskIntroduce = t('Introduce yourself')
-    const promptsVersionQuery = useSWR('latest-prompts-version', () => getPromptVersion(), {suspense: true})
-    const [promptVersion, setPromptVersion] = useAtom(promptVersionAtom)
+    // const promptsVersionQuery = useSWR('latest-prompts-version', () => getPromptVersion(), {suspense: true})
+    // const [promptVersion, setPromptVersion] = useAtom(promptVersionAtom)
     const [timerId, setTimerId] = useState<number | null>(null);
     const [count, setCount] = useState(0);
     const [intervalId, setIntervalId] = useState(null);
@@ -239,6 +238,11 @@ function PromptFlow() {
         if (cacheDevInfo == undefined){
             cacheDevInfo = {} as DevInfo
         }
+        if (store.get("player_name") != null){
+            cacheDevInfo.player_name = store.get("player_name")
+            devInfoPersist.player_name = store.get("player_name")
+        }
+
         win.dev_info = {
             prompts: devInfoPersist.prompts == undefined ? {} : devInfoPersist.prompts,
             prompt_welcome: cacheDevInfo.prompt_welcome !== undefined ? cacheDevInfo.prompt_welcome : welcomeStr,
@@ -255,7 +259,7 @@ function PromptFlow() {
             input_text_message: cacheDevInfo.input_text_message !== undefined ? cacheDevInfo.input_text_message : "",
             player_pos: cacheDevInfo.player_pos !== undefined ? cacheDevInfo.player_pos : devInfoPersist.player_pos,
             i18nextLng: store.get("i18nextLng") == null ? "en" : store.get("i18nextLng"),
-            player_name: cacheDevInfo.player_name !== undefined ? cacheDevInfo.player_name : (devInfoPersist.player_name == undefined ? "Bob" : devInfoPersist.player_name),
+            player_name: cacheDevInfo.player_name !== undefined ? cacheDevInfo.player_name : (devInfoPersist.player_name == undefined ? "ChatDev" : devInfoPersist.player_name),
             player_init: cacheDevInfo.player_init !== undefined ? cacheDevInfo.player_init : (devInfoPersist.player_init == undefined ? 0 : devInfoPersist.player_init),
             workFlowingDisable: cacheDevInfo.workFlowingDisable !== undefined ? cacheDevInfo.workFlowingDisable : (devInfoPersist.workFlowingDisable == undefined ? false : devInfoPersist.workFlowingDisable),
             response_update_text: cacheDevInfo.response_update_text !== undefined ? cacheDevInfo.response_update_text : "",
@@ -274,15 +278,15 @@ function PromptFlow() {
 
         updateLocalPrompts()
 
-        const promptVersionLocal = getStore("prompt_version", getVersion())
-        const promptVersionRemote = promptsVersionQuery.data as PromptVersion
-        if (promptVersionRemote.version != "" && promptVersionRemote.version != promptVersionLocal){
+        // const promptVersionLocal = getStore("prompt_version", getVersion())
+        // const promptVersionRemote = promptsVersionQuery.data as PromptVersion
+        /*if (promptVersionRemote.version != "" && promptVersionRemote.version != promptVersionLocal){
             setPromptVersion(promptVersionRemote.version)
             setStore("prompt_version", promptVersionRemote.version)
             loadTheLatestPrompt().then(r => {
                 importFromText(r.yaml)
             })
-        }
+        }*/
         links.forEach((link) => {
             if (link.href.includes('react')) {
                 link.style.display = 'none';
