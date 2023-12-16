@@ -2,6 +2,7 @@ import i18next from 'i18next'
 import { ofetch } from 'ofetch'
 import Browser from 'webextension-polyfill'
 import chatdev_prompt_flow from '~/assets/chatdev_gpts_all.json'
+import chatdev_prompt_overwrite from '~/assets/chatdev_gpts_overwrite.json'
 import {getVersion, uuid} from "~utils";
 import {trackEvent} from "~app/plausible";
 import {requestHostPermission} from "~app/utils/permissions";
@@ -11,6 +12,7 @@ export interface Prompt {
   id: string
   title: string
   prompt: string
+  type?: string
 }
 
 export interface PromptLab {
@@ -50,21 +52,23 @@ function isPromptJsonContain(prompt: Prompt, prompts: Prompt[]): boolean {
 }
 
 export async function updateLocalPrompts()  {
-  const prePrompts = getStore("prompts", {});
-  if (prePrompts['Action_Target_Dialogue_Npc'] == undefined || getVersion() !== getStore("version", "")) {
-    const user_prompts = [] as Prompt[]
-    if (prePrompts != null){
-      for (const [key, value] of Object.entries(prePrompts)) {
+  const historyPrompts = getStore("prompts", {});
+  const historyVersion = getStore("version", "")
+
+  if (historyPrompts['Action_Target_Dialogue_Npc'] == undefined || getVersion() !== historyVersion) {
+    const user_history_prompts = [] as Prompt[]
+    if (historyPrompts != null){
+      for (const [key, value] of Object.entries(historyPrompts)) {
         const item = {
           id: uuid(),
           title: key,
           prompt: value
         } as Prompt;
-        user_prompts.push(item)
+        user_history_prompts.push(item)
       }
     }
 
-    // handle for chatdev_prompt_flow
+    // handle for chatdev_gpts_all
     for (const [key, value] of Object.entries(chatdev_prompt_flow)) {
       const p = {
         id: uuid(),
@@ -72,22 +76,41 @@ export async function updateLocalPrompts()  {
         prompt: value
       } as Prompt
 
-      if (!isPromptJsonContain(p, user_prompts)) {
-        user_prompts.push(p);
+      if (!isPromptJsonContain(p, user_history_prompts)) {
+        user_history_prompts.push(p);
       } else {
-        const index = user_prompts.findIndex(item => item.title === p.title);
-        user_prompts[index].prompt = p.prompt;
+        // old version should overwrite user's GPTs.
+        if (historyVersion.startsWith("1.0") || historyVersion.startsWith("1.1") || historyVersion.startsWith("1.2")) {
+          const index = user_history_prompts.findIndex(item => item.title === p.title);
+          user_history_prompts[index].prompt = p.prompt;
+        }
+      }
+    }
+
+    // handle for chatdev_gpts_overwrite
+    for (const [key, value] of Object.entries(chatdev_prompt_overwrite)) {
+      const p = {
+        id: uuid(),
+        title: key,
+        prompt: value
+      } as Prompt
+
+      if (!isPromptJsonContain(p, user_history_prompts)) {
+        user_history_prompts.push(p);
+      } else {
+        const index = user_history_prompts.findIndex(item => item.title === p.title);
+        user_history_prompts[index].prompt = p.prompt;
       }
     }
 
     // write to local
     const prompt_dict: { [key: string]: string } = {};
-    user_prompts.forEach(item => {
+    user_history_prompts.forEach(item => {
       prompt_dict[item.title] = item.prompt;
     });
     setStore("prompts", prompt_dict);
     console.log("updateLocalPrompts")
-    await Browser.storage.local.set({ prompts: user_prompts });
+    await Browser.storage.local.set({ prompts: user_history_prompts });
     setStore("version", getVersion());
     trackEvent('update_prompt_flow')
   }
@@ -126,6 +149,7 @@ export async function saveLocalPrompt(prompt: Prompt) {
     if (p.id === prompt.id) {
       p.title = prompt.title
       p.prompt = prompt.prompt
+      p.type = prompt.type
       existed = true
       break
     }
