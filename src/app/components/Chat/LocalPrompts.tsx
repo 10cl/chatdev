@@ -30,7 +30,7 @@ import 'ace-builds/src-noconflict/mode-javascript';
 import shareIcon from '~/assets/icons/share.svg'
 
 import Browser from "webextension-polyfill";
-import {BiExport, BiImport, BiShareAlt} from "react-icons/bi";
+import {BiCloudUpload, BiExport, BiImport, BiShareAlt, BiUpload} from "react-icons/bi";
 import {exportData, exportAgentAll, exportPromptFlow, importData, importPromptFlow} from "~app/utils/export";
 import {uuid} from "~utils";
 import Tooltip from "~app/components/Tooltip";
@@ -115,19 +115,18 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
 
     function onFocusYaml(event: any, editor: Ace.Editor | undefined){
         console.log("onFocus", event)
-        if (event.type == "blur"){
-            setEditorStatus('Yaml')
-        }else if (event.type == "focus"){
+        setEditorStatus('Yaml')
+
+        if (event.type == "focus" && getStore("generate_content", "") == ""){
             setEditorStatus('')
         }
     }
 
     function onFocusPrompt(event: any, editor: Ace.Editor | undefined){
         console.log("onFocus", event)
-        if (event.type == "blur"){
+        const promptType = getStore("editor_prompt_type", "func:")
+        if (promptType == "func:"){
             setEditorStatus('Prompt')
-        }else if (event.type == "focus"){
-            setEditorStatus('')
         }
     }
 
@@ -187,6 +186,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                         prompt = prompt.replaceAll("'", "").replaceAll(" ", "")
                         if(!isURL(prompt)){
                             if (editorPrompt != prompt){
+                                setStore("editor_prompt_type", targetPath)
                                 setEditorPrompt(prompt)
                                 setEditorPromptTimes(editorPromptTimes + 1);
                             }
@@ -221,6 +221,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     }
 
     React.useEffect(() => {
+        setEditorStatus("Yaml")
+        setStore("editor_prompt_type", "path:")
         // data stub:
         const sqlTables = [
             { name: 'roles', description: 'Defining the various agents in your company, such as the ``Chief Executive Officer``.' },
@@ -321,8 +323,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     <Button size="small" text={t('Export ALL')} icon={<BiExport />} onClick={exportAgentAll} />
                     <Button size="small" text={t('Export Current')} icon={<BiExport />} onClick={exportPromptFlow} />
                     <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importYaml} />
-                    <Tooltip content={t('Share')}>
-                        <Button size="small" text={t('Share')} icon={<BiShareAlt />} onClick={shareGpts} />
+                    <Tooltip content={t('Upload')}>
+                        <Button size="small" text={t('Upload')} icon={<BiCloudUpload />} onClick={shareGpts} />
                     </Tooltip>
                 </div>
             </div>
