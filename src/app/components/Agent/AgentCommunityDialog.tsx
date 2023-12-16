@@ -1,6 +1,6 @@
 import { ChatMessageModel } from '~types'
 import Dialog from '../Dialog'
-import PromptLab from "~app/components/PromptLibrary/PromptLab";
+import AgentCommunity from "~app/components/Agent/AgentCommunity";
 import {useTranslation} from "react-i18next";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
     messages: ChatMessageModel[]
 }
 
-const PromptLabDialog = (props: Props) => {
+const AgentCommunityDialog = (props: Props) => {
     const { t } = useTranslation()
 
     return (
@@ -20,10 +20,10 @@ const PromptLabDialog = (props: Props) => {
             className="w-[800px] min-h-[400px]"
         >
             <div className="p-5 overflow-auto">
-                <PromptLab />
+                <AgentCommunity />
             </div>
         </Dialog>
     )
 }
 
-export default PromptLabDialog
+export default AgentCommunityDialog

@@ -1,18 +1,13 @@
-import { useState } from 'react'
-import cx from 'classnames'
+
 import { ChatMessageModel } from '~types'
 import Dialog from '../Dialog'
-import MarkdownView from './MarkdownView'
-import store from "store2";
-import PromptLibrary from "~app/components/PromptLibrary/Library";
-
 interface Props {
   open: boolean
   onClose: () => void
   messages: ChatMessageModel[]
 }
 
-const PreViewFrameDialog = (props: Props) => {
+const HtmlTypeView = (props: Props) => {
 
   return (
     <Dialog
@@ -28,4 +23,4 @@ const PreViewFrameDialog = (props: Props) => {
   )
 }
 
-export default PreViewFrameDialog
+export default HtmlTypeView

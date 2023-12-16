@@ -19,7 +19,7 @@ import { trackEvent } from '~app/plausible'
 import { Prompt } from '~services/prompts'
 import Button from '../Button'
 import PromptCombobox, { ComboboxContext } from '../PromptCombobox'
-import PromptLibraryDialog from '../PromptLibrary/Dialog'
+import AgentLocalDialog from '~app/components/Agent/AgentLocalDialog'
 import TextInput from './TextInput'
 import {promptLibraryDialogOpen} from "~app/state";
 import {useAtom} from "jotai/index";
@@ -139,7 +139,7 @@ const ChatMessageInput: FC<Props> = (props) => {
         <>
           {/*<GoBook size={22} color="#707070" className="cursor-pointer" onClick={openPromptLibrary} />*/}
           {isPromptLibraryDialogOpen && (
-            <PromptLibraryDialog
+            <AgentLocalDialog
               isOpen={true}
               onClose={() => setIsPromptLibraryDialogOpen(false)}
               insertPrompt={insertTextAtCursor}

@@ -1,7 +1,7 @@
 import cx from 'classnames'
 import { ChatMessageModel } from '~types'
 import Dialog from '../Dialog'
-import ShareGPTView from './ShareGPTView'
+import AgentUploadView from './AgentUploadView'
 
 interface Props {
   open: boolean
@@ -9,7 +9,7 @@ interface Props {
   messages: ChatMessageModel[]
 }
 
-const ShareGPTDialog = (props: Props) => {
+const AgentUploadDialog = (props: Props) => {
   return (
     <Dialog
       title="Share GPTs"
@@ -17,10 +17,10 @@ const ShareGPTDialog = (props: Props) => {
       onClose={props.onClose}
       className={cx('rounded-xl', 'w-[800px] h-[400px]')}>
       {(() => {
-          return <ShareGPTView messages={props.messages} />
+          return <AgentUploadView messages={props.messages} />
       })()}
     </Dialog>
   )
 }
 
-export default ShareGPTDialog
+export default AgentUploadDialog

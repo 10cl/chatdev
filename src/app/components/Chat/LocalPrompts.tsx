@@ -4,7 +4,15 @@ import './main.css'
 import React from "react";
 import {useTranslation} from "react-i18next";
 import useSWR from "swr";
-import {getStore, loadLocalPrompts, Prompt, saveLocalPrompt, saveLocalPromptTitle, setStore} from "~services/prompts";
+import {
+    getStore,
+    isURL,
+    loadLocalPrompts,
+    Prompt,
+    saveLocalPrompt,
+    saveLocalPromptTitle,
+    setStore
+} from "~services/prompts";
 import AceEditor from "react-ace";
 import Button from "~app/components/Button";
 import {useAtom} from "jotai/index";
@@ -46,6 +54,21 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     const successTips = t('Imported GPTs successfully')
     const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
     const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
+    type SelectionValue = {
+        anchor: {
+            row: number;
+            column: number;
+            document: {
+                $lines: string[];
+            };
+        };
+        cursor: {
+            row: number;
+            column: number;
+        };
+        session: Ace.EditSession;
+    };
+    let markers = [];
 
     async function savePrompt(prompt: Prompt) {
         const existed = await saveLocalPromptTitle(prompt)
@@ -88,27 +111,6 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         }
         // ensure dag yaml update.
         getStore("prompts", {})["Flow_Dag_Yaml"] += "\n"
-    }
-
-    type SelectionValue = {
-        anchor: {
-            row: number;
-            column: number;
-            document: {
-                $lines: string[];
-            };
-        };
-        cursor: {
-            row: number;
-            column: number;
-        };
-        session: Ace.EditSession;
-    };
-    let markers = [];
-
-    function isURL(str: string) {
-        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
-        return urlPattern.test(str);
     }
 
     function onFocusYaml(event: any, editor: Ace.Editor | undefined){

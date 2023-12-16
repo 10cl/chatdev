@@ -195,7 +195,7 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   )
 }
 
-const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
+const AgentLocal = (props: { insertPrompt: (text: string) => void }) => {
   const { t } = useTranslation()
 
   const insertPrompt = useCallback(
@@ -229,4 +229,4 @@ const PromptLibrary = (props: { insertPrompt: (text: string) => void }) => {
   )
 }
 
-export default PromptLibrary
+export default AgentLocal

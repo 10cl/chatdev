@@ -3,16 +3,14 @@ import { trackEvent } from '~app/plausible'
 import { ChatMessageModel } from '~types'
 import Button from '../Button'
 import {Input, Textarea} from '../Input'
-import { uploadToShareGPT } from './sharegpt'
-import Tooltip from "~app/components/Tooltip";
-import htmlIcon from "~assets/icons/html.svg";
 import {useTranslation} from "react-i18next";
+import {uploadToShareGPT} from "~services/prompts";
 
 interface Props {
   messages: ChatMessageModel[]
 }
 
-const ShareGPTView: FC<Props> = ({ messages }) => {
+const AgentUploadView: FC<Props> = ({ messages }) => {
   const [uploading, setUploading] = useState(false)
   const [resultId, setResultId] = useState<string | undefined>(undefined)
   const [copied, setCopied] = useState(false)
@@ -85,4 +83,4 @@ const ShareGPTView: FC<Props> = ({ messages }) => {
   )
 }
 
-export default ShareGPTView
+export default AgentUploadView

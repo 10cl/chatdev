@@ -14,7 +14,6 @@ import {
     sidebarCollapsedAtom,
     workFlowingDisableAtom
 } from "~app/state";
-import {trackEvent} from "~app/plausible";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
     return (
@@ -131,7 +130,7 @@ function CommunityPrompts() {
     )
 }
 
-const PromptLab = () => {
+const AgentCommunity = () => {
 
     return (
         <Suspense fallback={<BeatLoader size={10} className="mt-5" color="rgb(var(--primary-text))"/>}>
@@ -140,4 +139,4 @@ const PromptLab = () => {
     )
 }
 
-export default PromptLab
+export default AgentCommunity

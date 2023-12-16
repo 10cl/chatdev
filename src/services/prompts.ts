@@ -157,6 +157,53 @@ export async function removeLocalPrompt(id: string) {
   setStore("prompts", prompt_dict)
 }
 
+function getPromptFlow() {
+  const prompts = getStore("prompts", {})
+  const promptFlowYaml = prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]
+  if (promptFlowYaml == undefined) {
+    return
+  }
+  const exportPrompts: { [key: string]: string } = {};
+  exportPrompts['Flow_Dag_Yaml'] = promptFlowYaml;
+  const yamlLines = promptFlowYaml.split("\n")
+
+  let targetPath = '';
+  const functionPath = 'func:';
+  const promptPath = 'path:';
+  const regexFunc = /func:\s*([\w_]+)\s*/
+  const regexPath = /path:\s*([\w_]+)\s*/
+
+  for (let i = 0; i < yamlLines.length; i++) {
+    const line = yamlLines[i];
+    const matchFunc = line.match(regexFunc)
+    const matchPath = line.match(regexPath)
+    if (matchFunc || matchPath) {
+      let prompt;
+
+      let pathIndex = 0;
+      if (matchFunc){
+        prompt = matchFunc[1];
+        pathIndex = line.indexOf(functionPath);
+        targetPath = functionPath
+      }else if (matchPath){
+        prompt = matchPath[1];
+        pathIndex = line.indexOf(promptPath);
+        targetPath = promptPath
+      }
+
+      if (prompt) {
+        prompt = prompt.replace(/\s+/g, "")
+        if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+          exportPrompts[prompt] = prompts[prompt]
+        }
+      }
+    }
+  }
+  console.log(exportPrompts)
+
+  return exportPrompts
+}
+
 export async function loadRemotePrompts() {
   return ofetch<PromptLab[]>('https://chatdev.toscl.com/api/get_communities', {
     params: { language: i18next.language, languages: i18next.languages, version: getVersion(), fp: getStore("fp", "") },
@@ -172,6 +219,21 @@ export async function loadYaml(share: string) {
     console.error('Failed to load remote prompts', err)
     return {} as PromptYAML
   })
+}
+
+export async function uploadToShareGPT(json: { [p: string]: File | string }) {
+  const resp = await ofetch('https://chatdev.toscl.com/api/upload', {
+    method: 'POST',
+    body: {
+      title: json.title,
+      intro: json.intro,
+      yaml: getPromptFlow(),
+      author: getStore("player_name", ""),
+      fp: getStore("fp", ""),
+      lang: i18next.language
+    }
+  })
+  return resp.share as string
 }
 
 // export async function getPromptVersion() {
@@ -220,4 +282,9 @@ export function getStore(key:any, value?:any){
     return value
   }
   return result
+}
+
+export function isURL(str: string) {
+  const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+  return urlPattern.test(str);
 }

@@ -8,6 +8,7 @@ import historyIcon from '~/assets/icons/history.svg'
 import libraryIcon from '~/assets/icons/library.svg'
 import editIcon from '~/assets/icons/edit.svg'
 import htmlIcon from '~/assets/icons/html.svg'
+import addIcon from '~/assets/icons/add.svg'
 import closeIcon from '~/assets/icons/close.svg'
 import assistantIcon from '~/assets/icons/assistant.svg'
 import settingsIcon from '~/assets/icons/setting_top.svg'
@@ -19,7 +20,7 @@ import { ChatMessageModel } from '~types'
 import { BotId, BotInstance } from '../../bots'
 import Button from '../Button'
 import HistoryDialog from '../History/Dialog'
-import PreViewFrameDialog from '../Share/PreViewFrameDialog'
+import HtmlTypeView from '~app/components/AgentPreview/HtmlTypeView'
 import SwitchBotDropdown from '../SwitchBotDropdown'
 import Tooltip from '../Tooltip'
 import ChatMessageInput from './ChatMessageInput'
@@ -28,6 +29,23 @@ import LocalPrompts from './LocalPrompts'
 import store from 'store2'
 import React, { useEffect  } from 'react';
 import GameButton from '../GameButtom';
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/mode-yaml";
+import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/ext-language_tools";
+import {toBase64} from "js-base64";
+import AgentCommunityDialog from "~app/components/Agent/AgentCommunityDialog";
+import loadingImg from "~assets/loading.png";
+import SettingsDialog from "~app/components/Settings/SettingsDialog";
+import {BeatLoader} from "react-spinners";
+import {getStore, isURL, loadRemoteUrl, loadYaml, setStore} from "~services/prompts";
+import {requestHostPermission} from "~app/utils/permissions";
+import {ChatError, ErrorCode} from "~utils/errors";
+import {UserConfig} from "~services/user-config";
+import AgentUploadDialog from "~app/components/Agent/AgentUploadDialog";
+import {useNavigate} from "@tanstack/react-router";
+import {importFromText} from "~app/utils/export";
+
 import {useAtom, useAtomValue} from "jotai/index";
 import {
   gameModeEnable,
@@ -48,27 +66,6 @@ import {
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-import "ace-builds/src-noconflict/theme-github";
-
-import "ace-builds/src-noconflict/mode-yaml";
-import "ace-builds/src-noconflict/theme-github";
-import "ace-builds/src-noconflict/ext-language_tools";
-import {toBase64} from "js-base64";
-import PromptLabDialog from "~app/components/Chat/PromptLabDialog";
-import loadingImg from "~assets/loading.png";
-import {GoBook} from "react-icons/go";
-import SettingsDialog from "~app/components/Settings/SettingsDialog";
-import useSWR from "swr";
-import {BeatLoader} from "react-spinners";
-import Markdown from "~app/components/Markdown";
-import {getStore, loadRemoteUrl, loadYaml, setStore} from "~services/prompts";
-import {requestHostPermission} from "~app/utils/permissions";
-import {ChatError, ErrorCode} from "~utils/errors";
-import {UserConfig} from "~services/user-config";
-import ShareGPTView from "~app/components/Share/ShareGPTView";
-import ShareGPTDialog from "~app/components/Share/ShareGPTDialog";
-import {useNavigate} from "@tanstack/react-router";
-import {importFromText} from "~app/utils/export";
 interface Props {
   botId: BotId
   bot: BotInstance
@@ -124,10 +121,6 @@ const ConversationPanel: FC<Props> = (props) => {
     return true;
   }
 
-  function isURL(str: string) {
-    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
-    return urlPattern.test(str);
-  }
   const confirmTips = t('Are you sure you want to import the GPTs?')
   const successTips = t('Imported GPTs successfully')
 
@@ -340,6 +333,11 @@ const ConversationPanel: FC<Props> = (props) => {
   const openShareDialog = useCallback(() => {
     setShowWebPreviewDialog(true)
     trackEvent('open_share_dialog', { botId: props.botId })
+  }, [props.botId])
+
+  const newAgentButton = useCallback(() => {
+
+
   }, [props.botId])
 
   const getOffsetX = (e: any) =>{
@@ -571,9 +569,9 @@ const ConversationPanel: FC<Props> = (props) => {
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">
-            {/*<Tooltip content={t('Share Prompt Library')}>*/}
-            {/*  <img src={shareIcon} className="w-5 h-5 cursor-pointer" onClick={openShareDialog} />*/}
-            {/*</Tooltip>*/}
+            <Tooltip content={t('New Agent')}>
+              <img src={addIcon} className="w-5 h-5 cursor-pointer" onClick={newAgentButton} />
+            </Tooltip>
             {false && <Tooltip content={t('Open Web Preview')}>
               <img src={htmlIcon} className="w-5 h-5 cursor-pointer" onClick={openHtmlDialog} />
             </Tooltip>}
@@ -657,13 +655,13 @@ const ConversationPanel: FC<Props> = (props) => {
       </div>
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
       {isPreviewShow && (
-        <PreViewFrameDialog open={true} onClose={() => setShowWebPreviewDialog(false)} messages={props.messages} />
+        <HtmlTypeView open={true} onClose={() => setShowWebPreviewDialog(false)} messages={props.messages} />
       )}
       {shareViewShow && (
-          <ShareGPTDialog open={true} onClose={() => setShowShareView(false)} messages={props.messages} />
+          <AgentUploadDialog open={true} onClose={() => setShowShareView(false)} messages={props.messages} />
       )}
       {showAssistant && (
-          <PromptLabDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />
+          <AgentCommunityDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />
       )}
       {showSettings && (
           <SettingsDialog open={true} onClose={() => setShowSettings(false)} />

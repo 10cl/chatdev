@@ -8,7 +8,7 @@ import './main.css'
 import {useAtom} from "jotai/index";
 import {gameModeEnable} from "~app/state";
 import React from "react";
-import PromptLab from "~app/components/PromptLibrary/PromptLab";
+import AgentCommunity from "~app/components/Agent/AgentCommunity";
 
 interface Props {
   botId: BotId
@@ -26,7 +26,7 @@ const ChatMessageList: FC<Props> = (props) => {
                 {props.messages.length > 0 && props.messages.map((message, index) => {
                     return <ChatMessageCard key={message.id} message={message} className={index === 0 ? 'mt-5' : undefined} />
                 })}
-                {props.messages.length <= 0 && <PromptLab />}
+                {props.messages.length <= 0 && <AgentCommunity />}
             </div>
         </ScrollToBottom>
     )
