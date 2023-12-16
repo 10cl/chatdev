@@ -149,8 +149,8 @@ export async function importFromText(json: JSON){
 
   if(prompt_dict['Flow_Dag_Yaml'] !== undefined) {
     // prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
-
-    if (getStore("editor_show", false)) {
+    const isGameMode = getStore("gameModeEnable", true)
+    if (!isGameMode) {
         prompt_dict[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
     } else {
         prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
