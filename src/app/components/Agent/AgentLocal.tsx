@@ -10,6 +10,14 @@ import Button from '../Button'
 import { Input, Textarea } from '../Input'
 import Tabs, { Tab } from '../Tabs'
 import {GoBook} from "react-icons/go";
+import {useAtom} from "jotai/index";
+import {
+    editorPromptAtom,
+    editorPromptTimesAtom,
+    editorYamlTimesAtom,
+    isNewAgentShowAtom, promptLibraryDialogOpen,
+    showEditorAtom
+} from "~app/state";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
   return (
@@ -50,7 +58,7 @@ const PromptItem = (props: {
         <p title={props.prompt} className="truncate text-sm font-medium text-primary-text">{props.title}</p>
       </div>
       <div className="flex flex-row gap-1">
-        {props.edit && <ActionButton text={t('Edit')} onClick={props.edit} />}
+        {props.edit && <ActionButton text={t('Open')} onClick={props.edit} />}
         {props.copyToLocal && <ActionButton text={t(saved ? 'Saved' : 'Save')} onClick={copyToLocal} />}
       </div>
       {props.title.indexOf("Flow_Dag_Yaml") == -1
@@ -68,49 +76,16 @@ const PromptItem = (props: {
     </div>
   )
 }
-
-function PromptForm(props: { initialData: Prompt; onSubmit: (data: Prompt) => void; onClose: () => void }) {
-  const { t } = useTranslation()
-
-  const onSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
-      e.stopPropagation()
-      const formdata = new FormData(e.currentTarget)
-      const json = Object.fromEntries(formdata.entries())
-      if (json.title && json.prompt) {
-        props.onSubmit({
-          id: props.initialData.id,
-          title: json.title as string,
-          prompt: json.prompt as string,
-        })
-      }
-    },
-    [props],
-  )
-
-  return (
-    <form className="flex flex-col gap-2 w-full" onSubmit={onSubmit}>
-      <div className={"w-full " + (props.initialData.title.indexOf("Profile_") != -1 || props.initialData.title.indexOf("Position_") != -1? "hidden":"")}>
-        <span className="text-sm font-semibold block mb-1 text-primary-text">Prompt {t('Title')}</span>
-        <Input className="w-full" name="title" defaultValue={props.initialData.title} />
-      </div>
-      <div className="w-full">
-        <span className="text-sm font-semibold block mb-1 text-primary-text">Prompt {t('Content')}</span>
-        <Textarea className="w-full" name="prompt" defaultValue={props.initialData.prompt} />
-      </div>
-      <div className="flex flex-row gap-2 mt-1">
-        <Button color="primary" text={t('Save')} className="w-fit" size="small" type="submit" />
-        <Button color="flat" text={t('Cancel')} className="w-fit" size="small" onClick={props.onClose} />
-      </div>
-    </form>
-  )
-}
-
 function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   const { t } = useTranslation()
   const [formData, setFormData] = useState<Prompt | null>(null)
     const [profile, setProfile] = useState(false)
+    const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
+    const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
+    const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
+    const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+    const [isNewAgentShow, setNewAgentDialog] = useAtom(isNewAgentShowAtom)
+    const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
 
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
     useEffect(() => {
@@ -140,18 +115,18 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
         }
     }, [])
 
-  const savePrompt = useCallback(
-    async (prompt: Prompt) => {
-      const existed = await saveLocalPrompt(prompt)
-      localPromptsQuery.mutate()
-      setFormData(null)
-      setStore("edit_" + prompt.title, true)
-      trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
-    },
-    [localPromptsQuery],
-  )
+    useCallback(
+        async (prompt: Prompt) => {
+            const existed = await saveLocalPrompt(prompt)
+            localPromptsQuery.mutate()
+            setFormData(null)
+            setStore("edit_" + prompt.title, true)
+            trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
+        },
+        [localPromptsQuery],
+    );
 
-  const removePrompt = useCallback(
+    const removePrompt = useCallback(
     async (id: string) => {
       await removeLocalPrompt(id)
       localPromptsQuery.mutate()
@@ -159,6 +134,26 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
     },
     [localPromptsQuery],
   )
+
+    const openAgent = useCallback(
+        async (prompt: Prompt) => {
+
+            // setEditorPrompt("Flow_Dag_Yaml")
+            setStore("real_yaml", prompt.title)
+
+            setEditorPrompt("Action_Prompt_Template");
+
+            setEditorPromptTimes(editorPromptTimes + 1)
+            setShowEditor(true)
+            setStore("editor_show", true)
+
+            const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+            setEditorYamlTimes(editorYamlTimes)
+            setStore("editorYamlTimes", editorYamlTimes)
+            setIsPromptLibraryDialogOpen(false)
+        },
+        [localPromptsQuery],
+    )
 
   const create = useCallback(() => {
     setFormData({ id: uuid(), title: '', prompt: '' })
@@ -173,7 +168,7 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
               key={prompt.id}
               title={prompt.title}
               prompt={prompt.prompt}
-              edit={() => !formData && setFormData(prompt)}
+              edit={() => openAgent(prompt)}
               remove={() => removePrompt(prompt.id)}
               insertPrompt={props.insertPrompt}
             />
@@ -184,13 +179,6 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
           You have no prompts.
         </div>
       )}
-      <div className="mt-5">
-        {formData ? (
-          <PromptForm initialData={formData} onSubmit={savePrompt} onClose={() => setFormData(null)} />
-        ) : (
-          <Button text={t('Create new prompt')} size="small" onClick={create} />
-        )}
-      </div>
     </>
   )
 }
@@ -206,27 +194,11 @@ const AgentLocal = (props: { insertPrompt: (text: string) => void }) => {
     [props],
   )
 
-  const tabs = useMemo<Tab[]>(
-    () => [
-      { name: t('Your Prompts'), value: 'local' },
-    ],
-    [t],
-  )
-
-  return (
-    <Tabs
-      tabs={tabs}
-      renderTab={(tab: (typeof tabs)[0]['value']) => {
-        if (tab === 'local') {
-          return (
-            <Suspense fallback={<BeatLoader size={10} className="mt-5" color="rgb(var(--primary-text))" />}>
-              <LocalPrompts insertPrompt={insertPrompt} />
-            </Suspense>
-          )
-        }
-      }}
-    />
-  )
+    return (
+        <Suspense fallback={<BeatLoader size={10} className="mt-5" color="rgb(var(--primary-text))"/>}>
+            <LocalPrompts insertPrompt={insertPrompt}/>
+        </Suspense>
+    )
 }
 
 export default AgentLocal

@@ -31,7 +31,7 @@ import shareIcon from '~/assets/icons/share.svg'
 
 import Browser from "webextension-polyfill";
 import {BiExport, BiImport, BiShareAlt} from "react-icons/bi";
-import {exportData, exportGPTsAll, exportPromptFlow, importData, importPromptFlow} from "~app/utils/export";
+import {exportData, exportAgentAll, exportPromptFlow, importData, importPromptFlow} from "~app/utils/export";
 import {uuid} from "~utils";
 import Tooltip from "~app/components/Tooltip";
 import discordIcon from "~assets/icons/discord.svg";
@@ -50,8 +50,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
     const { t } = useTranslation()
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true})
-    const confirmTips = t('Are you sure you want to import the GPTs?')
-    const successTips = t('Imported GPTs successfully')
+    const confirmTips = t('Are you sure you want to import the Agent?')
+    const successTips = t('Imported Agent successfully')
     const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
     const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
     type SelectionValue = {
@@ -224,7 +224,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         // data stub:
         const sqlTables = [
             { name: 'roles', description: 'Defining the various agents in your company, such as the ``Chief Executive Officer``.' },
-            { name: 'nodes', description: 'Defining your own node of GPTs process.' },
+            { name: 'nodes', description: 'Defining your own node of Agent process.' },
             { name: 'prompt', description: 'Node type(support various)' },
             { name: 'string', description: 'Node type(text content)' },
             { name: 'npc', description: 'Choose npc in Game Moe' },
@@ -318,7 +318,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         <div className="overflow-auto h-full flex flex-col promptide">
             <div className="flex items-left mx-10 margin-5">
                 <div className="flex flex-row gap-3">
-                    <Button size="small" text={t('Export ALL')} icon={<BiExport />} onClick={exportGPTsAll} />
+                    <Button size="small" text={t('Export ALL')} icon={<BiExport />} onClick={exportAgentAll} />
                     <Button size="small" text={t('Export Current')} icon={<BiExport />} onClick={exportPromptFlow} />
                     <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importYaml} />
                     <Tooltip content={t('Share')}>

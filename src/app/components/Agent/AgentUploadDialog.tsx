@@ -12,7 +12,7 @@ interface Props {
 const AgentUploadDialog = (props: Props) => {
   return (
     <Dialog
-      title="Share GPTs"
+      title="Upload Your Agent"
       open={props.open}
       onClose={props.onClose}
       className={cx('rounded-xl', 'w-[800px] h-[400px]')}>

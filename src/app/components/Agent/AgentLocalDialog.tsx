@@ -12,7 +12,7 @@ const AgentLocalDialog = (props: Props) => {
     const { t } = useTranslation()
 
     return (
-    <Dialog title={t("Open Prompt Library")} open={props.isOpen} onClose={props.onClose} className="w-[800px] min-h-[400px]">
+    <Dialog title={t("Your Agents")} open={props.isOpen} onClose={props.onClose} className="w-[800px] min-h-[400px]">
       <div className="p-5 overflow-auto">
         <AgentLocal insertPrompt={props.insertPrompt} />
       </div>

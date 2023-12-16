@@ -14,7 +14,7 @@ const AgentCommunityDialog = (props: Props) => {
 
     return (
         <Dialog
-            title={t('GPTs')}
+            title={t('Agent Community')}
             open={props.open}
             onClose={props.onClose}
             className="w-[800px] min-h-[400px]"

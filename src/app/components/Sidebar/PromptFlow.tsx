@@ -85,11 +85,11 @@ function PromptFlow() {
     }
 
     const { t } = useTranslation()
-    const welcomeStr = t('Welcome ChatDev IDE!  Here,  You can explore the map, interact with existing GPTs, or customize your GPTs.  first of all, How would you like us to call you?')
+    const welcomeStr = t('Welcome ChatDev IDE!  Here,  You can explore the map, interact with existing Agent, or customize your Agent.  first of all, How would you like us to call you?')
     const welcomeIntro = t("Welcome, {player_name}! You can now use the arrow keys to control the game character to start exploring the map, and ensure you are logged in to the LLM website to access all features")
-    const promptFlowOpen = t("GPTs is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the GPTs defined on the right.")
-    const promptFlowClose = t("GPTs is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
-    const promptFlowDone = t("The GPTs has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
+    const promptFlowOpen = t("Agent is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Agent defined on the right.")
+    const promptFlowClose = t("Agent is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
+    const promptFlowDone = t("The Agent has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
     const promptTaskIntroduce = t('Introduce yourself')
     // const promptsVersionQuery = useSWR('latest-prompts-version', () => getPromptVersion(), {suspense: true})
     // const [promptVersion, setPromptVersion] = useAtom(promptVersionAtom)
@@ -187,7 +187,7 @@ function PromptFlow() {
             const exceptionNode = getStore("exception_nodes")
             if (exceptionNode != null && exceptionNode != "") {
                 setStore("exception_nodes", "")
-                window.confirm(t('GPTs') + " Exception: " + exceptionNode)
+                window.confirm(t('Agent') + " Exception: " + exceptionNode)
             }
 
             handlePersistentStorage()
@@ -327,7 +327,7 @@ function PromptFlow() {
                 seminarDisable ? 'items-center px-[15px]' : 'w-[330px] px-4',
             )}
         >
-            <Tooltip content={t('Visualization of GPTs structure')}>
+            <Tooltip content={t('Visualization of Agent structure')}>
                 <img src={collapseIcon} className={cx('w-6 h-6 cursor-pointer my-5', seminarDisable ? 'self-end' : 'rotate-180')} onClick={() => setCollapsedAndUpdate()} />
             </Tooltip>
             <div className="flex flex-col gap-3 overflow-y-auto scrollbar-none">

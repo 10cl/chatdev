@@ -50,7 +50,7 @@ const functionPath = 'func:';
 const promptPath = 'path:';
 let targetPath = '';
 
-export async function exportGPTsAll() {
+export async function exportAgentAll() {
   const prompts = getStore("prompts", {})
   const blob = new Blob([JSON.stringify(prompts, null, 4)], {type: 'application/json'})
   await fileSave(blob, {fileName: 'chatdev_gpts_all.json'})

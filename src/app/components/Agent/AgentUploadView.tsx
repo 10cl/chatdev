@@ -57,7 +57,7 @@ const AgentUploadView: FC<Props> = ({ messages }) => {
   return (
     <div className="p-5 flex flex-col gap-5 h-full">
       <p className="text-center text-primary-text">
-        This will generate a share link for this GPTs.
+        This will generate a public link for this Agent.
       </p>
       {resultId ? (
         <div className="flex flex-row gap-3">
