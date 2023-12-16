@@ -7,12 +7,14 @@ import {GoBook} from "react-icons/go";
 import {importFromText} from "~app/utils/export";
 import {useAtom} from "jotai/index";
 import {
+    editorPromptAtom,
     editorPromptTimesAtom,
     editorYamlTimesAtom,
-    seminarDisableAtom, showGptsDialogAtom,
+    seminarDisableAtom, showEditorAtom, showGptsDialogAtom,
     sidebarCollapsedAtom,
     workFlowingDisableAtom
 } from "~app/state";
+import {trackEvent} from "~app/plausible";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
     return (
@@ -39,6 +41,9 @@ const PromptLabItem = (props: {
     const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
     const confirmTips = t('Are you sure you want to import the GPTs?')
     const successTips = t('Imported GPTs successfully')
+    const successEditTips = t('Import succeeded. Do you need to edit?')
+    const [showEditor, setShowEditor] = useAtom(showEditorAtom)
+    const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
 
     const importToFlowYaml = useCallback(() => {
         if (!window.confirm(confirmTips)) {
@@ -55,7 +60,22 @@ const PromptLabItem = (props: {
                     setEditorYamlTimes(editorYamlTimes)
                     setStore("editorYamlTimes", editorYamlTimes)
 
-                    alert(successTips)
+                    if (!window.confirm(successEditTips)) {
+                        return
+                    }
+
+                    // setEditorPrompt("Flow_Dag_Yaml")
+                    setStore("real_yaml", getStore("editor_yaml", "Default_Flow_Dag_Yaml"))
+                    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
+                        getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
+                    }
+                    setEditorPrompt("Action_Prompt_Template");
+
+                    setEditorPromptTimes(editorPromptTimes + 1)
+                    setShowEditor(true)
+                    setStore("editor_show", true)
+
+                    setShowAssistant(false)
                 })
             }catch (e) {
                 alert(e)

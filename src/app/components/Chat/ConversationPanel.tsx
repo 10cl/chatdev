@@ -166,7 +166,7 @@ const ConversationPanel: FC<Props> = (props) => {
     // setShowEditor(false)
     // setShowAssistant(false)
     // setShowSettings(false)
-    // setShowShareView(false)
+    setShowShareView(false)
 
     const setFp = async () => {
       const fp = await FingerprintJS.load();

@@ -40,7 +40,6 @@ interface Window {
 }
 
 export async function loadLocalPrompts() {
-  await updateLocalPrompts()
   const { prompts: value } = await Browser.storage.local.get('prompts')
   return (value || []) as Prompt[]
 }
@@ -53,7 +52,6 @@ function isPromptJsonContain(prompt: Prompt, prompts: Prompt[]): boolean {
 export async function updateLocalPrompts()  {
   const prePrompts = getStore("prompts", {});
   if (prePrompts['Action_Target_Dialogue_Npc'] == undefined || getVersion() !== getStore("version", "")) {
-
     const user_prompts = [] as Prompt[]
     if (prePrompts != null){
       for (const [key, value] of Object.entries(prePrompts)) {

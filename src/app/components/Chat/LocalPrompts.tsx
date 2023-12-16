@@ -59,7 +59,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         if (prompts !== null && prompts[editorPrompt]){
             return prompts[editorPrompt]
         }
-        return "";
+        return "// TODO for: " + editorPrompt;
     }
 
     function onChangeYaml(value: string) {
@@ -98,6 +98,11 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         session: Ace.EditSession;
     };
     let markers = [];
+
+    function isURL(str: string) {
+        const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
+        return urlPattern.test(str);
+    }
 
     function onSelectionChange(selectionValue: SelectionValue) {
         const { anchor, cursor } = selectionValue;
@@ -138,15 +143,16 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     if (cursor.row == highlightMarker.startRow
                         && highlightMarker.startCol <= start
                         && highlightMarker.endCol >= start){
-                        if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+                        // if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+                        if(!isURL(prompt)){
                             if (editorPrompt != prompt){
                                 setEditorPrompt(prompt)
                                 setEditorPromptTimes(editorPromptTimes + 1);
                             }
                         }
-
                     }
-                    if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+                    // if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+                    if(!isURL(prompt)){
                         markers.push(highlightMarker);
                     }
 
@@ -248,9 +254,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
             prompt.prompt = value
             savePrompt(prompt)
         }else{
-            if (getStore("prompts", {})[title] != undefined){
-                savePrompt({id:uuid(), title: title, prompt: value})
-            }
+            savePrompt({id:uuid(), title: title, prompt: value})
         }
     }
     async function importYaml(){
