@@ -29,14 +29,13 @@ interface Props {
   onSubmit: (value: string) => void
   className?: string
   disabled?: boolean
-  placeholder?: string
+  placeholder?: string | null
   actionButton?: ReactNode | null
   autoFocus?: boolean
 }
 
 const ChatMessageInput: FC<Props> = (props) => {
   const { t } = useTranslation()
-  const { placeholder = t('Ensure you are logged in to the LLM website to access all features') } = props
 
   const [value, setValue] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
@@ -170,7 +169,7 @@ const ChatMessageInput: FC<Props> = (props) => {
           formref={formRef}
           name="input"
           disabled={props.disabled}
-          placeholder={placeholder as string}
+          placeholder={props.placeholder as string}
           value={value}
           onValueChange={onValueChange}
           autoFocus={props.autoFocus}

@@ -75,7 +75,7 @@ const AgentUploadView: FC<Props> = ({ messages }) => {
               <Textarea className="w-full" name="intro"/>
             </div>
             <div className="flex flex-row gap-3">
-              <Button text="Share" size="small" color="primary" type="submit" isLoading={uploading}/>
+              <Button text={t('Upload')} size="small" color="primary" type="submit" isLoading={uploading}/>
             </div>
           </form>
       )}

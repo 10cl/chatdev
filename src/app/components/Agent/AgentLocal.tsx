@@ -154,16 +154,14 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
         },
         [localPromptsQuery],
     )
-
-  const create = useCallback(() => {
-    setFormData({ id: uuid(), title: '', prompt: '' })
-  }, [])
-
-  return (
+    useCallback(() => {
+        setFormData({ id: uuid(), title: '', prompt: '' })
+    }, []);
+    return (
     <>
       {localPromptsQuery.data.length ? (
         <div className={"grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 " + (profile? "hidden":"")}>
-          {localPromptsQuery.data.map((prompt) => (prompt.title.indexOf("Position_") == -1 &&
+          {localPromptsQuery.data.map((prompt) => ((prompt.type == "yaml" || prompt.prompt.indexOf("reference: ") != -1) && prompt.title.indexOf("Position_") == -1 &&
             <PromptItem
               key={prompt.id}
               title={prompt.title}

@@ -64,7 +64,8 @@ const PromptLabItem = (props: {
                     }
 
                     // setEditorPrompt("Flow_Dag_Yaml")
-                    setStore("real_yaml", getStore("editor_yaml", "Default_Flow_Dag_Yaml"))
+                    const isGameMode = getStore("gameModeEnable", true)
+                    setStore("real_yaml", getStore(isGameMode?"editor_yaml":"real_yaml", "Default_Flow_Dag_Yaml"))
                     if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
                         getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
                     }
@@ -92,7 +93,7 @@ const PromptLabItem = (props: {
             <div className="min-w-0 flex-1">
                 <p title={props.title}
                    className="truncate text-sm font-semibold text-primary-text italic pl-1">{props.title}</p>
-                <div className="text-primary-text line-clamp-1 prompt-intro">{props.intro}</div>
+                <div title={props.intro} className="text-primary-text line-clamp-1 prompt-intro">{props.intro}</div>
             </div>
             <div className="flex flex-row gap-1">
                 <a target="_blank" href={"https://chatdev.toscl.com/s/" + props.share} rel="noreferrer">
