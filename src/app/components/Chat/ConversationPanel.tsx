@@ -44,7 +44,7 @@ import {
   editorYamlAtom,
   editorPromptAtom,
   showShareAtom,
-  fpHashAtom, seminarDisableAtom,
+  fpHashAtom, seminarDisableAtom, editorFocusAtom,
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
@@ -92,6 +92,7 @@ const ConversationPanel: FC<Props> = (props) => {
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
   const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
   const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
+  const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
 
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
 
@@ -163,10 +164,12 @@ const ConversationPanel: FC<Props> = (props) => {
 
   useEffect(() => {
     console.log("init")
+    setStore("editor_show", showEditor)
     // setShowEditor(false)
     // setShowAssistant(false)
     // setShowSettings(false)
     setShowShareView(false)
+    setEditorFocus('')
 
     const setFp = async () => {
       const fp = await FingerprintJS.load();
@@ -199,7 +202,10 @@ const ConversationPanel: FC<Props> = (props) => {
       }
 
       const value = getStore("input_text", "")
-      if (value != "") {
+      const task_refresh = getStore("task_refresh", false)
+      const generate_refresh = getStore("generate_refresh", false)
+
+      if (value != "" || task_refresh || generate_refresh) {
         console.log("input text null")
         const messageTimes = getStore("messageTimes", 0) + 1
         setChangeTime(messageTimes)
@@ -227,10 +233,14 @@ const ConversationPanel: FC<Props> = (props) => {
     async (input: string) => {
       // if in editor, send message as the GPTs.
       if (getStore("editor_show")){
+        // Editor Switch false
         setShowEditor(false)
         setStore("editor_show", false)
+        // GameMode false
         setGameModeEnable(false)
         setStore("gameModeEnable", false)
+
+        // GPTs Switch open
         setStore("workFlowingDisable", false)
         setWorkFlowingDisable(false)
       }
@@ -295,6 +305,18 @@ const ConversationPanel: FC<Props> = (props) => {
       setShowWebPreviewDialog(true)
       trackEvent('open_web_preview', { botId: botId })
       setStore("task_refresh", false)
+    }
+
+    if (getStore("generate_refresh", false)){
+      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("generate_content", "")
+
+      const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+      setEditorYamlTimes(editorYamlTimes)
+      setStore("editorYamlTimes", editorYamlTimes)
+      openFlowEditor()
+      setStore("generate_refresh", false)
+
+      alert("Generate Success, You can continue editing in the editor.")
     }
   }
 
@@ -464,6 +486,10 @@ const ConversationPanel: FC<Props> = (props) => {
     setShowEditor(false)
     setStore("editor_show", false)
     trackEvent('close_editor_prompt_flow')
+
+    // focus set ''
+    setEditorFocus('')
+    setStore("editor_focus", '')
   },[])
 
 
@@ -615,7 +641,7 @@ const ConversationPanel: FC<Props> = (props) => {
                   onClick={props.stopGenerating}
                 />
               ) : (
-                mode === 'full' && <Button text={t('Send')} color="primary" type="submit" />
+                mode === 'full' && <Button text={editorFocus!=""? t('Generate') : t('Send')} color="primary" type="submit" />
               )
             }
           />

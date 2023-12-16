@@ -8,7 +8,13 @@ import {getStore, loadLocalPrompts, Prompt, saveLocalPrompt, saveLocalPromptTitl
 import AceEditor from "react-ace";
 import Button from "~app/components/Button";
 import {useAtom} from "jotai/index";
-import {editorPromptAtom, editorPromptTimesAtom, editorYamlTimesAtom, showShareAtom} from "~app/state";
+import {
+    editorFocusAtom,
+    editorPromptAtom,
+    editorPromptTimesAtom,
+    editorYamlTimesAtom,
+    showShareAtom
+} from "~app/state";
 import store from "store2";
 import {Ace, EditSession, Range} from "ace-builds";
 import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
@@ -39,6 +45,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     const confirmTips = t('Are you sure you want to import the GPTs?')
     const successTips = t('Imported GPTs successfully')
     const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
+    const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
 
     async function savePrompt(prompt: Prompt) {
         const existed = await saveLocalPromptTitle(prompt)
@@ -104,6 +111,29 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         return urlPattern.test(str);
     }
 
+    function onFocusYaml(event: any, editor: Ace.Editor | undefined){
+        console.log("onFocus", event)
+        if (event.type == "blur"){
+            setEditorStatus('Yaml')
+        }else if (event.type == "focus"){
+            setEditorStatus('')
+        }
+    }
+
+    function onFocusPrompt(event: any, editor: Ace.Editor | undefined){
+        console.log("onFocus", event)
+        if (event.type == "blur"){
+            setEditorStatus('Prompt')
+        }else if (event.type == "focus"){
+            setEditorStatus('')
+        }
+    }
+
+    function setEditorStatus(value: string){
+        setEditorFocus(value)
+        setStore("editor_focus", value)
+    }
+
     function onSelectionChange(selectionValue: SelectionValue) {
         const { anchor, cursor } = selectionValue;
         const { row, column, document } = anchor;
@@ -115,27 +145,35 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         let targetPath = '';
         const functionPath = 'func:';
         const promptPath = 'path:';
-        const prompts = getStore("prompts", null)
+        const regexFunc = /func:\s*([\w_]+)\s*/
+        const regexPath = /path:\s*([\w_]+)\s*/
+
         onChangeYaml(document.$lines.join("\n"))
         for (let i = 0; i < document.$lines.length; i++) {
             const line = document.$lines[i];
-            if (line.includes(promptPath) || line.includes(functionPath)) {
-                if (!line.includes(promptPath)){
+            const matchFunc = line.match(regexFunc)
+            const matchPath = line.match(regexPath)
+            if (matchFunc || matchPath) {
+                let prompt;
+
+                let pathIndex = 0;
+                if (matchFunc){
+                    prompt = matchFunc[1];
+                    pathIndex = line.indexOf(functionPath);
                     targetPath = functionPath
-                }else{
+                }else if (matchPath){
+                    prompt = matchPath[1];
+                    pathIndex = line.indexOf(promptPath);
                     targetPath = promptPath
                 }
-                const pathIndex = line.indexOf(targetPath);
-                const pathValue = line.substring(pathIndex + targetPath.length);
-                let prompt = line.substring(pathIndex + targetPath.length);
 
-                if (pathValue && prompt) {
+                if (prompt) {
                     const highlightMarker = {
                         prompt: prompt,
                         startRow: i,
-                        startCol: pathIndex + targetPath.length,
+                        startCol: pathIndex + targetPath.length + 1,
                         endRow: i,
-                        endCol: pathIndex + targetPath.length + prompt.length,
+                        endCol: pathIndex + targetPath.length + prompt.length + 1,
                         className: 'path-marker',
                         type: 'text'
                     }
@@ -144,6 +182,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                         && highlightMarker.startCol <= start
                         && highlightMarker.endCol >= start){
                         // if (prompts !== null && prompts !== undefined && prompts[prompt] !== undefined) {
+                        prompt = prompt.replaceAll("'", "").replaceAll(" ", "")
                         if(!isURL(prompt)){
                             if (editorPrompt != prompt){
                                 setEditorPrompt(prompt)
@@ -294,6 +333,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     height="100%"
                     onChange={onChangeYaml}
                     onSelectionChange={onSelectionChange}
+                    onFocus={onFocusYaml}
+                    onBlur={onFocusYaml}
                     defaultValue={getEditYaml()}
                     editorProps={{ $blockScrolling: true }}
                     setOptions={{
@@ -311,6 +352,8 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
                     width="50%"
                     height="100%"
                     onChange={onChangePrompt}
+                    onFocus={onFocusPrompt}
+                    onBlur={onFocusPrompt}
                     defaultValue={getEditPrompt()}
                     editorProps={{ $blockScrolling: true }}
                     setOptions={{
