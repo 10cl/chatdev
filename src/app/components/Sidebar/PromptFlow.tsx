@@ -34,7 +34,8 @@ import Dialog from "~app/components/Dialog";
 import Button from "~app/components/Button";
 import useSWR from "swr";
 import {importFromText} from "~app/utils/export";
-import {getVersion} from "~utils";
+import {getVersion, uuid} from "~utils";
+import Browser from "webextension-polyfill";
 function PromptFlow() {
 
     interface DevInfoPersist {
@@ -124,7 +125,7 @@ function PromptFlow() {
     const [nodeBg, setNodeBg] = useState('#bbd9e9');
     let devInfoPersist
 
-    function handlePersistentStorage() {
+    async function handlePersistentStorage() {
         const win = window as Window
         if (win.dev_info != undefined){
             devInfoPersist = {
@@ -141,6 +142,41 @@ function PromptFlow() {
                 real_yaml: win.dev_info.real_yaml
             } as DevInfoPersist
             store.set("dev_info", devInfoPersist)
+
+            const prompts = win.dev_info.prompts
+            if (prompts != undefined && Object.keys(prompts).length > 1) {
+                handleBrowserStorage(prompts)
+            }
+        }
+    }
+
+    async function handleBrowserStorage(prompts:any) {
+        const { prompts: prompts_value } = await Browser.storage.local.get('prompts')
+        const browser_prompt_dict: { [key: string]: string } = {};
+        const add_prompts = [] as Prompt[]
+
+        ((prompts_value || []) as Prompt[]).forEach(item => {
+            if (prompts[item.title] == undefined){
+                prompts[item.title] = item.prompt
+            }
+            browser_prompt_dict[item.title] = item.prompt
+        });
+
+        for (const [key, value] of Object.entries(prompts)) {
+            if (browser_prompt_dict[key] == undefined){
+                const item = {
+                    id: uuid(),
+                    title: key,
+                    prompt: value
+                } as Prompt;
+                add_prompts.push(item)
+            }
+        }
+        if (add_prompts.length > 0){
+            ((add_prompts || []) as Prompt[]).forEach(item => {
+                prompts_value.unshift(item)
+            })
+            await Browser.storage.local.set({ prompts_value })
         }
     }
 
@@ -192,7 +228,7 @@ function PromptFlow() {
 
             handlePersistentStorage()
 
-        }, 1000);
+        }, 3000);
         // @ts-ignore
         setTimerId(id);
         return () => {

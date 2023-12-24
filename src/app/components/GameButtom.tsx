@@ -16,9 +16,7 @@ import {
   showHistoryAtom
 } from "~app/state";
 import {BotId} from "~app/bots";
-import {loadHistoryMessagesByMark} from "~services/chat-history";
 import {getStore, setStore} from "~services/prompts";
-import {toBase64} from "js-base64";
 
 interface IMousePositionModal {
   visible: boolean;

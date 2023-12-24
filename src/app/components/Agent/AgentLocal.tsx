@@ -55,7 +55,7 @@ const PromptItem = (props: {
             <GoBook size={22} color="#707070" className="cursor-pointer"/>
         )}
         <div className="min-w-0 flex-1">
-        <p title={props.prompt} className="truncate text-sm font-medium text-primary-text">{props.title}</p>
+        <p title={props.title + "\n" + props.prompt} className="truncate text-sm font-medium text-primary-text">{props.title}</p>
       </div>
       <div className="flex flex-row gap-1">
         {props.edit && <ActionButton text={t('Open')} onClick={props.edit} />}
@@ -78,7 +78,6 @@ const PromptItem = (props: {
 }
 function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
   const { t } = useTranslation()
-  const [formData, setFormData] = useState<Prompt | null>(null)
     const [profile, setProfile] = useState(false)
     const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
     const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
@@ -88,43 +87,6 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
     const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
 
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
-    useEffect(() => {
-        let prompt = null
-        if (getStore("prompt_edit").indexOf("Profile_") !== -1) {
-            for (let i = 0; i < localPromptsQuery.data.length; i++) {
-                if (localPromptsQuery.data[i].title == getStore("prompt_edit")) {
-                    prompt = localPromptsQuery.data[i];
-                }
-            }
-        } else if (getStore("prompt_edit").indexOf("Position_") !== -1) {
-            for (let i = 0; i < localPromptsQuery.data.length; i++) {
-                if (localPromptsQuery.data[i].title == getStore("prompt_edit")) {
-                    prompt = localPromptsQuery.data[i];
-                }
-            }
-            if (prompt == null){
-                prompt = { id: uuid(), title: getStore("prompt_edit"), prompt: getStore("pointerover_pos_name", "") }
-            }
-        }
-        setStore("prompt_edit", "")
-        if (prompt !== null) {
-            setFormData(prompt)
-            setProfile(true)
-        }else{
-            setProfile(false)
-        }
-    }, [])
-
-    useCallback(
-        async (prompt: Prompt) => {
-            const existed = await saveLocalPrompt(prompt)
-            localPromptsQuery.mutate()
-            setFormData(null)
-            setStore("edit_" + prompt.title, true)
-            trackEvent(existed ? 'edit_local_prompt' : 'add_local_prompt')
-        },
-        [localPromptsQuery],
-    );
 
     const removePrompt = useCallback(
     async (id: string) => {
@@ -154,14 +116,12 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
         },
         [localPromptsQuery],
     )
-    useCallback(() => {
-        setFormData({ id: uuid(), title: '', prompt: '' })
-    }, []);
+
     return (
     <>
       {localPromptsQuery.data.length ? (
-        <div className={"grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 " + (profile? "hidden":"")}>
-          {localPromptsQuery.data.map((prompt) => ((prompt.type == "yaml" || prompt.prompt.indexOf("reference: ") != -1) && prompt.title.indexOf("Position_") == -1 &&
+        <div className={"grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 "}>
+          {localPromptsQuery.data.map((prompt) => ((prompt.type == "yaml" || prompt.prompt.indexOf("reference: ") != -1) &&
             <PromptItem
               key={prompt.id}
               title={prompt.title}

@@ -227,6 +227,9 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
+      const isGameMode = getStore("gameModeEnable", true)
+      const isWorkFlowingDisable = getStore("workFlowingDisable", false)
+
       // if in editor, send message as the Agent.
       if (getStore("editor_show")){
         // Editor Switch false
@@ -239,10 +242,14 @@ const ConversationPanel: FC<Props> = (props) => {
         // Agent Switch open
         setStore("workFlowingDisable", false)
         setWorkFlowingDisable(false)
+      }else{
+        if(isGameMode){
+          // Generate Yaml
+          setEditorFocus("")
+          setStore("editor_focus", "")
+        }
       }
 
-      const isGameMode = getStore("gameModeEnable", true)
-      const isWorkFlowingDisable = getStore("workFlowingDisable", false)
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
         setStore("input_text_pending", input)
         updateConfigValue({ startupPage: props.botId })
@@ -315,12 +322,6 @@ const ConversationPanel: FC<Props> = (props) => {
 
       console.log("generate_refresh " + getStore("editor_focus", '') + " prompt: " + editorPrompt)
 
-      const isGameMode = getStore("gameModeEnable", true)
-      setStore("real_yaml", getStore(isGameMode?"editor_yaml":"real_yaml", "Default_Flow_Dag_Yaml"))
-      if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
-        getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
-      }
-
       setEditorPromptTimes(editorPromptTimes + 1)
       setShowEditor(true)
       setStore("editor_show", true)
@@ -330,11 +331,12 @@ const ConversationPanel: FC<Props> = (props) => {
       setStore("editorYamlTimes", editorYamlTimes)
 
       setStore("generate_refresh", false)
-
+      // generate yaml & reset conversion, protect against context
+      resetConversation()
       // alert("Generate Success, You can continue editing in the editor.")
     }else if (getStore("editor_focus", '') !== '' && getStore("generate_content", "") != ""){
         // update for Yaml, 2s update
-        if (new Date().getTime() - getStore("generate_content_time", 0) > 1000) {
+        if (new Date().getTime() - getStore("generate_content_time", 0) > 500) {
           // update for Yaml
           if (getStore("editor_focus", '') == "Yaml") {
             getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("generate_content", "")
@@ -439,8 +441,7 @@ const ConversationPanel: FC<Props> = (props) => {
           setGameContent(getStore("pointer_tips", ""))
 
         }else if (pointerover_pos){
-          const promptKey  = 'Position_' + toBase64(getStore("pointerover_pos_name", ""))
-          setStore("prompt_edit", promptKey)
+          setStore("prompt_edit", getStore("pointerover_pos_name", ""))
           setGameContent(getStore("pointer_tips", "TODO"))
         }
         setGameFloatVisible(pointerover || pointerover_pos)
@@ -468,6 +469,9 @@ const ConversationPanel: FC<Props> = (props) => {
     }else{
       setStore("workFlowingDisable", false)
       setWorkFlowingDisable(false)
+
+      setEditorFocus("")
+      setStore("editor_focus", "")
     }
   }
 
@@ -579,12 +583,11 @@ const ConversationPanel: FC<Props> = (props) => {
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
             {(isUrlReq||
-                ((isGameMode || showEditor)
-                    && props.messages.length > 0
+                (props.messages.length > 0
                     && !props.messages[props.messages.length-1].text
                     && !props.messages[props.messages.length-1].error))
                 && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
-            {(isGameMode || showEditor) && props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
+            {props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
             {mode === 'compact' && props.onSwitchBot && (
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
             )}
@@ -610,24 +613,22 @@ const ConversationPanel: FC<Props> = (props) => {
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">
-            {!workFlowingDisable && <Tooltip content={cx(showEditor ? t('Exit') : (t('Edit') + " " + t('Agent')))}>
-              <img src={!showEditor?editIcon:closeIcon} className="w-5 h-5 cursor-pointer" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
-            </Tooltip>}
-            <Tooltip content={t('New Agent')}>
-              <img src={addIcon} className="w-5 h-5 cursor-pointer" onClick={newAgentButton} />
-            </Tooltip>
-            <Tooltip content={t('Open Your Agent')}>
-              <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openYourAgent} />
-            </Tooltip>
             {false && <Tooltip content={t('Open Web Preview')}>
               <img src={htmlIcon} className="w-5 h-5 cursor-pointer" onClick={openHtmlDialog} />
             </Tooltip>}
-            <Tooltip content={t('Clear conversation')}>
-              <img src={clearIcon} className="w-5 h-5 cursor-pointer" onClick={resetConversation} />
-            </Tooltip>
-            <Tooltip content={t('View history')}>
-              <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
-            </Tooltip>
+
+            {!workFlowingDisable && <Tooltip content={cx(showEditor ? t('Exit') : (t('Edit') + " " + t('Agent')))}>
+              <img src={!showEditor?editIcon:closeIcon} className="w-5 h-5 cursor-pointer" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
+            </Tooltip>}
+            {!workFlowingDisable && <Tooltip content={t('New Agent')}>
+              <img src={addIcon} className="w-5 h-5 cursor-pointer" onClick={newAgentButton} />
+            </Tooltip>}
+            {!workFlowingDisable && <Tooltip content={t('Open Your Agent')}>
+              <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openYourAgent} />
+            </Tooltip>}
+            {!workFlowingDisable && <Tooltip content={cx(t('Agent Community'))}>
+              <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
+            </Tooltip>}
             <Tooltip content={cx(workFlowingDisable ? t('Start') : t('Stop')) + " " + t('Agent')}>
               <button
                   className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 ' + (isGameMode ? "":'flow-open'))}
@@ -637,8 +638,11 @@ const ConversationPanel: FC<Props> = (props) => {
                 <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
               </button>
             </Tooltip>
-            <Tooltip content={cx(t('Agent Community'))}>
-              <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
+            <Tooltip content={t('Clear conversation')}>
+              <img src={clearIcon} className="w-5 h-5 cursor-pointer" onClick={resetConversation} />
+            </Tooltip>
+            <Tooltip content={t('View history')}>
+              <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
             </Tooltip>
             <Tooltip content={cx(t('Settings'))}>
               <img src={settingsIcon} className="w-5 h-5 cursor-pointer" onClick={openSettings} />
@@ -669,7 +673,7 @@ const ConversationPanel: FC<Props> = (props) => {
             mode={mode}
             disabled={props.generating}
             placeholder={showEditor
-                ? (t('Describe here, AI will help you generate ') + (editorFocus != "Prompt" ? "YAML: " + getStore("real_yaml", "Default_Flow_Dag_Yaml") : "JS: " + editorPrompt))
+                ? (t('Describe here, AI will help you generate your Agent ') + (editorFocus != "Prompt" ? "YAML: " + getStore("real_yaml", "Default_Flow_Dag_Yaml") : "func: " + editorPrompt))
                 : t('Ensure you are logged in to the LLM website to access all features')}
             onSubmit={onSubmit}
             autoFocus={mode === 'full'}
