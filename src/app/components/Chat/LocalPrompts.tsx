@@ -81,6 +81,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
         if (prompts !== null && prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]){
             return prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]
         }
+        setEditorStatus('Yaml')
         return "";
     }
 
@@ -221,7 +222,7 @@ function PromptForm(props: {setShowEditor: (show: boolean) => void;  }) {
     }
 
     React.useEffect(() => {
-        setEditorStatus("Yaml")
+        // setEditorStatus("Yaml")
         setStore("editor_prompt_type", "path:")
         // data stub:
         const sqlTables = [

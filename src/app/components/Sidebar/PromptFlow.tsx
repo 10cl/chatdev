@@ -5,7 +5,7 @@ import {
     editorPromptAtom,
     editorPromptTimesAtom,
     showEditorAtom,
-    seminarDisableAtom, promptVersionAtom, gameModeEnable, editorYamlAtom
+    seminarDisableAtom, promptVersionAtom, gameModeEnable, editorYamlAtom, yamlExceptionAtom
 } from '~app/state'
 import React, {MouseEvent as ReactMouseEvent, useCallback, useEffect, useState} from 'react';
 import ReactFlow, {
@@ -112,6 +112,7 @@ function PromptFlow() {
     const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
     const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
+    const [yamlException, setYamlException] = useAtom(yamlExceptionAtom)
 
     const [showEditor, setShowEditor] = useAtom(showEditorAtom)
     const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
@@ -193,6 +194,7 @@ function PromptFlow() {
             }else if (prompts['Flow_Dag_Yaml'] != getStore("flow_yaml", undefined)){
                 setStore("flow_yaml", prompts['Flow_Dag_Yaml'])
                 updateFlow()
+                setStore("chat_reset", true)
             }
 
             if (getStore("flow_edge", "") !== flowEdge) {
@@ -225,6 +227,11 @@ function PromptFlow() {
                 setStore("exception_nodes", "")
                 window.confirm(t('Agent') + " Exception: " + exceptionNode)
             }
+
+            // yaml exception
+            const yaml_exception = getStore("yaml_exception", "")
+            console.log("yaml: " + yaml_exception + ", store: " + yamlException)
+            setYamlException(yaml_exception)
 
             handlePersistentStorage()
 
@@ -385,6 +392,7 @@ function PromptFlow() {
                     <Background/>
                 </ReactFlow>
             </div>
+            {!seminarDisable && yamlException != "" && <div id="yaml-exception" className="group relative flex items-center space-x-3 rounded-lg border border-primary-border bg-primary-background px-5 py-4 shadow-sm hover:border-gray-400">{yamlException}</div>}
         </aside>
     )
 }

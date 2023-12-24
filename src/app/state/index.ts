@@ -46,6 +46,7 @@ export const messageTimesTimesAtom = atomWithStorage<number>('messageTimes', 0)
 export const editorPromptTimesAtom = atomWithStorage<number>('editorPromptTimes', 0)
 export const promptLibraryDialogOpen = atomWithStorage('promptLibraryDialogOpen', false)
 export const promptVersionAtom = atomWithStorage('prompt_version', getVersion())
+export const yamlExceptionAtom = atomWithStorage('yaml_exception', "")
 export const floatTipsOpen = atomWithStorage('floatTipsOpen', false)
 
 export const sidePanelBotAtom = atomWithStorage<BotId>('sidePanelBot', 'chatgpt')

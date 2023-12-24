@@ -55,3 +55,10 @@
     font-size: 14px;
     word-break: break-all;
 }
+
+#yaml-exception{
+    white-space: pre;
+    word-wrap: break-word;
+    font-size: 12px;
+    margin-bottom: 20px;
+}

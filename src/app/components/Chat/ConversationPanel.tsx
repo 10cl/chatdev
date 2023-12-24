@@ -62,7 +62,7 @@ import {
   editorYamlAtom,
   editorPromptAtom,
   showShareAtom,
-  fpHashAtom, seminarDisableAtom, editorFocusAtom, isNewAgentShowAtom,
+  fpHashAtom, seminarDisableAtom, editorFocusAtom, isNewAgentShowAtom, yamlExceptionAtom,
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewAgentDialog from "~app/components/Agent/NewAgentDialog";
@@ -200,9 +200,9 @@ const ConversationPanel: FC<Props> = (props) => {
       const value = getStore("input_text", "")
       const task_refresh = getStore("task_refresh", false)
       const generate_refresh = getStore("generate_refresh", false)
+      const generate_content = getStore("generate_content", false)
 
-      if (value != "" || task_refresh || generate_refresh) {
-        console.log("input text null")
+      if (value != "" || task_refresh || generate_refresh || generate_content != "") {
         const messageTimes = getStore("messageTimes", 0) + 1
         setChangeTime(messageTimes)
         setStore("messageTimes", messageTimes)
@@ -248,6 +248,11 @@ const ConversationPanel: FC<Props> = (props) => {
           setEditorFocus("")
           setStore("editor_focus", "")
         }
+      }
+
+      if (getStore("chat_reset")){
+        setStore("chat_reset", false)
+        resetConversation()
       }
 
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
@@ -318,7 +323,7 @@ const ConversationPanel: FC<Props> = (props) => {
         getStore("prompts")[editorPrompt] = getStore("generate_content", "")
       }
 
-      setStore("generate_content", "")
+      finishGenerate()
 
       console.log("generate_refresh " + getStore("editor_focus", '') + " prompt: " + editorPrompt)
 
@@ -330,7 +335,6 @@ const ConversationPanel: FC<Props> = (props) => {
       setEditorYamlTimes(editorYamlTimes)
       setStore("editorYamlTimes", editorYamlTimes)
 
-      setStore("generate_refresh", false)
       // generate yaml & reset conversion, protect against context
       resetConversation()
       // alert("Generate Success, You can continue editing in the editor.")
@@ -374,9 +378,9 @@ const ConversationPanel: FC<Props> = (props) => {
   const newAgentButton = useCallback(() => {
     setNewAgentDialog(true)
 
-    // Generate Yaml
-    setEditorFocus("Yaml")
-    setStore("editor_focus", "Yaml")
+    // // Generate Yaml
+    // setEditorFocus("Yaml")
+    // setStore("editor_focus", "Yaml")
   }, [props.botId])
 
   const getOffsetX = (e: any) =>{
@@ -479,6 +483,7 @@ const ConversationPanel: FC<Props> = (props) => {
     if (isGameMode){
       return
     }
+    finishGenerate()
     setGameFloatVisible(false)
 
     if (!window.confirm((workFlowingDisable?
@@ -518,6 +523,9 @@ const ConversationPanel: FC<Props> = (props) => {
     setStore("editorYamlTimes", editorYamlTimes)
 
     setShowAssistant(false)
+
+    setGameModeEnable(false)
+    setStore("gameModeEnable", false)
     trackEvent('open_editor_prompt_flow')
   },[])
 
@@ -537,6 +545,7 @@ const ConversationPanel: FC<Props> = (props) => {
 
 
   const openAssistant = useCallback(async () => {
+    finishGenerate()
     if (!(await requestHostPermission('https://*.chatdev.toscl.com/'))) {
       throw new ChatError('Missing chatdev.toscl.com permission', ErrorCode.MISSING_HOST_PERMISSION)
     }
@@ -548,6 +557,7 @@ const ConversationPanel: FC<Props> = (props) => {
   },[])
 
   const openSettings = useCallback(() => {
+    finishGenerate()
     setShowSettings(true)
     trackEvent('open_settings')
   },[])
@@ -558,10 +568,17 @@ const ConversationPanel: FC<Props> = (props) => {
   },[])
 
   const openYourAgent = useCallback(() => {
+    finishGenerate()
     setStore("prompt_edit", "")
     setIsPromptLibraryDialogOpen(true)
     trackEvent('open_prompt_library')
   }, [])
+
+  const finishGenerate = useCallback(() => {
+    setStore("generate_content", "")
+    setStore("generate_refresh", false)
+  }, [])
+
 
   function getLastMessage() {
     const errorMsg = props.messages[props.messages.length-1].error
