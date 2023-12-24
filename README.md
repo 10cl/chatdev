@@ -45,7 +45,7 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
 
 ## 📢 TLDR
 * GameMode: in the AI Town Social Simulation, you can customize these NPCs & location mark.
-* GPTs Support: import from GPTs Community or defined yours.
+* Agent Support: import from Agent Community or defined yours.
 * PromptIDE: Automatic completion, Dual screen display, Visualize PromptFlow, JavaScript Support
 * Not just ChatGpt, but the new Bing Chat, Google Bard, Claude, QianWen, iFlytek Spark, and more than 10 open source models.
 
@@ -64,17 +64,17 @@ When the distance between the player and the NPC <100, the NPC will trigger the 
 ![custom_map](./screenshots/custom_map.png)
 Drag chatdev/src/assets/ex_assets/chatdev_main_map.json to TILED app.
 
-### GPTs
-GPTs is a large language model, you can import GPTs from the community or customize Prompt Flow in PromptIDE to achieve new GPTs, run GPTs to let NPCs achieve multi-person self-collaboration to complete tasks.
-in the GPTs, if the GPTs's Prompt Flow defines the role(`npc`, see [Flows](#flows) for details), and assigns the NPC in the map to the role, then they will gather together in the map to hold a seminar and execute the complete process of GPTs. If no role is defined, you can view the complete execution process in Chat Mode and have a dialogue in the usual LLM way.
+### Agent
+Agent is a large language model, you can import Agent from the community or customize Prompt Flow in PromptIDE to achieve new Agent, run Agent to let NPCs achieve multi-person self-collaboration to complete tasks.
+in the Agent, if the Agent's Prompt Flow defines the role(`npc`, see [Flows](#flows) for details), and assigns the NPC in the map to the role, then they will gather together in the map to hold a seminar and execute the complete process of Agent. If no role is defined, you can view the complete execution process in Chat Mode and have a dialogue in the usual LLM way.
 
 ## ✨ Chat Mode
-when you choose Chat Mode, and close the `GPTs` in the upper right corner, select your favorite large model on the left, Chat Mode will be a regular LLM UI, and all your inputs will be through the normal LLM interface, output the reply of the large model.
+when you choose Chat Mode, and close the `Agent` in the upper right corner, select your favorite large model on the left, Chat Mode will be a regular LLM UI, and all your inputs will be through the normal LLM interface, output the reply of the large model.
 
 ![chat_mode.png](./screenshots/chat_mode.png)
 
-### GPTs Community
-You can import GPTs from the community, and you can also share your GPTs with others.
+### Agent Community
+You can import Agent from the community, and you can also share your Agent with others.
 ![gpts_community.png](./screenshots/gpts_community.png)
 
 ### Chat History
@@ -83,7 +83,7 @@ Your chat will be stored locally, and you can view the historical chat records o
 
 ### Chat Chain
 in Chat Mode, if you are in Chat Mode, then the execution of Prompt Flow will be in the form of Chat Chain, and the execution of Prompt Flow will be in the form of Chat Chain in the chat box.
-right-click to open GPTs in the upper right corner, enter your one-sentence demand, your input will be used as the input variable `${inputs.input}` in `Chat Chain`, and `Chat Chain` will execute the corresponding node according to your input. The execution order of the node is from top to bottom. If the input variable of the node is satisfied, the node will be executed, otherwise the node will be skipped and the next node will be executed.
+right-click to open Agent in the upper right corner, enter your one-sentence demand, your input will be used as the input variable `${inputs.input}` in `Chat Chain`, and `Chat Chain` will execute the corresponding node according to your input. The execution order of the node is from top to bottom. If the input variable of the node is satisfied, the node will be executed, otherwise the node will be skipped and the next node will be executed.
 ![chat-prompt-flow.gif](./screenshots/chat-prompt-flow.gif)
 
 ## ✨ Prompt IDE
@@ -93,8 +93,8 @@ Prompt flow is a suite of development tools designed to streamline the end-to-en
 
 - **Prompt Flow Editor**: Used to edit the YAML file of `Prompt Flow` and the prompt content and JavaScript script of the node
 - **Prompt Flow Visualization**: Through the visualization of the execution process of the Prompt Flow node, the color of the node will change when it is executed to a certain node
-- **JavaScript Support**: Through JavaScript scripts, you can use your creativity to realize the cooperation of different NPCs to achieve your GPTs
-- **Export & Import**: You can import other excellent GPTs or share your GPTs
+- **JavaScript Support**: Through JavaScript scripts, you can use your creativity to realize the cooperation of different NPCs to achieve your Agent
+- **Export & Import**: You can import other excellent Agent or share your Agent
 
 ### PromptFow Editor
 
@@ -121,14 +121,14 @@ A flow is represented as a YAML file and can be visualized using our IDE.
 
 Here is an example:
 
-#### Write GPTs/Agent
+#### Write Agent/Agent
 Indicates the definition of the current node's output content. `${TestModification}` references the node's name,
 signifying that the current node's output is the output of the `TestModification` node (`output` variable).
-This is a standard format, you need to ensure that 'desc' nodes are used to describe your GPTs in the map, define 'reference' under 'outputs' nodes to represent the most total nodes, and make all nodes connected.
+This is a standard format, you need to ensure that 'desc' nodes are used to describe your Agent in the map, define 'reference' under 'outputs' nodes to represent the most total nodes, and make all nodes connected.
 
 ```yaml
 # Required
-desc: 'your GPTs description' # In the game map, mouse over the description displayed by GPTs
+desc: 'your Agent description' # In the game map, mouse over the description displayed by Agent
 
 # Required
 outputs:
@@ -149,7 +149,7 @@ in the prompt:
 {intro} will replace by 'xxx'
 {input_text} will replace by the content what you entered in the input box.
 
-- The full GPTs summarizing Twitter content are below：
+- The full Agent summarizing Twitter content are below：
 ```yaml
 desc: 'summary elonmusk latest twitter'
 
@@ -193,7 +193,7 @@ use `node_name.xxx`: represents a variable that references another node
 You can export your prompt flow to a json file and import it to another devices.
 it contains all the information about your prompt flow, including the prompt, the JavaScript functions, and the YAML file.
 
-### GPTs Example
+### Agent Example
 Our examples should also give you an idea how to use that:
 
 #### Chatting with NPC
@@ -349,7 +349,7 @@ now, I say: {task}
 
 #### Generate a website in one sentence
 ```yaml
-desc: "single GPTs - generated web pages - multi-role collaborative presentation"
+desc: "single Agent - generated web pages - multi-role collaborative presentation"
 
 outputs:
   overview:

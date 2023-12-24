@@ -45,7 +45,7 @@ ChatDev IDE是一个用于构建AI代理的工具，无论是在游戏中的NPC�
 
 ## 📢 简介
 * 游戏模式：在AI镇社会模拟中，您可以自定义这些NPC和位置标记。
-* GPTs支持：从GPTs社区导入或自定义您的GPT。
+* Agent支持：从Agent社区导入或自定义您的智能体。
 * PromptIDE：自动完成，双屏显示，可视化PromptFlow，JavaScript节点支持
 * 不仅仅是ChatGpt，还有Bing Chat，Google Bard，Claude，千问，讯飞等超过10种开源模型。
 
@@ -65,19 +65,19 @@ ChatDev IDE是一个用于构建AI代理的工具，无论是在游戏中的NPC�
 
 ![custom_map](./screenshots/custom_map.png) 将`chatdev/src/assets/ex_assets/chatdev_main_map.json`拖到 `TILED` 应用程序中。
 
-### GPTs
+### Agent
 
-GPTs是一个大型语言模型，您可以从社区导入GPTs或在PromptIDE中自定义Prompt Flow以实现新的GPTs，运行GPTs让NPC实现多人自我协作完成任务。 在GPTs中，如果GPTs的Prompt Flow定义了角色(`npc`，详情见[流程](#flows))，并将地图中的NPC分配给该角色，那么它们将在地图上聚集在一起举行研讨会并执行GPTs的完整过程。如果没有定义角色，您可以在聊天模式中查看完整的执行过程，并以通常的LLM方式进行对话。
+Agent是一个大型语言模型，您可以从社区导入Agent或在PromptIDE中自定义Prompt Flow以实现新的Agent，运行Agent让NPC实现多人自我协作完成任务。 在Agent中，如果Agent的Prompt Flow定义了角色(`npc`，详情见[流程](#flows))，并将地图中的NPC分配给该角色，那么它们将在地图上聚集在一起举行研讨会并执行Agent的完整过程。如果没有定义角色，您可以在聊天模式中查看完整的执行过程，并以通常的LLM方式进行对话。
 
 ## ✨ 聊天模式
 
-当您选择聊天模式，并关闭右上角的`GPTs`，在左侧选择您喜欢的大型模型时，聊天模式将是一个常规的LLM用户界面，并且所有的输入都将通过正常的LLM界面，输出大型模型的回复。
+当您选择聊天模式，并关闭右上角的`Agent`，在左侧选择您喜欢的大型模型时，聊天模式将是一个常规的LLM用户界面，并且所有的输入都将通过正常的LLM界面，输出大型模型的回复。
 
 ![chat_mode.png](./screenshots/chat_mode.png)
 
-### GPTs社区
+### Agent社区
 
-您可以从社区导入GPTs，您也可以与他人分享您的GPTs。 ![gpts_community.png](./screenshots/gpts_community.png)
+您可以从社区导入Agent，您也可以与他人分享您的Agent。 ![gpts_community.png](./screenshots/gpts_community.png)
 
 ### 聊天历史
 
@@ -95,8 +95,8 @@ Prompt流是一套旨在简化LLM为基础的AI应用的端到端开发周期的
 
 * **Prompt Flow 编辑器**：用于编辑`Prompt Flow`的YAML文件以及节点的提示内容和JavaScript脚本
 * **Prompt Flow 可视化**：通过Prompt Flow节点的执行过程的可视化，当执行到某个节点时，节点的颜色会改变
-* **JavaScript 支持**：通过JavaScript脚本，您可以发挥您的创造力，实现不同NPC之间的协作，以实现您的GPTs
-* **导出 & 导入**：您可以导入其他优秀的GPTs或分享您的GPTs
+* **JavaScript 支持**：通过JavaScript脚本，您可以发挥您的创造力，实现不同NPC之间的协作，以实现您的Agent
+* **导出 & 导入**：您可以导入其他优秀的Agent或分享您的Agent
 
 ### PromptFow 编辑器
 
@@ -128,13 +128,13 @@ PromptFlow中的流程是由提示/函数的DAG（有向无环图）组成，称
 
 以下是一个示例：
 
-#### 编写GPTs/Agent
+#### 编写Agent/Agent
 
-表示当前节点输出内容的定义。`${TestModification}` 引用节点的名称，表示当前节点的输出是 `TestModification` 节点（`output` 变量）的输出。这是一种标准格式，您需要确保在地图中使用 'desc' 节点来描述您的GPTs，定义 'outputs' 节点下的 'reference'，以表示最终节点，并确保所有节点都连接在一起。
+表示当前节点输出内容的定义。`${TestModification}` 引用节点的名称，表示当前节点的输出是 `TestModification` 节点（`output` 变量）的输出。这是一种标准格式，您需要确保在地图中使用 'desc' 节点来描述您的Agent，定义 'outputs' 节点下的 'reference'，以表示最终节点，并确保所有节点都连接在一起。
 
 ```yaml
 # 必需
-desc: '您的GPTs描述' # 在游戏地图中，将鼠标悬停在GPTs显示的描述上
+desc: '您的Agent描述' # 在游戏地图中，将鼠标悬停在Agent显示的描述上
 
 # 必需
 outputs:
@@ -158,7 +158,7 @@ nodes:
     
 * `{input_text}` 将被输入框中输入的内容替换
     
-* 完整的概括Twitter内容的GPTs如下：
+* 完整的概括Twitter内容的Agent如下：
     
 
 ```yaml
@@ -200,7 +200,7 @@ nodes:
 
 您可以将您的提示流导出为JSON文件，并导入到另一个设备中。它包含有关提示流的所有信息，包括提示、JavaScript函数和YAML文件。
 
-### GPTs示例
+### Agent示例
 
 我们的示例还应该给您一个如何使用它的想法：
 
@@ -368,7 +368,7 @@ node.output = article.textContent
 #### 一句话生成一个网站
 
 ```yaml
-desc: "单个GPTs - 生成网页 - 多角色协作呈现"
+desc: "单个Agent - 生成网页 - 多角色协作呈现"
 
 outputs:
   overview:
