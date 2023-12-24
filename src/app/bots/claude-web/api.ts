@@ -1,4 +1,4 @@
-import { ofetch } from 'ofetch'
+import { FetchError, ofetch } from 'ofetch'
 import { uuid } from '~utils'
 import { ChatError, ErrorCode } from '~utils/errors'
 
@@ -11,7 +11,7 @@ export async function fetchOrganizationId(): Promise<string> {
     throw new ChatError('Claude webapp not avaiable in your country', ErrorCode.CLAUDE_WEB_UNAVAILABLE)
   }
   if (resp.status === 403) {
-    throw new ChatError('UNAUTHORIZED', ErrorCode.CLAUDE_WEB_UNAUTHORIZED)
+    throw new ChatError('There is no logged-in Claude account in this browser.', ErrorCode.CLAUDE_WEB_UNAUTHORIZED)
   }
   const orgs = await resp.json()
   return orgs[0].uuid
@@ -19,10 +19,17 @@ export async function fetchOrganizationId(): Promise<string> {
 
 export async function createConversation(organizationId: string): Promise<string> {
   const id = uuid()
-  await ofetch(`https://claude.ai/api/organizations/${organizationId}/chat_conversations`, {
-    method: 'POST',
-    body: { name: '', uuid: id },
-  })
+  try {
+    await ofetch(`https://claude.ai/api/organizations/${organizationId}/chat_conversations`, {
+      method: 'POST',
+      body: { name: '', uuid: id },
+    })
+  } catch (err) {
+    if (err instanceof FetchError && err.status === 403) {
+      throw new ChatError('There is no logged-in Claude account in this browser.', ErrorCode.CLAUDE_WEB_UNAUTHORIZED)
+    }
+    throw err
+  }
   return id
 }
 
