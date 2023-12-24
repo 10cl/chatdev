@@ -10,7 +10,7 @@ import {useAtom} from "jotai/index";
 import {
     editorPromptAtom,
     editorPromptTimesAtom,
-    editorYamlTimesAtom,
+    editorYamlTimesAtom, gameModeEnable,
     isNewAgentShowAtom,
     showEditorAtom
 } from "~app/state";
@@ -27,6 +27,7 @@ const NewAgentView: FC<Props> = ({ messages }) => {
     const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
     const [showEditor, setShowEditor] = useAtom(showEditorAtom)
     const [isNewAgentShow, setNewAgentDialog] = useAtom(isNewAgentShowAtom)
+    const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
 
     const createAgent = useCallback(
         async (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,6 +55,8 @@ const NewAgentView: FC<Props> = ({ messages }) => {
                     setEditorYamlTimes(editorYamlTimes)
                     setStore("editorYamlTimes", editorYamlTimes)
 
+                    setGameModeEnable(false)
+                    setStore("gameModeEnable", false)
                 } finally {
                     setCreating(false)
                     setNewAgentDialog(false)

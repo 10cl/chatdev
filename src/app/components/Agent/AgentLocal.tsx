@@ -14,7 +14,7 @@ import {useAtom} from "jotai/index";
 import {
     editorPromptAtom,
     editorPromptTimesAtom,
-    editorYamlTimesAtom,
+    editorYamlTimesAtom, gameModeEnable,
     isNewAgentShowAtom, promptLibraryDialogOpen,
     showEditorAtom
 } from "~app/state";
@@ -85,6 +85,7 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
     const [showEditor, setShowEditor] = useAtom(showEditorAtom)
     const [isNewAgentShow, setNewAgentDialog] = useAtom(isNewAgentShowAtom)
     const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+    const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
 
     const localPromptsQuery = useSWR('local-prompts', () => loadLocalPrompts(), { suspense: true })
 
@@ -113,6 +114,9 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
             setEditorYamlTimes(editorYamlTimes)
             setStore("editorYamlTimes", editorYamlTimes)
             setIsPromptLibraryDialogOpen(false)
+
+            setGameModeEnable(false)
+            setStore("gameModeEnable", false)
         },
         [localPromptsQuery],
     )

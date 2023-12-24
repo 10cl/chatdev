@@ -11,7 +11,7 @@ import {trackEvent} from "~app/plausible";
 import {useAtom} from "jotai/index";
 import {
   editorPromptAtom,
-  editorPromptTimesAtom, editorYamlAtom, editorYamlTimesAtom, floatTipsOpen, promptLibraryDialogOpen,
+  editorPromptTimesAtom, editorYamlAtom, editorYamlTimesAtom, floatTipsOpen, gameModeEnable, promptLibraryDialogOpen,
   showEditorAtom,
   showHistoryAtom
 } from "~app/state";
@@ -35,7 +35,7 @@ const GameButton = (props: IMousePositionModal) => {
 
   const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
   const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
-
+  const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
@@ -56,6 +56,9 @@ const GameButton = (props: IMousePositionModal) => {
     const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
     setEditorYamlTimes(editorYamlTimes)
     setStore("editorYamlTimes", editorYamlTimes)
+
+    setGameModeEnable(false)
+    setStore("gameModeEnable", false)
 
     trackEvent('open_editor_profile')
   }, [])
