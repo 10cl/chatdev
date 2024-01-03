@@ -66,6 +66,7 @@ import {
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewAgentDialog from "~app/components/Agent/NewAgentDialog";
+import {loadUrl} from "~document-loader/loader";
 
 interface Props {
   botId: BotId
@@ -282,10 +283,11 @@ const ConversationPanel: FC<Props> = (props) => {
         setStore("response_update_text", "⌛")
         setStore("response_type", "url")
         setUrlReq(true)
-        loadRemoteUrl(url).then(html => {
+        loadUrl(url).then(document => {
             setStore("response_type", "")
-            setStore("response_update_text", html)
-            console.log("html:" + html)
+            setStore("response_update_text", document)
+            console.log("remote url:")
+            console.log(document)
 
             setTimeout(function (){
               setUrlReq(false)
@@ -294,7 +296,7 @@ const ConversationPanel: FC<Props> = (props) => {
               setStore("messageTimes", messageTimes)
             }, 3000)
 
-            // sendProp.onUserSendMessage(html, botId)
+            // sendProp.onUserSendMessage(document, botId)
         })
       }else{
         sendProp.onUserSendMessage(value, botId)
