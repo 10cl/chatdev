@@ -5,9 +5,10 @@ import './base.scss'
 import './i18n'
 import { plausible } from './plausible'
 import { router } from './router'
+import {initForWinStore} from "~services/storage/window-store";
 
 const container = document.getElementById('app')!
 const root = createRoot(container)
-root.render(<RouterProvider router={router} />)
+initForWinStore().then(() => root.render(<RouterProvider router={router} />))
 
 plausible.enableAutoPageviews()
