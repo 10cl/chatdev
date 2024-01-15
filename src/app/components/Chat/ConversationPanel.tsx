@@ -28,7 +28,7 @@ import ChatMessageList from './ChatMessageList'
 import LocalPrompts from './LocalPrompts'
 import store from 'store2'
 import React, { useEffect  } from 'react';
-import GameButton from '../GameButtom';
+import GameAgentObjectModal from '../GameAgentObjectModal';
 import "ace-builds/src-noconflict/theme-github";
 import "ace-builds/src-noconflict/mode-yaml";
 import "ace-builds/src-noconflict/theme-github";
@@ -67,6 +67,7 @@ import {
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewAgentDialog from "~app/components/Agent/NewAgentDialog";
 import {loadUrl} from "~document-loader/loader";
+import GameModeView from "~app/components/GameModeView";
 
 interface Props {
   botId: BotId
@@ -691,7 +692,7 @@ const ConversationPanel: FC<Props> = (props) => {
               <span>{t('Ensure you are logged in to the LLM website to access all features, When using the default Webapp Mode, no tokens will be consumed.')}</span>
             </div>
           </div>
-          <div id="game-container" className={cx("game-container", isGameMode ? "" : "hidden")} onMouseMove={mouseMove}></div>
+          <GameModeView  botId={props.botId}/>
         </div>
 
         <div className={cx('mt-3 flex flex-col', marginClass, mode === 'full' ? 'mb-3' : 'mb-[5px]')}>
@@ -722,12 +723,6 @@ const ConversationPanel: FC<Props> = (props) => {
           />
         </div>
       </div>
-      <GameButton
-          botId={props.botId}
-          visible={gameFloatVisible}
-          content={gameContent}
-          defaultPosition={defaultPosition}
-      />
       {showHistory && <HistoryDialog botId={props.botId} open={true} onClose={() => setShowHistory(false)} />}
       {isPreviewShow && (
         <HtmlTypeView open={true} onClose={() => setShowWebPreviewDialog(false)} messages={props.messages} />
