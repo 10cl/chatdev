@@ -1,17 +1,24 @@
 import {ofetch} from "ofetch";
 import {CSVLoader} from "langchain/document_loaders/fs/csv";
 import {JSONLoader} from "langchain/document_loaders/fs/json";
-import { YoutubeLoader } from "langchain/document_loaders/web/youtube";
+import {YoutubeLoader} from "langchain/document_loaders/web/youtube";
 import {IMSDBLoader} from "langchain/document_loaders/web/imsdb";
 import {HNLoader} from "langchain/document_loaders/web/hn";
 import {GitbookLoader} from "langchain/document_loaders/web/gitbook";
 import {CheerioWebBaseLoader} from "langchain/document_loaders/web/cheerio";
-import {getStore} from "~services/prompts";
+import {
+    getNodeType,
+    setAgentReset,
+    setEmbeddingDocs,
+    setEmbeddingUrl,
+    setResponseType
+} from "~services/storage/memory-store";
 import {TextLoader} from "langchain/document_loaders/fs/text";
 import {WebPDFLoader} from "langchain/document_loaders/web/pdf";
 import {RecursiveCharacterTextSplitter} from "langchain/text_splitter";
+import {requestHostPermission} from "~app/utils/permissions";
 
-export async function loadDocument(url: string) {
+export async function loadDocuments(url: string) {
     const extension = extractFileExtension(url)
     try {
         let loader;
@@ -44,10 +51,19 @@ export async function loadDocument(url: string) {
             loader = new CheerioWebBaseLoader(url);
             const docs = await loader.load();
             const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
-            return splitter.splitDocuments(docs)
+            const resultDocs = await splitter.splitDocuments(docs)
+            // cache the doc loader.
+            setEmbeddingDocs(resultDocs)
+            setEmbeddingUrl(url)
+
+            return resultDocs
         }
-        const docs = await loader.load();
-        console.log({docs});
+
+        const docs = await loader.load()
+        // cache the doc loader.
+        setEmbeddingDocs(docs)
+        setEmbeddingUrl(url)
+
         return docs
     } catch (err) {
         console.error(err)
@@ -56,15 +72,41 @@ export async function loadDocument(url: string) {
     return undefined
 }
 
+export async function loadDocument(url: string) {
+    console.log("load document: " + url)
+    const docs = await loadDocuments(url)
+    if (docs){
+        let documents = ""
+        for (const retrievedDoc of docs) {
+            documents += retrievedDoc.pageContent + "\n"
+        }
+        return documents
+    }
+    return ""
+}
+
 export async function loadUrl(url : string) {
-    const loadType = getStore("node_type", "url")
-    if (loadType == "url"){
-        return ofetch<string>(url).catch((err) => {
-            alert('Failed to load remote html:' + err)
+    try {
+        console.log("load url: " + url)
+        const urlObj = new URL(url);
+        if (!(await requestHostPermission(urlObj.protocol + '//*.' + urlObj.hostname + "/"))) {
+            alert("Please allow the host permission to load the url.")
+            setAgentReset(true)
             return ""
-        })
-    }else if (loadType == "doc"){
-        return loadDocument(url)
+        }
+        setResponseType("url")
+
+        const loadType = getNodeType()
+        if (loadType == "url"){
+            return ofetch<string>(url).catch((err) => {
+                alert('Failed to load remote html:' + err)
+                return ""
+            })
+        }else if (loadType == "doc"){
+            return loadDocument(url)
+        }
+    }catch (e){
+        alert("loadUrl exception: " + e)
     }
 }
 

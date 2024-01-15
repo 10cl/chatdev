@@ -1,4 +1,4 @@
-import { Pipeline, pipeline } from "@xenova/transformers";
+import {FeatureExtractionPipeline, Pipeline, pipeline, Processor} from "@xenova/transformers";
 import { Embeddings, type EmbeddingsParams } from "@langchain/core/embeddings";
 import { chunkArray } from "@langchain/core/utils/chunk_array";
 
@@ -36,7 +36,7 @@ export class ChatDevLocalTransformersEmbeddings
 
   timeout?: number;
 
-  private pipelinePromise?: Promise<Pipeline>;
+  private pipelinePromise?:  Promise<FeatureExtractionPipeline>;
 
   constructor(fields?: Partial<HuggingFaceTransformersEmbeddingsParams>) {
     super(fields ?? {});
