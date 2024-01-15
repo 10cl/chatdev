@@ -57,7 +57,7 @@ const AgentUploadView: FC<Props> = ({ messages }) => {
   return (
     <div className="p-5 flex flex-col gap-5 h-full">
       <p className="text-center text-primary-text">
-        This will generate a public link for this Agent.
+          Store to the cloud & generate a public link that details the Agent.
       </p>
       {resultId ? (
         <div className="flex flex-row gap-3">

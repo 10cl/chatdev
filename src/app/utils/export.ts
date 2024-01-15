@@ -1,8 +1,14 @@
-import { fileOpen, fileSave } from 'browser-fs-access'
+import {fileOpen, fileSave} from 'browser-fs-access'
 import Browser from 'webextension-polyfill'
-import { trackEvent } from '~app/plausible'
-import {getStore, Prompt, setStore} from "~services/prompts";
-import store from "store2";
+import {trackEvent} from '~app/plausible'
+import {Prompt} from "~services/prompts";
+import {
+  getStore,
+  getRealYaml,
+  setRealYaml,
+  setRealYamlKey,
+  setStore, getRealYamlKey, setPrompts
+} from "~services/storage/memory-store";
 import {uuid} from "~utils";
 
 export async function exportData() {
@@ -10,10 +16,10 @@ export async function exportData() {
   const data = {
     sync: syncData,
     local: localData,
-    localStorage: { ...localStorage },
+    localStorage: {...localStorage},
   }
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
-  await fileSave(blob, { fileName: 'chatdev.json' })
+  const blob = new Blob([JSON.stringify(data)], {type: 'application/json'})
+  await fileSave(blob, {fileName: 'chatdev.json'})
   trackEvent('export_data')
 }
 
@@ -59,7 +65,7 @@ export async function exportAgentAll() {
 
 export async function exportPromptFlow() {
   const prompts = getStore("prompts", {})
-  const promptFlowYaml = prompts[getStore("real_yaml", "Default_Flow_Dag_Yaml")]
+  const promptFlowYaml = getRealYaml()
   if (promptFlowYaml == undefined) {
     return
   }
@@ -97,26 +103,26 @@ function isPromptJsonContain(prompt: Prompt, prompts: Prompt[]): boolean {
 }
 
 export async function importPromptFlow(confirmTips: string, successTips: string) {
-  const blob = await fileOpen({ extensions: ['.json'] })
-  if (!window.confirm(confirmTips)) {
-    return
-  }
+  const blob = await fileOpen({extensions: ['.json']})
+  /*  if (!window.confirm(confirmTips)) {
+      return
+    }*/
   try {
     const json = JSON.parse(await blob.text())
     importFromText(json)
-    alert(successTips)
-  }catch (e) {
+    // alert(successTips)
+  } catch (e) {
     alert(e)
   }
 }
 
-export async function importFromText(json: JSON){
-  if (json == null){
+export async function importFromText(json: JSON) {
+  if (json == null) {
     return
   }
   const user_prompts = [] as Prompt[]
   const prompts = getStore("prompts", {})
-  if (prompts != null){
+  if (prompts != null) {
     for (const [key, value] of Object.entries(prompts)) {
       const item = {
         id: uuid(),
@@ -147,21 +153,14 @@ export async function importFromText(json: JSON){
     prompt_dict[item.title] = item.prompt;
   });
 
-  if(prompt_dict['Flow_Dag_Yaml'] !== undefined) {
-    // prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
-    const isGameMode = getStore("gameModeEnable", true)
-    if (!isGameMode) {
-        prompt_dict[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
-    } else {
-        prompt_dict[getStore("editor_yaml", "Default_Flow_Dag_Yaml")] = prompt_dict['Flow_Dag_Yaml']
-    }
-    prompt_dict['Flow_Dag_Yaml'] = ""
-    setStore("yaml_update", true)
+  if (prompt_dict['Flow_Dag_Yaml'] !== undefined) {
+    prompt_dict[getRealYamlKey()] = prompt_dict['Flow_Dag_Yaml']
+    setRealYaml(prompt_dict['Flow_Dag_Yaml'])
   }
 
-  setStore("prompts", prompt_dict);
+  setPrompts(prompt_dict);
 
-  await Browser.storage.local.set({ prompts: user_prompts });
+  await Browser.storage.local.set({prompts: user_prompts});
 
   trackEvent('import_prompt_flow')
 }

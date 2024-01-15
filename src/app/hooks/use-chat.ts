@@ -7,9 +7,12 @@ import { ChatMessageModel } from '~types'
 import { uuid } from '~utils'
 import { ChatError } from '~utils/errors'
 import { BotId } from '../bots'
-import store from "store2"
-import {getStore, setStore} from "~services/prompts";
-
+import {
+  getStore, setAgentReset,
+  setRealYaml,
+  setRealYamlKey, setResponseErrorMessage, setResponseStream,
+  setStore
+} from "~services/storage/memory-store";
 export function useChat(botId: BotId) {
   const chatAtom = useMemo(() => chatFamily({ botId, page: 'singleton' }), [botId])
   const [chatState, setChatState] = useAtom(chatAtom)
@@ -53,14 +56,14 @@ export function useChat(botId: BotId) {
       })
 
         try {
-            setStore("input_text_message", "")
+            setResponseErrorMessage("")
             for await (const answer of resp) {
                 updateMessage(botMessageId, (message) => {
                     message.text = answer.text
-                    setStore("response_update_text", message.text)
+                    setResponseStream(message.text)
                 })
             }
-            setStore("input_text_message", "")
+            setResponseErrorMessage("")
         } catch (err: unknown) {
             if (!abortController.signal.aborted) {
                 abortController.abort()
@@ -96,6 +99,7 @@ export function useChat(botId: BotId) {
 
   const stopGenerating = useCallback(() => {
     chatState.abortController?.abort()
+    setAgentReset(true)
     if (chatState.generatingMessageId) {
       updateMessage(chatState.generatingMessageId, (message) => {
         if (!message.text && !message.error) {
@@ -137,3 +141,4 @@ export function useChat(botId: BotId) {
 
   return chat
 }
+

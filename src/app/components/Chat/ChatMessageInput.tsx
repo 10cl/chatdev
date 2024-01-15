@@ -21,7 +21,7 @@ import Button from '../Button'
 import PromptCombobox, { ComboboxContext } from '../PromptCombobox'
 import AgentLocalDialog from '~app/components/Agent/AgentLocalDialog'
 import TextInput from './TextInput'
-import {promptLibraryDialogOpen} from "~app/state";
+import {agentLocalDialogOpen} from "~app/state";
 import {useAtom} from "jotai/index";
 
 interface Props {
@@ -40,7 +40,7 @@ const ChatMessageInput: FC<Props> = (props) => {
   const [value, setValue] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(agentLocalDialogOpen)
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)

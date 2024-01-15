@@ -2,9 +2,13 @@ import { zip } from 'lodash-es'
 import Browser from 'webextension-polyfill'
 import { BotId } from '~app/bots'
 import { ChatMessageModel } from '~types'
-import store from "store2";
-import {getStore} from "~services/prompts";
-
+import {
+  getStore,
+  getRealYaml,
+  setRealYaml,
+  setRealYamlKey,
+  setStore
+} from "~services/storage/memory-store";
 /**
  * conversations:$botId => Conversation[]
  * conversation:$botId:$cid:messages => ChatMessageModel[]
@@ -74,6 +78,16 @@ export async function loadHistoryMessages(botId: BotId): Promise<ConversationWit
   console.log("loadHistoryMessages: " + promptEditValue)
   const conversations = await loadHistoryConversations(botId)
   const messagesList = await Promise.all(conversations.map((c) => promptEditValue == "" ? loadConversationMessages(botId, c.id) : loadHistoryMessagesByMark(botId, c.id, promptEditValue)))
+  return zip(conversations, messagesList).map(([c, messages]) => ({
+    id: c!.id,
+    createdAt: c!.createdAt,
+    messages: messages!,
+  }))
+}
+
+export async function loadAllMessageByMark(botId: BotId, mark: string): Promise<ConversationWithMessages[]> {
+  const conversations = await loadHistoryConversations(botId)
+  const messagesList = await Promise.all(conversations.map((c) => loadHistoryMessagesByMark(botId, c.id, mark)))
   return zip(conversations, messagesList).map(([c, messages]) => ({
     id: c!.id,
     createdAt: c!.createdAt,

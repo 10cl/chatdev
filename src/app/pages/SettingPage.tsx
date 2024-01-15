@@ -33,7 +33,13 @@ import {BotId} from "~app/bots";
 import {useAtom} from "jotai/index";
 import {showSettingsAtom} from "~app/state";
 import {Input} from "~app/components/Input";
-import {getStore, setStore} from "~services/prompts";
+import {
+  getStore,
+  getRealYaml,
+  setRealYaml,
+  setRealYamlKey,
+  setStore
+} from "~services/storage/memory-store";
 import store from "store2";
 
 const BING_STYLE_OPTIONS = [

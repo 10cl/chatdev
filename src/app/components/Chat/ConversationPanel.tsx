@@ -11,6 +11,7 @@ import htmlIcon from '~/assets/icons/html.svg'
 import addIcon from '~/assets/icons/add.svg'
 import closeIcon from '~/assets/icons/close.svg'
 import assistantIcon from '~/assets/icons/assistant.svg'
+import datasetsIcon from '~/assets/icons/datasets.svg'
 import settingsIcon from '~/assets/icons/setting_top.svg'
 import tipsIcon from '~/assets/ex_assets/profile/Wolfgang_Schulz.png'
 
@@ -26,8 +27,7 @@ import SwitchBotDropdown from '../SwitchBotDropdown'
 import Tooltip from '../Tooltip'
 import ChatMessageInput from './ChatMessageInput'
 import ChatMessageList from './ChatMessageList'
-import LocalPrompts from './LocalPrompts'
-import store from 'store2'
+import LocalPrompts from '../PromptIDE/LocalPrompts'
 import React, { useEffect  } from 'react';
 import GameAgentObjectModal from '../GameAgentObjectModal';
 import "ace-builds/src-noconflict/theme-github";
@@ -86,7 +86,7 @@ import {
   gameModeEnable,
   editorPromptTimesAtom,
   floatTipsOpen,
-  promptLibraryDialogOpen,
+  agentLocalDialogOpen,
   showEditorAtom,
   workFlowingDisableAtom,
   showHistoryAtom,
@@ -94,15 +94,29 @@ import {
   showGptsDialogAtom,
   messageTimesTimesAtom,
   editorYamlTimesAtom,
-  editorYamlAtom,
   editorPromptAtom,
   showShareAtom,
-  fpHashAtom, seminarDisableAtom, editorFocusAtom, isNewAgentShowAtom, yamlExceptionAtom,
+  fpHashAtom,
+  seminarDisableAtom,
+  isNewAgentShowAtom,
+  yamlExceptionAtom,
+  generateEnableAtom,
+  embeddingEnableAtom,
+  showDdataSetsAtom,
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewAgentDialog from "~app/components/Agent/NewAgentDialog";
 import {loadUrl} from "~document-loader/loader";
+import {embeddingMessage, retrieveDocs} from "~embedding/retrieve";
+import {Toaster, toast} from "react-hot-toast";
+import Browser from "webextension-polyfill";
+import {uuid} from "~utils";
+import {isPublicUrlFromWeb} from "~utils/format";
 import GameModeView from "~app/components/GameModeView";
+import {toastCustom} from "~app/components/Toast";
+import ErrorAction from "~app/components/Chat/ErrorAction";
+import store from "store2";
+import DataSetDialog from "~app/components/Agent/DataSetDialog";
 
 interface Props {
   botId: BotId
@@ -122,38 +136,43 @@ const ConversationPanel: FC<Props> = (props) => {
   const mode = props.mode || 'full'
   const marginClass = 'mx-5'
   const [showHistory, setShowHistory] = useAtom(showHistoryAtom)
+  const [generateEnable, setGenerateEnable] = useAtom(generateEnableAtom)
 
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
   const [showDataSets, setShowDataSets] = useAtom(showDdataSetsAtom)
   const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
   const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
-  const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
-
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
-
   const [isPreviewShow, setShowWebPreviewDialog] = useState(false)
   const [isNewAgentShow, setNewAgentDialog] = useAtom(isNewAgentShowAtom)
   const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
-
-  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(promptLibraryDialogOpen)
+  const [isPromptLibraryDialogOpen, setIsPromptLibraryDialogOpen] = useAtom(agentLocalDialogOpen)
   const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
-
   const [changeTime, setChangeTime] = useAtom(messageTimesTimesAtom)
-  const [timerId, setTimerId] = useState<number | null>(null);
-
+  const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
+  const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
   const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
   const [workFlowingDisable, setWorkFlowingDisable] = useAtom(workFlowingDisableAtom)
   const [userConfig, setUserConfig] = useState<UserConfig | undefined>(undefined)
-  const [isUrlReq, setUrlReq] = useState(false)
   const [fpHash, setFpHash] = useAtom(fpHashAtom);
+  const [isEmbeddingEnable, setEmbeddingEnable] = useAtom(embeddingEnableAtom)
+
   const navigate = useNavigate()
 
+  const setFp = async () => {
+    const fp = await FingerprintJS.load();
+
+    const { visitorId } = await fp.get();
+    setStore("fp", visitorId)
+    setFpHash(visitorId)
+  };
+
   const updateConfigValue = useCallback(
-      (update: Partial<UserConfig>) => {
-        setUserConfig({ ...userConfig!, ...update })
-      },
-      [userConfig],
+    (update: Partial<UserConfig>) => {
+      setUserConfig({ ...userConfig!, ...update })
+    },
+    [userConfig],
   )
 
   function propsMessageCheck(props: Props){
@@ -161,99 +180,62 @@ const ConversationPanel: FC<Props> = (props) => {
     return true;
   }
 
-  const confirmTips = t('Are you sure you want to import the Agent?')
-  const successTips = t('Imported Agent successfully')
+  const importShareAgent = useCallback((shareValue: string) => {
+    toast.promise(
+      loadYaml(shareValue).then(promptYaml => {
+        try {
+          setRealYamlKey("Default_Flow_Dag_Yaml")
 
-  const importToFlowYaml = useCallback(() => {
-    const isGameMode = getStore("gameModeEnable", true)
-    setStore("real_yaml", getStore(isGameMode?"editor_yaml":"real_yaml", "Default_Flow_Dag_Yaml"))
-    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
-      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
-    }
+          importFromText(JSON.parse(promptYaml.yaml)).then(() => {
+            setShowAssistant(false)
+            setSeminarDisable(false)
+            setWorkFlowingDisable(false)
 
-    openFlowEditor()
+            setGameModeEnable(false)
+            setStore("gameModeEnable", false)
 
-    if (!window.confirm(confirmTips)) {
-      return
-    }
-
-    loadYaml(getStore("share_current", "")).then(promptYaml => {
-      try {
-        closeFlowEditor()
-        importFromText(JSON.parse(promptYaml.yaml)).then(() => {
-          setShowAssistant(false)
-          setSeminarDisable(false)
-          setWorkFlowingDisable(false)
-          alert(successTips)
-          openFlowEditor()
-
-          const botId = props.botId as BotId
-          navigate({ to: '/chat/$botId', params: { botId } })
-        })
-      }catch (e) {
-        alert(e)
+            const botId = props.botId as BotId
+            navigate({to: '/chat/$botId', params: {botId}})
+          })
+        } catch (e) {
+          alert(e)
+        }
+      }),
+      {
+        loading: t('Load Agent...'),
+        success: <b>{t('Load success.')}</b>,
+        error: <b>{t('Load failed.')}</b>,
+      }, {
+        position: "top-center"
       }
-    })
+    );
   }, [props])
 
   useEffect(() => {
-    console.log("init")
-    setStore("editor_show", showEditor)
     // setShowEditor(false)
-    // setShowAssistant(false)
-    // setShowSettings(false)
     setShowShareView(false)
-    setEditorFocus('')
+    // setEditorGenerate('')
+    setGameFloatVisible(false)
+    setIsPromptLibraryDialogOpen(false)
 
-    const setFp = async () => {
-      const fp = await FingerprintJS.load();
+    setStore("gameModeEnable", store.get("gameModeEnable", true))
 
-      const { visitorId } = await fp.get();
-      setStore("fp", visitorId)
-      setFpHash(visitorId)
-    };
+    /*set fingerprint */
     if (fpHash != ""){
       setStore("fp", fpHash)
     }else{
       setFp();
     }
 
-    const regex = /(?:\?|&)share=([^&]+)/;
-    const match = window.location.href.match(regex);
-    if (match) {
-      const shareValue = match[1];
-      if(!getStore("share_" + shareValue)){
-        setStore("share_" + shareValue, true)
-        setStore("share_current", shareValue)
-        importToFlowYaml()
+    /* public url*/
+    const publicValue = isPublicUrlFromWeb()
+    if (publicValue) {
+      /* Cache it to avoid duplicate imports */
+      if (!getStore(publicValue)) {
+        setStore(publicValue, true)
+        importShareAgent(publicValue)
       }
     }
-
-    const id = setInterval(() => {
-      const response_type = getStore("response_type", "")
-      if (response_type == "url"){
-        setStore("response_update_text", getStore("response_update_text", "") + ".")
-      }
-
-      const value = getStore("input_text", "")
-      const task_refresh = getStore("task_refresh", false)
-      const generate_refresh = getStore("generate_refresh", false)
-      const generate_content = getStore("generate_content", false)
-
-      if (value != "" || task_refresh || generate_refresh || generate_content != "") {
-        const messageTimes = getStore("messageTimes", 0) + 1
-        setChangeTime(messageTimes)
-        setStore("messageTimes", messageTimes)
-      }
-
-    }, 1000)
-    // @ts-ignore
-    setTimerId(id);
-    return () => {
-      if (timerId) {
-        clearInterval(timerId);
-      }
-    };
   }, [props])
 
 
@@ -269,22 +251,13 @@ const ConversationPanel: FC<Props> = (props) => {
       const isWorkFlowingDisable = getStore("workFlowingDisable", false)
 
       // if in editor, send message as the Agent.
-      if (getStore("editor_show")){
-        // Editor Switch false
-        // setShowEditor(false)
-        // setStore("editor_show", false)
-        // // GameMode false
-        // setGameModeEnable(false)
-        // setStore("gameModeEnable", false)
-
-        // Agent Switch open
+      if (getEditorStatus()){
         setStore("workFlowingDisable", false)
         setWorkFlowingDisable(false)
       }else{
         if(isGameMode){
           // Generate Yaml
-          setEditorFocus("")
-          setStore("editor_focus", "")
+          setEditorGenerate("")
         }
       }
 
@@ -294,9 +267,9 @@ const ConversationPanel: FC<Props> = (props) => {
       }
 
       /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
-        setStore("input_text_pending", input)
+        setPendingMessage(input)
         updateConfigValue({ startupPage: props.botId })
-        updateSendMessage(props)
+        await updateSendMessage(props)
       }/*Chat Mode*/else{
         props.onUserSendMessage(input as string, props.botId)
       }
@@ -304,97 +277,126 @@ const ConversationPanel: FC<Props> = (props) => {
     [props],
   )
 
-  async function updateSendMessage(sendProp: Props) {
+  async function handleHookedMessage(sendProp: Props) {
+    const inputMessage = isHookedResponse("message")
     const botId = sendProp.botId
-    const value = getStore("input_text", "")
-    if (value != "") {
-      console.log("timer sendMessage " + botId)
-      setStore("input_text", "")
-      if(isURL(value)){
-        const url = value as string
-        const urlObj = new URL(url);
-        if (!(await requestHostPermission(urlObj.protocol + '//*.' + urlObj.hostname + "/"))) {
-          alert("Please allow the host permission to use this feature.")
-        }
 
-        setStore("response_update_text", "⌛")
-        setStore("response_type", "url")
-        setUrlReq(true)
-        loadUrl(url).then(document => {
-            setStore("response_type", "")
-            setStore("response_update_text", document)
-            console.log("remote url:")
-            console.log(document)
-
-            setTimeout(function (){
-              setUrlReq(false)
-              const messageTimes = getStore("messageTimes", 0) + 1
-              setChangeTime(messageTimes)
-              setStore("messageTimes", messageTimes)
-            }, 3000)
-
-            // sendProp.onUserSendMessage(document, botId)
-        })
+    if (inputMessage) {
+      const loadType = getNodeType()
+      if(loadType == "url" || loadType == "doc"){
+        await toast.promise(
+            loadUrl(inputMessage).then(document => {
+              if (document != ""){
+                setResponseType("")
+                setResponseStream(document)
+              }
+            }),
+            {
+              loading: t('Load url...'),
+              success: <b>{t('Load success.')}</b>,
+              error: <b>{t('Load failed.')}</b>,
+            }, {
+              position: "top-center"
+            }
+        );
+      }else if (loadType == "retrieve"){
+        await toast.promise(
+            retrieveDocs(inputMessage), {
+              loading: t('Embedding & retrieve docs...'),
+              success: <b>{t('retrieve success.')}</b>,
+              error: <b>{t('retrieve failed.')}</b>,
+            }, {
+              position: "top-center"
+            }
+        );
       }else{
-        sendProp.onUserSendMessage(value, botId)
+        sendProp.onUserSendMessage(inputMessage, botId)
       }
     }
+  }
 
-    if (isPromptLibraryDialogOpen){
-      setGameFloatVisible(false)
-    }
-
-    //  game update
-    setWorkFlowingDisable(getStore("workFlowingDisable", true))
-
-    if (getStore("task_refresh", false)){
-      store.set("task_html", getStore("task_html", ""))
-      setShowWebPreviewDialog(true)
-      trackEvent('open_web_preview', { botId: botId })
-      setStore("task_refresh", false)
-    }
-
-    if (getStore("generate_refresh", false)){
-      // update for Yaml
-      if (getStore("editor_focus", '') == "Yaml"){
-        getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("generate_content", "")
-      }else if (getStore("editor_focus", '') == "Prompt"){
-        getStore("prompts")[editorPrompt] = getStore("generate_content", "")
-      }
-
-      finishGenerate()
-
-      console.log("generate_refresh " + getStore("editor_focus", '') + " prompt: " + editorPrompt)
-
-      setEditorPromptTimes(editorPromptTimes + 1)
-      setShowEditor(true)
-      setStore("editor_show", true)
-
+  async function updateEditorContent() {
+    if (getEditorGenerate() == "Yaml"){
+      setRealYamlGenerating(getEditorGenerateContent())
       const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
       setEditorYamlTimes(editorYamlTimes)
       setStore("editorYamlTimes", editorYamlTimes)
+    }else if (getEditorGenerate() == "Prompt"){
+      setPromptValue(editorPrompt, getEditorGenerateContent())
+      setEditorPromptTimes(editorPromptTimes + 1)
+    }
+  }
+
+  async function updateSendMessage(sendProp: Props) {
+    const isGameMode = getStore("gameModeEnable", true)
+    setStore("botid", sendProp.botId)
+
+    /* Game mode, embedding llm response.*/
+    if (isGameMode && isEmbeddingEnable){
+      if (props.generating != getStore("chat_generating", false)) {
+        if (!props.generating) {
+          await embeddingMessage(props.messages)
+        }
+        setStore("chat_generating", props.generating)
+      }
+    }
+
+    /* handle result.*/
+    if (isHookedResponse("html")){
+      await Browser.storage.sync.set({task_html: getStore("task_html", "")})
+      openHtmlDialog()
+    }else if (isHookedResponse("generate")){
+      toast.success(t('Successfully generated!'), {
+        position: "top-center"
+      })
+
+      await updateEditorContent()
+
+      finishEditorGenerate()
+      setShowEditor(true)
+      setEditorStatus(true)
 
       // generate yaml & reset conversion, protect against context
       resetConversation()
       // alert("Generate Success, You can continue editing in the editor.")
-    }else if (getStore("editor_focus", '') !== '' && getStore("generate_content", "") != ""){
-        // update for Yaml, 2s update
-        if (new Date().getTime() - getStore("generate_content_time", 0) > 500) {
-          // update for Yaml
-          if (getStore("editor_focus", '') == "Yaml") {
-            getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("generate_content", "")
-          } else if (getStore("editor_focus", '') == "Prompt") {
-            getStore("prompts")[editorPrompt] = getStore("generate_content", "")
-          }
-
-          // refresh editor.
-          const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
-          setEditorYamlTimes(editorYamlTimes)
-          setStore("editorYamlTimes", editorYamlTimes)
-
-          setStore("generate_content_time", new Date().getTime())
-        }
+    }else if (isHookedResponse("history")){
+      toast.success(t('clear the history!'), {
+        position: "top-center"
+      })
+      props.resetConversation()
+    }else if (getEditorGenerate() !== '' && getEditorGenerateContent() != ""){ // stream...
+      if (new Date().getTime() - getStore("generate_content_time", 0) > 500) {  // update for Yaml, 2s update
+        await updateEditorContent()
+        setStore("generate_content_time", new Date().getTime())
+      }
     }
+
+    /*toast for last message error*/
+    if (props.messages && props.messages[props.messages.length-1]){
+      const errorMsg = props.messages[props.messages.length-1].error
+      if (errorMsg != undefined){
+        if (getResponseErrorMessage() != errorMsg.message){
+          setResponseErrorMessage(errorMsg.message)
+          setAgentReset(true)
+          if (isGameMode){
+            toast.error(getResponseErrorMessage(), {
+              position: "bottom-right",
+              duration: 5000,
+            })
+
+            toast((t) => (<ErrorAction error={errorMsg}/>), {
+              position: "bottom-right",
+              duration: 5000,
+            });
+          }
+        }
+      }else{
+        setResponseErrorMessage("")
+      }
+    }
+
+    /*Handle hooked Message*/
+    await handleHookedMessage(sendProp)
   }
 
   const openHtmlDialog = useCallback(() => {
@@ -405,7 +407,9 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const resetConversation = useCallback(() => {
     if (!props.generating) {
+      setAgentReset(true)
       props.resetConversation()
+      setStore("yaml_update", true)
     }
   }, [props])
 
@@ -417,118 +421,38 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const newAgentButton = useCallback(() => {
     setNewAgentDialog(true)
-
-    // // Generate Yaml
-    // setEditorFocus("Yaml")
-    // setStore("editor_focus", "Yaml")
   }, [props.botId])
-
-  const getOffsetX = (e: any) =>{
-    const event = e || window.event;
-    const srcObj = e.target || e.srcElement;
-    if (event.offsetX){
-      return event.offsetX;
-    }else{
-      const rect = srcObj.getBoundingClientRect();
-      const clientx = event.clientX;
-      return clientx - rect.left;
-    }
-  }
-
-
-  const getOffsetY = (e: any) => {
-    const event = e || window.event;
-    const srcObj = e.target || e.srcElement;
-    if (event.offsetY){
-      return event.offsetY;
-    }else{
-      const rect = srcObj.getBoundingClientRect();
-      const clientx = event.clientY;
-      return clientx - rect.top;
-    }
-  }
-  const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
-  const [gameFloatVisible, setGameFloatVisible] = useAtom(floatTipsOpen);
-  const [gameContent, setGameContent] = useState("");
-  const [defaultPosition, setDefaultPosition] = useState({
-    x: 32,
-    y: 32
-  })
-  useEffect(() => {
-    setGameFloatVisible(false)
-  }, [])
-
-  const mouseMove: MouseEventHandler<HTMLDivElement> = (e) => {
-    console.log("mouseMove")
-    let offsetX = 0
-    let offsetY = 0
-    if (window.innerWidth - 500 < getOffsetX(e)){
-      offsetX = -315
-    }else{
-      offsetX = 90
-    }
-    if (window.innerHeight - 350 < getOffsetY(e)){
-      offsetY = 0
-    }else{
-      offsetY = 50
-    }
-    const x = getOffsetX(e) + offsetX;
-    const y = getOffsetY(e) + offsetY;
-    if (y < window.innerHeight - 250){
-      const prompts = getStore("prompts", null)
-      const pointerover = getStore("pointerover", false)
-      const pointerover_pos = getStore("pointerover_pos", "")
-      if (prompts !== null){
-        if (pointerover){
-          const promptKey = "Profile_" + getStore("pointerover_name", "")
-          setStore("prompt_edit", promptKey)
-          setGameContent(getStore("pointer_tips", ""))
-
-        }else if (pointerover_pos){
-          setStore("prompt_edit", getStore("pointerover_pos_name", ""))
-          setGameContent(getStore("pointer_tips", "TODO"))
-        }
-        setGameFloatVisible(pointerover || pointerover_pos)
-        setDefaultPosition({ x, y });
-      }
-    }
-  }
 
   function setModeChange() {
     trackEvent('switch_map_and_chat')
     setShowEditor(false)
-    setStore("editor_show", false)
+    setEditorStatus(false)
     setGameFloatVisible(false)
 
     const newState = !getStore("gameModeEnable", false)
     setGameModeEnable(newState)
     setStore("gameModeEnable", newState)
-    if (!newState){
-     /* const prompts = getStore("prompts", {});
-      if(prompts['Default_Flow_Dag_Yaml'] != undefined){
-        prompts['Flow_Dag_Yaml'] = prompts['Default_Flow_Dag_Yaml']
-        setStore("editor_yaml", "Default_Flow_Dag_Yaml")
-        setStore("prompts", prompts);
-      }*/
-    }else{
+    if (newState){
       setStore("workFlowingDisable", false)
       setWorkFlowingDisable(false)
 
-      setEditorFocus("")
-      setStore("editor_focus", "")
+      setEditorGenerate("")
     }
   }
 
-  function setWorkFlowingAndUpdate() {
+  function setAgentSwitch() {
+    /* Game Mode should keep enable*/
     if (isGameMode){
+      toast.error(t("This should be enable in game mode."))
       return
     }
-    finishGenerate()
+
+    finishEditorGenerate()
     setGameFloatVisible(false)
 
     if (!window.confirm((workFlowingDisable?
-        t('Confirm whether to start your Agent?'):
-        t('Confirm whether to exit the Agent?')) as string)) {
+      t('Confirm whether to start your Agent?'):
+      t('Confirm whether to exit the Agent?')) as string)) {
       return
     }
     trackEvent('open_prompt_flow_collapsed')
@@ -539,45 +463,77 @@ const ConversationPanel: FC<Props> = (props) => {
 
     setStore("flow_node", "")
     setStore("flow_edge", "")
-    setStore("response_type", "");
-
+    setResponseType("");
   }
 
-  const openFlowEditor = useCallback(() => {
-    setGameFloatVisible(false)
-
-    // setEditorPrompt("Flow_Dag_Yaml")
-    const isGameMode = getStore("gameModeEnable", true)
-    setStore("real_yaml", getStore(isGameMode?"editor_yaml":"real_yaml", "Default_Flow_Dag_Yaml"))
-    if (getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] == undefined) {
-      getStore("prompts")[getStore("real_yaml", "Default_Flow_Dag_Yaml")] = getStore("prompts")["Action_YAML_Template"]
+  async function createNewAgentInGame(agentName: string) {
+    setRealYamlKey(agentName)
+    // duplicate agent name not save.
+    if (getPromptValue(agentName) == undefined) {
+      await saveLocalPrompt({
+        id: uuid(),
+        title: agentName,
+        prompt: "#TODO: defined your Agent structure for:" + getStore("player_mark", "") + "\n" + getGameVilleYaml(),
+        type: "yaml"
+      })
     }
     setEditorPrompt("Action_Prompt_Template");
 
     setEditorPromptTimes(editorPromptTimes + 1)
     setShowEditor(true)
-    setStore("editor_show", true)
+    setEditorStatus(true)
 
     const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
     setEditorYamlTimes(editorYamlTimes)
     setStore("editorYamlTimes", editorYamlTimes)
 
-    setShowAssistant(false)
-
     setGameModeEnable(false)
     setStore("gameModeEnable", false)
-    trackEvent('open_editor_prompt_flow')
-  },[])
+  }
 
+  const openFlowEditor = useCallback(() => {
+    setGameFloatVisible(false)
+
+    const isGameMode = getStore("gameModeEnable", true)
+    const player_mark = getStore("player_mark", "")
+    const yamlMark = getPromptValue(player_mark)
+
+    if ((isGameMode && yamlMark) || !isGameMode) {
+
+      if (isGameMode && getRealYaml() == undefined) {
+        setRealYaml("#TODO: defined your Agent structure for:" + getStore("player_mark", "") + "\n" + getGameVilleYaml())
+      }
+
+      setEditorPrompt("Action_Prompt_Template");
+
+      setEditorPromptTimes(editorPromptTimes + 1)
+      setShowEditor(true)
+      setEditorStatus(true)
+
+      const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
+      setEditorYamlTimes(editorYamlTimes)
+      setStore("editorYamlTimes", editorYamlTimes)
+
+      setShowAssistant(false)
+
+      setGameModeEnable(false)
+      setStore("gameModeEnable", false)
+      toast.success('You are editing ' + getRealYamlKey(), {
+        position: "bottom-right"
+      })
+    } else {
+      toastCustom(t('Here is undefined, Create a new Agent for ' + player_mark), ()=> createNewAgentInGame(player_mark), "Create")
+    }
+    trackEvent('open_editor_prompt_flow')
+  }, [])
 
   const closeFlowEditor = useCallback(() => {
     setShowEditor(false)
-    setStore("editor_show", false)
+    setEditorStatus(false)
     trackEvent('close_editor_prompt_flow')
 
     // focus set ''
-    setEditorFocus('')
-    setStore("editor_focus", '')
+    setEditorGenerate('')
 
     // force update yaml
     setStore("yaml_update", true)
@@ -585,7 +541,7 @@ const ConversationPanel: FC<Props> = (props) => {
 
 
   const openAssistant = useCallback(async () => {
-    finishGenerate()
+    finishEditorGenerate()
     if (!(await requestHostPermission('https://*.chatdev.toscl.com/'))) {
       throw new ChatError('Missing chatdev.toscl.com permission', ErrorCode.MISSING_HOST_PERMISSION)
     }
@@ -606,7 +562,7 @@ const ConversationPanel: FC<Props> = (props) => {
 
 
   const openSettings = useCallback(() => {
-    finishGenerate()
+    finishEditorGenerate()
     setShowSettings(true)
     trackEvent('open_settings')
   },[])
@@ -617,17 +573,12 @@ const ConversationPanel: FC<Props> = (props) => {
   },[])
 
   const openYourAgent = useCallback(() => {
-    finishGenerate()
+    finishEditorGenerate()
     setStore("prompt_edit", "")
     setIsPromptLibraryDialogOpen(true)
+    setGameFloatVisible(false)
     trackEvent('open_prompt_library')
   }, [])
-
-  const finishGenerate = useCallback(() => {
-    setStore("generate_content", "")
-    setStore("generate_refresh", false)
-  }, [])
-
 
   function getLastMessage() {
     const errorMsg = props.messages[props.messages.length-1].error
@@ -648,12 +599,6 @@ const ConversationPanel: FC<Props> = (props) => {
             <Tooltip content={props.bot.name || botInfo.name}>
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
-            {(isUrlReq||
-                (props.messages.length > 0
-                    && !props.messages[props.messages.length-1].text
-                    && !props.messages[props.messages.length-1].error))
-                && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />}
-            {props.messages.length > 0 && props.messages[props.messages.length-1].error && <span className="text-red-500">{getLastMessage()}</span>}
             {mode === 'compact' && props.onSwitchBot && (
               <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
             )}
@@ -673,9 +618,6 @@ const ConversationPanel: FC<Props> = (props) => {
               </Tooltip>
 
               <img src={chatModeIcon} className="w-5 h-5 cursor-pointer"/>
-
-              {/*<label className="text-[13px] whitespace-nowrap text-light-text font-medium select-none"*/}
-              {/*       id="headlessui-label-:re:" htmlFor="headlessui-switch-:rd:">{cx(isGameMode ? t('Chat Mode') : t('Game Mode'))}</label>*/}
             </div>
           </div>
           <div className="flex flex-row items-center gap-3">
@@ -689,17 +631,20 @@ const ConversationPanel: FC<Props> = (props) => {
             {!workFlowingDisable && <Tooltip content={t('New Agent')}>
               <img src={addIcon} className="w-5 h-5 cursor-pointer" onClick={newAgentButton} />
             </Tooltip>}
-            {!workFlowingDisable && <Tooltip content={t('Open Your Agent')}>
+            {!workFlowingDisable && <Tooltip content={t('Your Agent')}>
               <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openYourAgent} />
             </Tooltip>}
             {!workFlowingDisable && <Tooltip content={cx(t('Agent Community'))}>
               <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
             </Tooltip>}
+            {!workFlowingDisable && <Tooltip content={cx(t('Knowledge'))}>
+              <img src={datasetsIcon} className="w-5 h-5 cursor-pointer" onClick={openDataSets} />
+            </Tooltip>}
             <Tooltip content={cx(workFlowingDisable ? t('Start') : t('Stop')) + " " + t('Agent')}>
               <button
                   className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 ' + (isGameMode ? "":'flow-open'))}
                   id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
-                  onClick={() => setWorkFlowingAndUpdate()}
+                  onClick={() => setAgentSwitch()}
                   data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
                 <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
               </button>
@@ -716,7 +661,7 @@ const ConversationPanel: FC<Props> = (props) => {
           </div>
         </div>
 
-        <LocalPrompts className={cx(showEditor?"":"hidden")} setShowEditor={setShowEditor}/>
+        <LocalPrompts className={cx(showEditor?"":"hidden")}/>
         <div className={"hidden"} key={changeTime}>{propsMessageCheck(props)}</div>
 
         <div className={cx("promptgame overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
@@ -738,8 +683,8 @@ const ConversationPanel: FC<Props> = (props) => {
           <ChatMessageInput
             mode={mode}
             disabled={props.generating}
-            placeholder={showEditor
-                ? (t('Describe here, AI will help you generate your Agent ') + (editorFocus != "Prompt" ? "YAML: " + getStore("real_yaml", "Default_Flow_Dag_Yaml") : "func: " + editorPrompt))
+            placeholder={(showEditor && generateEnable)
+                ? (t('Describe here, AI will help you generate your Agent ') + (getEditorGenerate() != "Prompt" ? "YAML: " + getRealYamlKey() : "func: " + editorPrompt))
                 : t('Ensure you are logged in to the LLM website to access all features')}
             onSubmit={onSubmit}
             autoFocus={mode === 'full'}
@@ -752,7 +697,7 @@ const ConversationPanel: FC<Props> = (props) => {
                   onClick={props.stopGenerating}
                 />
               ) : (
-                mode === 'full' && <Button text={showEditor? t('Generate') : t('Send')} color="primary" type="submit" />
+                mode === 'full' && <Button text={(showEditor && generateEnable)? t('Generate') : t('Send')} color="primary" type="submit" />
               )
             }
           />

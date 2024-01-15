@@ -17,3 +17,12 @@ export function formatTime(time: number) {
   const minutes = String(date.getMinutes()).padStart(2, '0')
   return `${month}/${day} ${hours}:${minutes}`
 }
+
+export function isPublicUrlFromWeb() {
+  const regex = /(?:\?|&)share=([^&]+)/;
+  const match = window.location.href.match(regex);
+  if (match) {
+    return match[1];
+  }
+  return undefined
+}
