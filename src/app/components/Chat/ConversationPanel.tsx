@@ -361,7 +361,8 @@ const ConversationPanel: FC<Props> = (props) => {
   }
 
   const openHtmlDialog = useCallback(() => {
-    setShowWebPreviewDialog(true)
+    // setShowWebPreviewDialog(true)
+    window.open('https://chatdev.toscl.com/example/preview.html', '_blank');
     trackEvent('open_html_dialog')
   }, [])
 

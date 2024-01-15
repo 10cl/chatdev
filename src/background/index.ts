@@ -16,6 +16,13 @@ async function openAppPage() {
   await Browser.tabs.create({ url: `app.html${hash}` })
 }
 
+async function sendMessageToActiveTab(message: { code: any; action: string }) {
+  const [tab] = await Browser.tabs.query({ active: true, lastFocusedWindow: true });
+  if (tab.id != null) {
+    await Browser.tabs.sendMessage(tab.id, message);
+  }
+}
+
 async function openSharePage(share: string) {
   const tabs = await Browser.tabs.query({})
   const url = Browser.runtime.getURL('app.html')
@@ -50,5 +57,8 @@ Browser.commands.onCommand.addListener(async (command) => {
 Browser.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action == "openExtension") {
     openSharePage(request.share)
+  }else if (request.action == "getCode"){
+    const { task_html} = await Browser.storage.sync.get('task_html')
+    sendMessageToActiveTab({action: "html", code: task_html})
   }
 })

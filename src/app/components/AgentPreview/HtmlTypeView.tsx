@@ -17,7 +17,7 @@ const HtmlTypeView = (props: Props) => {
       className="w-[800px] min-h-[400px]"
     >
       <div className="p-5 overflow-auto">
-        <iframe className="mx-auto bg-primary-background max-h-full overflow-hidden flex flex-col w-[800px] min-h-[400px]" src={'/app.html#/preview'}/>
+        <iframe className="mx-auto bg-primary-background max-h-full overflow-hidden flex flex-col w-[800px] min-h-[400px]" src={'https://chatdev.toscl.com/example/preview.html'}/>
       </div>
     </Dialog>
   )
