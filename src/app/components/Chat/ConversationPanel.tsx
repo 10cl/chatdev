@@ -12,6 +12,7 @@ import addIcon from '~/assets/icons/add.svg'
 import closeIcon from '~/assets/icons/close.svg'
 import assistantIcon from '~/assets/icons/assistant.svg'
 import settingsIcon from '~/assets/icons/setting_top.svg'
+import tipsIcon from '~/assets/ex_assets/profile/Wolfgang_Schulz.png'
 
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
@@ -38,7 +39,41 @@ import AgentCommunityDialog from "~app/components/Agent/AgentCommunityDialog";
 import loadingImg from "~assets/loading.png";
 import SettingsDialog from "~app/components/Settings/SettingsDialog";
 import {BeatLoader} from "react-spinners";
-import {getStore, isURL, loadRemoteUrl, loadYaml, saveLocalPrompt, setStore} from "~services/prompts";
+import {
+  isURL,
+  loadYaml,
+  saveLocalPrompt,
+} from "~services/prompts";
+import {
+  getStore,
+  getRealYaml,
+  setRealYaml,
+  setRealYamlKey,
+  setStore,
+  getPromptValue,
+  setPromptValue,
+  getEditorGenerate,
+  setEditorGenerate,
+  getRealYamlKey,
+  getGameVilleYaml,
+  setEditorStatus,
+  getEditorStatus,
+  setResponseType,
+  setResponseStream,
+  getTipsPosition,
+  getTipsContent,
+  getHookedMessage,
+  setHookedMessage,
+  setPendingMessage,
+  getEditorGenerateContent,
+  setEditorGenerateContent,
+  finishEditorGenerate,
+  isHookedResponse,
+  getNodeType,
+  getEmbeddingDocs,
+  getResponseErrorMessage,
+  setResponseErrorMessage, setAgentReset, setRealYamlGenerating
+} from "~services/storage/memory-store";
 import {requestHostPermission} from "~app/utils/permissions";
 import {ChatError, ErrorCode} from "~utils/errors";
 import {UserConfig} from "~services/user-config";
@@ -742,6 +777,7 @@ const ConversationPanel: FC<Props> = (props) => {
       {showSettings && (
           <SettingsDialog open={true} onClose={() => setShowSettings(false)} />
       )}
+      <Toaster/>
     </ConversationContext.Provider>
   )
 }
