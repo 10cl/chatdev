@@ -18,7 +18,7 @@ export async function loadDocument(url: string) {
         if (extension == "pdf") {
             const blob = await ofetch(url, {responseType: "blob"});
             loader = new WebPDFLoader(blob);
-        } else if (extension == "csv") {
+        } /*else if (extension == "csv") {
             const blob = await ofetch(url, {responseType: "blob"});
             loader = new CSVLoader(blob);
         } else if (extension == "json") {
@@ -35,12 +35,12 @@ export async function loadDocument(url: string) {
             loader = new GitbookLoader(url, {
                 shouldLoadAllPaths: true,
             });
-        } else if (isYouTubeLink(url)){
+        }*//* else if (isYouTubeLink(url)){
             loader = YoutubeLoader.createFromUrl(url, {
                 language: "en",
                 addVideoInfo: true,
             });
-        } else {
+        } */else {
             loader = new CheerioWebBaseLoader(url);
             const docs = await loader.load();
             const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");

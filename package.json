@@ -124,8 +124,6 @@
     "unified": "^10.1.2",
     "uuid": "^9.0.0",
     "webextension-polyfill": "^0.10.0",
-    "websocket-as-promised": "^2.0.1",
-    "youtube-transcript": "^1.0.6",
-    "youtubei.js": "^8.1.0"
+    "websocket-as-promised": "^2.0.1"
   }
 }
