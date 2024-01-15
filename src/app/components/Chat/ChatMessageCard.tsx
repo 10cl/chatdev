@@ -1,12 +1,19 @@
 import cx from 'classnames'
-import { FC, memo, useEffect, useMemo, useState } from 'react'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { IoCheckmarkSharp, IoCopyOutline } from 'react-icons/io5'
-import { BeatLoader } from 'react-spinners'
-import { ChatMessageModel } from '~/types'
+import React, {FC, memo, useEffect, useMemo, useState} from 'react'
+import {CopyToClipboard} from 'react-copy-to-clipboard'
+import {IoCheckmarkSharp, IoCopyOutline} from 'react-icons/io5'
+import {BeatLoader} from 'react-spinners'
+import {ChatMessageModel} from '~/types'
 import Markdown from '../Markdown'
 import ErrorAction from './ErrorAction'
 import MessageBubble from './MessageBubble'
+import {
+  getStore,
+  getRealYaml,
+  setRealYaml,
+  setRealYamlKey,
+  setStore, setPendingMessage
+} from "~services/storage/memory-store";
 
 const COPY_ICON_CLASS = 'self-top cursor-pointer invisible group-hover:visible mt-[12px] text-primary-text'
 
@@ -15,7 +22,7 @@ interface Props {
   className?: string
 }
 
-const ChatMessageCard: FC<Props> = ({ message, className }) => {
+const ChatMessageCard: FC<Props> = ({message, className}) => {
   const [copied, setCopied] = useState(false)
 
   const copyText = useMemo(() => {
@@ -33,6 +40,10 @@ const ChatMessageCard: FC<Props> = ({ message, className }) => {
     }
   }, [copied])
 
+  function tipClick(value: string) {
+    setPendingMessage(value)
+  }
+
   return (
     <div
       className={cx('group flex gap-3 w-full', message.author === 'user' ? 'flex-row-reverse' : 'flex-row', className)}
@@ -40,17 +51,21 @@ const ChatMessageCard: FC<Props> = ({ message, className }) => {
       <div className="flex flex-col w-11/12  max-w-fit items-start gap-2">
         <MessageBubble color={message.author === 'user' ? 'primary' : 'flat'}>
           {message.text ? (
-            <Markdown type={message.author === 'user'?0:1}>{message.text}</Markdown>
+            <Markdown type={message.author === 'user' ? 0 : 1}>{message.text}</Markdown>
           ) : (
-            !message.error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))" />
+            !message.error && <BeatLoader size={10} className="leading-tight" color="rgb(var(--primary-text))"/>
           )}
           {!!message.error && <p className="text-red-500">{message.error.message}</p>}
         </MessageBubble>
-        {!!message.error && <ErrorAction error={message.error} />}
+        {!message.error && getStore("yaml_tips", []).length > 0 && getStore("yaml_tips",[]).map((item: string, index: any) => {
+          return <div><span key={index} className="agent-action"
+                            onClick={() => tipClick(item)}>{index + 1}. {item}</span></div>
+        })}
+        {!!message.error && <ErrorAction error={message.error}/>}
       </div>
       {!!copyText && (
         <CopyToClipboard text={copyText} onCopy={() => setCopied(true)}>
-          {copied ? <IoCheckmarkSharp className={COPY_ICON_CLASS} /> : <IoCopyOutline className={COPY_ICON_CLASS} />}
+          {copied ? <IoCheckmarkSharp className={COPY_ICON_CLASS}/> : <IoCopyOutline className={COPY_ICON_CLASS}/>}
         </CopyToClipboard>
       )}
     </div>

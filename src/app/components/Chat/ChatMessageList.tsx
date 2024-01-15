@@ -4,11 +4,13 @@ import ScrollToBottom from 'react-scroll-to-bottom'
 import { BotId } from '~app/bots'
 import { ChatMessageModel } from '~types'
 import ChatMessageCard from './ChatMessageCard'
-import './main.css'
+import '../../main.css'
 import {useAtom} from "jotai/index";
-import {gameModeEnable} from "~app/state";
+import {gameModeEnable, messageTimesTimesAtom} from "~app/state";
 import React from "react";
 import AgentCommunity from "~app/components/Agent/AgentCommunity";
+import ChatTipsCard from "~app/components/Chat/ChatTipsCard";
+import {getStore, setStore} from "~services/storage/memory-store";
 
 interface Props {
   botId: BotId
@@ -19,6 +21,7 @@ interface Props {
 const ChatMessageList: FC<Props> = (props) => {
     // console.error(props.messages)
     const [isGameMode] = useAtom(gameModeEnable)
+    const [changeTime, setChangeTime] = useAtom(messageTimesTimesAtom)
 
     return (
         <ScrollToBottom className={cx('overflow-auto h-full', isGameMode?"hidden":"")}>
@@ -26,7 +29,8 @@ const ChatMessageList: FC<Props> = (props) => {
                 {props.messages.length > 0 && props.messages.map((message, index) => {
                     return <ChatMessageCard key={message.id} message={message} className={index === 0 ? 'mt-5' : undefined} />
                 })}
-                {props.messages.length <= 0 && <AgentCommunity />}
+                {props.messages.length <= 0 && <ChatTipsCard key={changeTime} botId={props.botId} messages={props.messages}/>}
+                {getStore("community_visited", true) && <AgentCommunity/> && setStore("community_visited", false)}
             </div>
         </ScrollToBottom>
     )
