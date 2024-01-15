@@ -89,6 +89,7 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
+  const [showDataSets, setShowDataSets] = useAtom(showDdataSetsAtom)
   const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
   const [seminarDisable, setSeminarDisable] = useAtom(seminarDisableAtom)
   const [editorFocus, setEditorFocus] = useAtom(editorFocusAtom)
@@ -559,6 +560,15 @@ const ConversationPanel: FC<Props> = (props) => {
     trackEvent('open_assistant')
   },[])
 
+  const openDataSets = useCallback(async () => {
+    finishEditorGenerate()
+    setGameFloatVisible(false)
+
+    setShowDataSets(true)
+    trackEvent('open_datasets')
+  },[])
+
+
   const openSettings = useCallback(() => {
     finishGenerate()
     setShowSettings(true)
@@ -730,6 +740,9 @@ const ConversationPanel: FC<Props> = (props) => {
       )}
       {showAssistant && (
           <AgentCommunityDialog open={true} onClose={() => setShowAssistant(false)} messages={props.messages} />
+      )}
+      {showDataSets && (
+          <DataSetDialog open={true} onClose={() => setShowDataSets(false)} messages={props.messages} />
       )}
       {showSettings && (
           <SettingsDialog open={true} onClose={() => setShowSettings(false)} />
