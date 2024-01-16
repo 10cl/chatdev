@@ -30,6 +30,8 @@ import {trackEvent} from "~app/plausible";
 import {Connection} from "@reactflow/core/dist/esm/types/general";
 import {getVersion, uuid} from "~utils";
 import Browser from "webextension-polyfill";
+import {initChatEmbedding} from "~embedding/retrieve";
+import {handlePersistentStorage, initForWinStore} from "~services/storage/window-store";
 import {initEnv} from "~app/utils/env";
 
 function PromptFlow() {
