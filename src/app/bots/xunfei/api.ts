@@ -4,7 +4,7 @@ import { ChatError, ErrorCode } from '~utils/errors'
 
 export async function getGeeToken(): Promise<string> {
   const resp: string = await ofetch('https://riskct.geetest.com/g2/api/v1/pre_load?client_type=web')
-  const config = JSON.parse(resp.slice(1, -1))
+  const config = JSON.parse(resp)
   console.debug('GeeGuard config:', config)
   const token = await (window as any).GeeGuard.load({
     appId: 'ihuqg3dmuzcr2kmghumvivsk7c3l4joe',
