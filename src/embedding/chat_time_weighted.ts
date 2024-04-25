@@ -6,7 +6,7 @@ import {Document} from "@langchain/core/documents";
 import store from "store2";
 import {loadAllMessageByMark} from "~services/chat-history";
 import Browser from "webextension-polyfill";
-import {getStore} from "~services/storage/memory-store";
+import {getBotId, getStore} from "~services/storage/memory-store";
 import {toBase64} from "js-base64";
 
 /**
@@ -183,7 +183,7 @@ export class ChatTimeWeightedVectorStoreRetriever extends BaseRetriever {
 
     for (let i = 0; i < texts.length; i++) {
       const mark = texts[i]
-      const historyQuery = await loadAllMessageByMark(getStore("botid", "chatgpt"), mark)
+      const historyQuery = await loadAllMessageByMark(getBotId(), mark)
       for (const c of Array.from(historyQuery).reverse()) {
         const messages = c.messages.filter((m) => m.text)
         if (!messages.length) {

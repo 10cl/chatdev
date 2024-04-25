@@ -17,16 +17,10 @@ import {ChatTimeWeightedVectorStoreRetriever} from "~embedding/chat_time_weighte
 import {CheerioWebBaseLoader} from "langchain/document_loaders/web/cheerio";
 import {toBase64} from "js-base64";
 
-interface Window {
-    retriever?: TimeWeightedVectorStoreRetriever;
-    chat_retriever?: ChatTimeWeightedVectorStoreRetriever;
-    movement?: JSON;
-}
-
 export async function retrieveDocs(query: string) {
     const docs = getEmbeddingDocs() as  Document[]
     console.log("query: " + query + " doc len: " + docs.length)
-    const win = window as Window
+    const win = window
     const retriever = win.retriever
     if (retriever){
         // embedding will cost lost of times.
@@ -36,7 +30,7 @@ export async function retrieveDocs(query: string) {
 }
 
 export async function initChatEmbedding(enable: boolean){
-    const win = window as Window
+    const win = window
 
     /* for chat embedding */
     const embeddingChat = new ChatDevLocalTransformersEmbeddings({
@@ -85,7 +79,7 @@ export async function embeddingMessage(messages: ChatMessageModel[]){
 }
 
 export async function getMarkDocument(marks: string[], query: string) {
-    const win = window as Window
+    const win = window
     const retriever = win.chat_retriever
     let documentRetrieveAll = ""
     if (retriever) {
@@ -127,7 +121,7 @@ export async function embeddingDocument(url: string, docs : Document[]){
 }
 
 export async function getRetrieveUrlDocument(url: string, query: string) {
-    const win = window as Window
+    const win = window
     const retriever = win.chat_retriever
     let documentRetrieveAll = ""
     if (retriever) {

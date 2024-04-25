@@ -7,7 +7,7 @@ import {
   getRealYaml,
   setRealYaml,
   setRealYamlKey,
-  setStore
+  setStore, isGameWindow, getPlayerMark
 } from "~services/storage/memory-store";
 /**
  * conversations:$botId => Conversation[]
@@ -47,7 +47,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
   }
 
   function getValidMark(message: ChatMessageModel) {
-    const isGameMode = getStore("gameModeEnable", true)
+    const isGameMode = isGameWindow()
     if (message.mark != undefined){
       return message.mark
     }
@@ -56,7 +56,7 @@ export async function setConversationMessages(botId: BotId, cid: string, message
       return ""
     }
 
-    const playerPos = getStore("player_mark", "")
+    const playerPos = getPlayerMark()
     if (playerPos != ""){
       return playerPos
     }
