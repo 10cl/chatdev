@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./screenshots/chatdev.png">
+    <img src="./screenshots/chatdev.svg">
 </p>
 <h1 align="center">ChatDev IDE: Building Your AI Agent</h1>
 
@@ -15,7 +15,7 @@
 <a href="https://microsoftedge.microsoft.com/addons/detail/ceoneifbmcdiihmgfjeodiholmbpmibm?utm_source=github"><img src="./screenshots/edge-logo.png" width="160" alt="Get ChatDev for Microsoft Edge"></a>
 
 
-[Screenshot](#-screenshot) &nbsp;&nbsp;|&nbsp;&nbsp; [GameMode](#-game-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [ChatMode](#-chat-mode) &nbsp;&nbsp;|&nbsp;&nbsp; [PromptIDE](#-prompt-ide) &nbsp;&nbsp;|&nbsp;&nbsp; [Bots](#-bots) &nbsp;&nbsp;|&nbsp;&nbsp; [Installation](#-installation) &nbsp;&nbsp;
+[Screenshot](#-screenshot) &nbsp;&nbsp;|&nbsp;&nbsp; [GameWindow](#-game-window) &nbsp;&nbsp;|&nbsp;&nbsp; [ChatWindow](#-chat-window) &nbsp;&nbsp;|&nbsp;&nbsp; [PromptIDE](#-prompt-ide) &nbsp;&nbsp;|&nbsp;&nbsp; [Bots](#-bots) &nbsp;&nbsp;|&nbsp;&nbsp; [Installation](#-installation) &nbsp;&nbsp;
 
 [author-image]: https://img.shields.io/badge/author-10cl-blue.svg
 [author-url]: https://github.com/10cl
@@ -51,13 +51,23 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
     <th align="center">ChatDev(OpenBMB)</th>
   </tr>
   <tr>
+    <td align="center">Goal</td>
+    <td align="center">Agent for virtual/real world.</td>
+    <td align="center">Agent for generate demo</td>
+  </tr>
+  <tr>
+    <td align="center">First commit</td>
+    <td align="center">Aug 20, 2023<a href="https://github.com/10cl/chatdev/commit/9007d6ab13d82b606dbef5302021c679cd30bac0">9007d6ab</a></td>
+    <td align="center">Sep 4, 2023<a href="https://github.com/OpenBMB/ChatDev/commit/acb93cf3d15cec5b9ee6eec0850ddd3932164329">acb93cf3</a></td>
+  </tr>
+  <tr>
     <td align="center">Programming Approach</td>
     <td align="center">TypeScript</td>
     <td align="center">Python Code</td>
   </tr>
   <tr>
     <td align="center">WorkFlow</td>
-    <td align="center">[promptflowx](https://github.com/10cl/promptflowx/)</td>
+    <td align="center"><a href="https://github.com/10cl/promptflowx/">promptflowx</a></td>
     <td align="center">ChatChainConfig.json</td>
   </tr>
   <tr>
@@ -87,13 +97,14 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
   </tr>
 </table>
 
-## ✨ Game Mode
+## ✨ Game Window
 [Generative_agents_dev](https://github.com/10cl/generative_agents_dev/) is the most exciting part, all the roles you can customize, you can design a mathematician, a psychological analysis expert to solve various problems for you, you just need to define a reasonable Prompt role definition, the richness of the map will be completely controlled by you, if you are satisfied with your design, you can also share it with us, we will recommend it to other users.
-In Game Mode, you can choose your favorite large model on the left, on the map, control the NPC's actions through the direction keys or mouse, when you are close to the NPC or reach the marked position, the NPC will actively trigger the cold start response, or actively enter your chat content in the input box below.
+In Game Window, you can choose your favorite large model on the left, on the map, control the NPC's actions through the direction keys or mouse, when you are close to the NPC or reach the marked position, the NPC will actively trigger the cold start response, or actively enter your chat content in the input box below.
 the game is based on a simulated AI town social environment, you can get close to the NPC or walk to a specific location, through the input and NPC to communicate or chat with yourself in a specific location.
 
-## ✨ Chat Mode
-when you choose Chat Mode, and close the `Agent` in the upper right corner, select your favorite large model on the left, Chat Mode will be a regular LLM UI, and all your inputs will be through the normal LLM interface, output the reply of the large model.
+## ✨ Chat Window
+Choose Chat Window, and click `Switch to Chat Mode...` in the upper right corner, select your favorite large model on the left, Chat Window will be a regular LLM Chat UI, 
+and all your inputs will be through the normal LLM interface, output the reply of the large model.
 
 ![chat_mode.png](./screenshots/chat_mode.png)
 
