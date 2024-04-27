@@ -16,7 +16,7 @@ const SettingsDialog = (props: Props) => {
             title={`${t('Settings')} (v${getVersion()})`}
             open={props.open}
             onClose={props.onClose}
-            className="w-[800px] min-h-[400px]"
+            className="w-[800px] min-h-[300px]"
         >
             <div className="p-5 overflow-auto">
                 <SettingPage/>

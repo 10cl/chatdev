@@ -21,8 +21,9 @@ import Button from '../Button'
 import PromptCombobox, { ComboboxContext } from '../PromptCombobox'
 import AgentLocalDialog from '~app/components/Agent/AgentLocalDialog'
 import TextInput from './TextInput'
-import {agentLocalDialogOpen} from "~app/state";
+import {agentLocalDialogOpen, promptFlowTips} from "~app/state";
 import {useAtom} from "jotai/index";
+import {getEditorStatus, setHookedMessage} from "~services/storage/memory-store";
 
 interface Props {
   mode: 'full' | 'compact'
@@ -44,28 +45,25 @@ const ChatMessageInput: FC<Props> = (props) => {
 
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
+  const [tips, setTips] = useAtom(promptFlowTips);
 
   const { refs, floatingStyles, context } = useFloating({
     whileElementsMounted: autoUpdate,
     middleware: [offset(15), flip(), shift()],
     placement: 'top-start',
-    open: isComboboxOpen,
+    open: !getEditorStatus() && tips && tips.length > 0,
     onOpenChange: setIsComboboxOpen,
   })
 
   const floatingListRef = useRef([])
 
-  const handleSelect = useCallback((p: Prompt) => {
-    if (p.id === 'PROMPT_LIBRARY') {
-      setIsPromptLibraryDialogOpen(true)
-      setIsComboboxOpen(false)
-      trackEvent('open_prompt_library', { source: 'combobox' })
-    } else {
-      setValue(p.prompt)
-      setIsComboboxOpen(false)
-      inputRef.current?.focus()
-      trackEvent('use_prompt', { source: 'combobox' })
-    }
+  const handleSelect = useCallback((prompt: string) => {
+    // setValue(prompt)
+    setTips([])
+    inputRef.current?.focus()
+    // trackEvent('use_prompt', { source: 'combobox' })
+
+    setHookedMessage(prompt)
   }, [])
 
   const listNavigation = useListNavigation(context, {
@@ -115,10 +113,10 @@ const ChatMessageInput: FC<Props> = (props) => {
 
   useEffect(() => {
     setIsPromptLibraryDialogOpen(false)
-    if (isComboboxOpen) {
+    if (!getEditorStatus() && tips && tips.length > 0) {
       trackEvent('open_prompt_combobox')
     }
-  }, [isComboboxOpen])
+  }, [tips])
 
   const insertTextAtCursor = useCallback(
     (text: string) => {
@@ -145,7 +143,7 @@ const ChatMessageInput: FC<Props> = (props) => {
             />
           )}
           <ComboboxContext.Provider value={comboboxContext}>
-            {isComboboxOpen && (
+            {!getEditorStatus() && tips && tips.length > 0 && (
               <FloatingFocusManager context={context} modal={false} initialFocus={-1}>
                 <div
                   ref={refs.setFloating}

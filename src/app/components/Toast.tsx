@@ -1,5 +1,4 @@
 import {toast} from "react-hot-toast";
-import tipsIcon from "~assets/ex_assets/profile/Wolfgang_Schulz.png";
 import React from "react";
 
 export function toastCustom(message: string, clickAction?: () => Promise<void>, actionLabel?: string) {
@@ -14,7 +13,7 @@ export function toastCustom(message: string, clickAction?: () => Promise<void>, 
                     <div className="flex-shrink-0 pt-0.5">
                         <img
                             className="h-10 w-10 rounded-full"
-                            src={tipsIcon}
+                            src="/assets/images/profile/Wolfgang_Schulz.png"
                             alt=""
                         />
                     </div>

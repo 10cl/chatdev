@@ -12,8 +12,10 @@ import {
   getRealYaml,
   setRealYaml,
   setRealYamlKey,
-  setStore, setPendingMessage
+  setStore, setPendingMessage, isChatMode, setHookedMessage
 } from "~services/storage/memory-store";
+import {useAtom} from "jotai/index";
+import {promptFlowTips} from "~app/state";
 
 const COPY_ICON_CLASS = 'self-top cursor-pointer invisible group-hover:visible mt-[12px] text-primary-text'
 
@@ -24,6 +26,7 @@ interface Props {
 
 const ChatMessageCard: FC<Props> = ({message, className}) => {
   const [copied, setCopied] = useState(false)
+  const [tips, setTips] = useAtom(promptFlowTips);
 
   const copyText = useMemo(() => {
     if (message.text) {
@@ -41,7 +44,7 @@ const ChatMessageCard: FC<Props> = ({message, className}) => {
   }, [copied])
 
   function tipClick(value: string) {
-    setPendingMessage(value)
+    setHookedMessage(value)
   }
 
   return (
@@ -57,10 +60,10 @@ const ChatMessageCard: FC<Props> = ({message, className}) => {
           )}
           {!!message.error && <p className="text-red-500">{message.error.message}</p>}
         </MessageBubble>
-        {!message.error && getStore("yaml_tips", []).length > 0 && getStore("yaml_tips",[]).map((item: string, index: any) => {
+{/*        {!message.error && !isChatMode() && tips.length > 0 && tips.map((item: string, index: any) => {
           return <div><span key={index} className="agent-action"
                             onClick={() => tipClick(item)}>{index + 1}. {item}</span></div>
-        })}
+        })}*/}
         {!!message.error && <ErrorAction error={message.error}/>}
       </div>
       {!!copyText && (

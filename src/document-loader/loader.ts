@@ -20,34 +20,13 @@ import {requestHostPermission} from "~app/utils/permissions";
 
 export async function loadDocuments(url: string) {
     const extension = extractFileExtension(url)
+    console.log("load document url: " + url + " , extension: " + extension)
     try {
         let loader;
         if (extension == "pdf") {
             const blob = await ofetch(url, {responseType: "blob"});
             loader = new WebPDFLoader(blob);
-        } /*else if (extension == "csv") {
-            const blob = await ofetch(url, {responseType: "blob"});
-            loader = new CSVLoader(blob);
-        } else if (extension == "json") {
-            const blob = await ofetch(url, {responseType: "blob"});
-            loader = new JSONLoader(blob);
-        } else if (extension == "txt") {
-            const blob = await ofetch(url, {responseType: "blob"});
-            loader = new TextLoader(blob);
-        } else if (isIMSDbLink(url)) {
-            loader = new IMSDBLoader(url);
-        }else if (isHackerNewsLink(url)){
-            loader = new HNLoader(url);
-        } else if (isGitBookLink(url)){
-            loader = new GitbookLoader(url, {
-                shouldLoadAllPaths: true,
-            });
-        }*//* else if (isYouTubeLink(url)){
-            loader = YoutubeLoader.createFromUrl(url, {
-                language: "en",
-                addVideoInfo: true,
-            });
-        } */else {
+        } else {
             loader = new CheerioWebBaseLoader(url);
             const docs = await loader.load();
             const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
@@ -94,20 +73,32 @@ export async function loadUrl(url : string) {
             setAgentReset(true)
             return ""
         }
-        setResponseType("url")
+        return ofetch<string>(url).catch((err) => {
+            alert('Failed to load remote html:' + err)
+            setAgentReset(true)
+            return ""
+        })
 
-        const loadType = getNodeType()
-        if (loadType == "url"){
-            return ofetch<string>(url).catch((err) => {
-                alert('Failed to load remote html:' + err)
-                return ""
-            })
-        }else if (loadType == "doc"){
-            return loadDocument(url)
-        }
     }catch (e){
         alert("loadUrl exception: " + e)
+        setAgentReset(true)
     }
+}
+
+export async function loadDoc(url : string) {
+  try {
+    console.log("load doc: " + url)
+    const urlObj = new URL(url);
+    if (!(await requestHostPermission(urlObj.protocol + '//*.' + urlObj.hostname + "/"))) {
+      alert("Please allow the host permission to load the document.")
+      setAgentReset(true)
+      return ""
+    }
+    return loadDocument(url)
+  }catch (e){
+    alert("loadDoc exception: " + e)
+    setAgentReset(true)
+  }
 }
 
 export function isURLWithFileExtension(str: string) {

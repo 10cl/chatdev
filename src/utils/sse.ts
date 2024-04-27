@@ -30,3 +30,11 @@ export async function parseSSEResponse(resp: Response, onMessage: (message: stri
     parser.feed(str)
   }
 }
+
+export function waitThreeSeconds(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1000);
+  });
+}

@@ -94,7 +94,7 @@ export async function exportPromptFlow() {
     }
   }
   const blob = new Blob([JSON.stringify(exportPrompts, null, 4)], {type: 'application/json'})
-  await fileSave(blob, {fileName: 'chatdev_gpts.json'})
+  await fileSave(blob, {fileName: 'ChatDev_Agent_' + getRealYamlKey() + '.json'})
   trackEvent('export_prompt_flow')
 }
 

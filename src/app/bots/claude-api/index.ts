@@ -26,7 +26,7 @@ export class ClaudeApiBot extends AbstractBot {
       },
       body: JSON.stringify({
         prompt,
-        model: this.getModelName(),
+        model: this.config.claudeApiModel,
         max_tokens_to_sample: 100_000,
         stream: true,
       }),
@@ -44,7 +44,9 @@ export class ClaudeApiBot extends AbstractBot {
     this.conversationContext.prompt += `\n\nHuman: ${params.prompt}\n\nAssistant:`
 
     const resp = await this.fetchCompletionApi(this.conversationContext.prompt, params.signal)
-
+    if (resp.status === 403) {
+      throw new ChatError('Please check your network to access: anthropic.com', ErrorCode.NETWORK_ERROR)
+    }
     let result = ''
 
     await parseSSEResponse(resp, (message) => {

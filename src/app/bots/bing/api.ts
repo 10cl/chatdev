@@ -25,12 +25,16 @@ export async function createConversation(): Promise<ConversationResponse> {
     }
   } catch (err) {
     console.error('retry bing create', err)
-    rawResponse = await ofetch.raw<ConversationResponse>(API_ENDPOINT, {
-      headers: { ...headers, 'x-forwarded-for': randomIP() },
-      redirect: 'error',
-    })
-    if (!rawResponse._data) {
-      throw new FetchError(`Failed to fetch (${API_ENDPOINT})`)
+    try {
+      rawResponse = await ofetch.raw<ConversationResponse>(API_ENDPOINT, {
+        headers: {...headers, 'x-forwarded-for': randomIP()},
+        redirect: 'error',
+      })
+      if (!rawResponse._data) {
+        throw new ChatError('There is no logged-in Microsoft Copilot in this browser.', ErrorCode.BING_UNAUTHORIZED)
+      }
+    }catch (err){
+      throw new ChatError('There is no logged-in Microsoft Copilot in this browser.', ErrorCode.BING_UNAUTHORIZED)
     }
   }
 

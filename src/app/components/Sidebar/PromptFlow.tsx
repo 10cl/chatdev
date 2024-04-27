@@ -3,25 +3,26 @@ import {useAtom} from "jotai/index";
 import collapseIcon from '~/assets/icons/collapse.svg'
 import {
   editorPromptAtom,
-  editorPromptTimesAtom, embeddingEnableAtom, messageTimesTimesAtom,
+  editorPromptTimesAtom, embeddingEnableAtom, messageTimesTimesAtom, promptFlowDesc, promptFlowTips,
   seminarDisableAtom,
   showEditorAtom,
   yamlExceptionAtom
 } from '~app/state'
 import React, {MouseEvent as ReactMouseEvent, useCallback, useEffect, useState} from 'react';
-import ReactFlow, {addEdge, Background, EdgeTypes, useEdgesState, useNodesState,} from 'reactflow';
+import ReactFlow, {addEdge, Background, Edge, EdgeTypes, useEdgesState, useNodesState,} from 'reactflow';
+import * as yamlParser from 'js-yaml';
 
 import 'reactflow/dist/style.css';
 import store from "store2";
 import CustomEdge from "~app/components/Sidebar/CustomEdge";
 import {Prompt,} from "~services/prompts";
 import {
-  checkGameUpdate,
+  checkGameUpdate, getPromptLib,
   getRealYaml,
-  getStore, isHookedResponse, setEditorStatus,
+  getStore, isHookedResponse, isChatMode, isYamlChanged, setEditorStatus,
   setRealYaml,
   setRealYamlKey,
-  setStore
+  setStore, setHookedMessage
 } from "~services/storage/memory-store";
 import {useTranslation} from "react-i18next";
 import {Node} from "@reactflow/core/dist/esm/types/nodes";
@@ -33,6 +34,7 @@ import Browser from "webextension-polyfill";
 import {initChatEmbedding} from "~embedding/retrieve";
 import {handlePersistentStorage, initForWinStore} from "~services/storage/window-store";
 import {initEnv} from "~app/utils/env";
+import {PromptFlowDag, promptflowx} from "promptflowx";
 
 function PromptFlow() {
   const {t} = useTranslation()
@@ -41,15 +43,15 @@ function PromptFlow() {
   const promptFlowOpen = t("Agent is already open. Please enter your requirements in the input box. ChatDev will automatically disassemble them and open the relevant roundtable meeting on the map according to the Agent defined on the right.")
   const promptFlowClose = t("Agent is already closed. You can continue to explore freely on the map and look for NPCs to interact with.")
   const promptFlowDone = t("The Agent has been completed. You can continue to wait for other team members to join. Click the button above to switch to chat mode and view the project overview. When all members are present, you can start the roundtable meeting and approach the corresponding team member to continue the current project discussion.")
-  const [timerId, setTimerId] = useState<number | null>(null);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout>();
   let flowEdge = ""
   let flowNode = ""
 
   const initialNodes = [
-    {id: '1', position: {x: 0, y: 0}, data: {label: '1'}},
-    {id: '2', position: {x: 0, y: 100}, data: {label: '2'}},
+    {id: 'inputs', position: {x: 0, y: 0}, data: {label: 'inputs'}},
+    {id: 'outputs', position: {x: 0, y: 100}, data: {label: 'outputs'}},
   ];
-  const initialEdges = [{id: 'e1-2', source: '1', target: '2', animated: true}];
+  const initialEdges = [{id: 'inputs-outputs', source: 'inputs', target: 'outputs', animated: true}];
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -65,6 +67,9 @@ function PromptFlow() {
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
   const [changeTime, setChangeTime] = useAtom(messageTimesTimesAtom)
   const [isEmbeddingEnable, setEmbeddingEnable] = useAtom(embeddingEnableAtom)
+  const [nodeClickTime, setNodeClickTime] = useState(0)
+  const [desc, setDesc] = useAtom(promptFlowDesc);
+  const [tips, setTips] = useAtom(promptFlowTips);
 
   const edgeTypes: EdgeTypes = {
     default: CustomEdge,
@@ -73,59 +78,23 @@ function PromptFlow() {
   const [nodeBg, setNodeBg] = useState('#bbd9e9');
 
   const startTimer = () => {
-    const id = setInterval(() => {
-      const player_init = getStore("player_init", 0)
-
-      if (player_init == 2) {
-        setStore("player_init", 3)
-        updateFlow()
-        setSeminarDisable(false)
-      } else if (getRealYaml != getStore("flow_yaml", undefined)) {
-        setStore("flow_yaml", getRealYaml())
-        updateFlow()
-        setStore("chat_reset", true)
-      }
-
-      if (getStore("flow_edge", "") !== flowEdge) {
-        flowEdge = getStore("flow_edge", "")
-        setEdges((prevNodes) =>
-          prevNodes.map((node) =>
-            node.id === flowEdge ? {...node, animated: true} : {...node, animated: false}
-          )
-        );
-      }
-
-      if (getStore("flow_node") && getStore("flow_node") !== flowNode) {
-        flowNode = getStore("flow_node")
-        setNodes((nds) =>
-          nds.map((node) => {
-            if (node.id === getStore("flow_node").id) {
-              // it's important that you create a new object here
-              // in order to notify react flow about the change
-              node.style = {...node.style, backgroundColor: nodeBg};
-            }
-
-            return node;
-          })
-        );
-      }
+    const id = setInterval(async () => {
+      await updateReactCanvasFlow()
 
       // exception tips
       const exceptionNode = isHookedResponse("exception")
       if (exceptionNode)
         window.confirm(t('Agent') + " Exception: " + exceptionNode)
 
-      // yaml check exception
-      const yaml_exception = getStore("yaml_exception", "")
-      setYamlException(yaml_exception)
-      handlePersistentStorage()
+      await handlePersistentStorage()
 
       /*Handle panel refresh*/
       checkGameUpdate()
       setChangeTime(getStore("messageTimes", 0))
 
+
     }, 1000);
-    // @ts-ignore
+
     setTimerId(id);
     return () => {
       if (timerId) {
@@ -136,12 +105,10 @@ function PromptFlow() {
 
   const onNodeClick = (event: ReactMouseEvent, node: Node) => {
     const currentTime = new Date().getTime();
-    const lastClickTime = getStore("chatdev_node_click_time")
-    if (lastClickTime !== null && lastClickTime !== undefined) {
-      const timeInterval = currentTime - lastClickTime;
+    if (nodeClickTime) {
+      const timeInterval = currentTime - nodeClickTime;
       if (timeInterval < threshold) {
-        // @ts-ignore
-        const promptKey = node.source ? node.source.path : "";
+        const promptKey = node.data ? node.data.source : "";
         if (promptKey != "") {
           setEditorPrompt(promptKey);
           setEditorPromptTimes(editorPromptTimes + 1);
@@ -151,8 +118,12 @@ function PromptFlow() {
         }
       }
     }
-    setStore("chatdev_node_click_time", currentTime)
+    setNodeClickTime(currentTime)
   }
+
+  useEffect(() => {
+    setEditorStatus(showEditor)
+  }, [showEditor]);
 
   useEffect(() => {
     initEnv()
@@ -163,7 +134,6 @@ function PromptFlow() {
     setStore("prompt_flow_open", promptFlowOpen)
     setStore("prompt_flow_close", promptFlowClose)
     setStore("prompt_flow_done", promptFlowDone)
-    setEditorStatus(showEditor)
 
     /*Game Mode init status*/
     const player_init = getStore("player_init", 0);
@@ -182,7 +152,7 @@ function PromptFlow() {
     startTimer()
 
     /*update flow structure*/
-    updateFlow()
+    updateReactCanvasFlow()
 
     /* for chat embedding */
     initChatEmbedding(isEmbeddingEnable)
@@ -191,26 +161,115 @@ function PromptFlow() {
 
   function setCollapsedAndUpdate() {
     setSeminarDisable((c) => !c)
-    updateFlow()
+    updateReactCanvasFlow()
   }
 
-  function updateFlow() {
-    if (getStore("flow_edges", "") !== undefined && getStore("flow_edges", "") !== "") {
+  async function updateReactCanvasFlow() {
+    if (isYamlChanged() && getRealYaml() != undefined) {
+      try{
+        console.log("updateReactCanvasFlow yaml changed: " + getRealYaml());
+        // Initialize variables
+        const inputs = {
+          id: "inputs",
+          data: {label: "inputs"},
+          position: {x: 100, y: 0},
+        }
+        const canvasEdges = [] as Edge[];
+        const canvasNodes = [] as Node[]
+        canvasNodes.push(inputs)
 
-      setNodes((prevNodes) => prevNodes.filter((node) => node.id === ''));
-      const nodesFlows = getStore("flow_nodes")
-      // for (let i = 0; i < nodesFlows.length; i++) {
-      //   setNodes((prevNodes) => [...prevNodes, nodesFlows[i]]);
-      // }
-      setNodes(() => [...nodesFlows]);
+        let prevNodeName = "inputs"
+        const nodes = await promptflowx.buildPath(getRealYaml(), getPromptLib())
+        let distance = 0;
+        const dag = yamlParser.load(getRealYaml()) as PromptFlowDag;
 
-      setEdges((prevNodes) => prevNodes.filter((node) => node.id === ''));
-      const edgesFlows = getStore("flow_edges")
-      // for (let i = 0; i < edgesFlows.length; i++) {
-      //   setEdges((prevNodes) => [...prevNodes, edgesFlows[i]]);
-      // }
-      setEdges(() => [...edgesFlows]);
-      setStore("yaml_changed", true)
+        if (dag.desc){
+          setDesc(dag.desc)
+        }else{
+          setDesc("")
+        }
+
+        if (!isChatMode() && dag.tips){
+          setTips(dag.tips)
+        }else{
+          setTips([])
+        }
+
+        const minX = 0;
+        const maxX = 150;
+
+        for (const node of nodes) {
+          const xPos = Math.random() * (maxX - minX) + minX;
+
+          distance += 70
+          const canvasNode = {
+            id: node.name,
+            data: {label: node.name, source: node.source.path},
+            position: {x: xPos, y: distance}
+          } as Node
+
+          const canvasEdge = {
+            id: `${prevNodeName}-${node.name}`,
+            source: prevNodeName,
+            target: node.name
+          } as Edge
+
+          canvasNodes.push(canvasNode)
+          canvasEdges.push(canvasEdge)
+          prevNodeName = node.name
+        }
+
+        // endpoint to `outputs`.
+        canvasNodes.push({
+          id: "outputs",
+          data: {label: "outputs"},
+          position: {x: 100, y: distance + 70}
+        })
+        canvasEdges.push({
+          id: `${prevNodeName}-outputs}`,
+          source: prevNodeName,
+          target: "outputs"
+        })
+
+        setNodes((prevNodes) => prevNodes.filter((node) => node.id === ''));
+        setNodes(() => [...canvasNodes]);
+
+        setEdges((prevNodes) => prevNodes.filter((node) => node.id === ''));
+        setEdges(() => [...canvasEdges]);
+
+        setYamlException("")
+      }catch (e){
+        if (e instanceof Error) {
+          setYamlException(e.toString())
+          setEdges(initialEdges)
+          setNodes(initialNodes)
+        }
+      }
+    }
+
+    // highlight the node & edge.
+    if (getStore("flow_edge", "") !== flowEdge) {
+      flowEdge = getStore("flow_edge", "")
+      setEdges((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === flowEdge ? {...node, animated: true} : {...node, animated: false}
+        )
+      );
+    }
+
+    if (getStore("flow_node", "") !== flowNode) {
+      flowNode = getStore("flow_node")
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === flowNode) {
+            // it's important that you create a new object here
+            // in order to notify react flow about the change
+            node.style = {...node.style, backgroundColor: nodeBg};
+          }
+
+          return node;
+        })
+      );
     }
   }
 

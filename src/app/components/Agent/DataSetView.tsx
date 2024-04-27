@@ -49,7 +49,6 @@ const PromptLabItem = (props: {
   const confirmTips = t('Are you sure you want to import the Agent?')
   const successTips = t('Imported Agent successfully')
   const successEditTips = t('Import succeeded. Do you need to edit?')
-  const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [editorPrompt, setEditorPrompt] = useAtom(editorPromptAtom)
   const [isGameMode, setGameModeEnable] = useAtom(gameModeEnable)
   const conversation = useContext(ConversationContext)

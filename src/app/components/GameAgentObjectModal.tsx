@@ -1,8 +1,5 @@
-import * as ReactTooltip from '@radix-ui/react-tooltip'
 import {FC, PropsWithChildren, useCallback} from 'react'
 import React, { useState, useEffect } from 'react';
-import {GoBook} from "react-icons/go";
-import store from "store2";
 import Tooltip from "~app/components/Tooltip";
 import editIcon from "~assets/icons/edit_blue.svg";
 import historyIcon from "~assets/icons/history_mark.svg";
@@ -21,10 +18,11 @@ import {
   getRealYaml,
   setRealYaml,
   setRealYamlKey,
-  setStore, getPromptValue, getGameVilleYaml, setEditorStatus
+  setStore, getPromptValue, getGameVilleYaml, setEditorStatus, isGameWindow, setGameWindow, getMouseAgent
 } from "~services/storage/memory-store";
 interface IMousePositionModal {
   visible: boolean;
+  yaml: string;
   content: string;
   botId: BotId
   defaultPosition: {
@@ -49,10 +47,10 @@ const GameAgentObjectModal = (props: IMousePositionModal) => {
   const openFlowEditor = useCallback(() => {
     // setIsPromptLibraryDialogOpen(true)
     setRealYamlKey(getStore(("prompt_edit")))
-    const isGameMode = getStore("gameModeEnable", true)
-    
+    const isGameMode = isGameWindow()
+
     if (isGameMode && getRealYaml() == undefined) {
-      setRealYaml("#TODO: defined your Agent structure for:" + getStore("player_mark", "") + "\n" + getGameVilleYaml())
+      setRealYaml("#TODO: defined your Agent structure for:" + props.yaml + "\n" + getGameVilleYaml())
     }
 
     setEditorPrompt("Action_Prompt_Template");
@@ -65,11 +63,11 @@ const GameAgentObjectModal = (props: IMousePositionModal) => {
     setEditorYamlTimes(editorYamlTimes)
     setStore("editorYamlTimes", editorYamlTimes)
 
-    setGameModeEnable(false)
-    setStore("gameModeEnable", false)
+    // setGameModeEnable(false)
+    // setGameWindow(false)
 
     trackEvent('open_editor_profile')
-  }, [])
+  }, [props])
 
   const [showHistory, setShowHistory] = useAtom(showHistoryAtom)
 
@@ -83,7 +81,7 @@ const GameAgentObjectModal = (props: IMousePositionModal) => {
           className="mouse-position-modal"
           style={{left: `${x}px`, top: `${y}px`, visibility: `${visible ? 'visible' : 'hidden'}`}}>
         <div className="mouse-position-modal-content">
-          <img src={("./assets/profile/" + getStore("pointerover_name", "Ryan_Park") + ".png")} className="w-5 h-5"/>{content}
+          <img src={("./assets/images/profile/" + getStore("pointerover_name", "Ryan_Park") + ".png")} className="w-5 h-5"/>{content}
           <div className="flex flex-row items-center float-right">
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-6 h-6 cursor-pointer float-right" onClick={openHistoryDialog}/>

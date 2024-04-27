@@ -6,7 +6,7 @@ export default defineManifest(async (env) => {
     name: '__MSG_appName__',
     description: '__MSG_appDesc__',
     default_locale: 'en',
-    version: '1.4.0',
+    version: '1.5.1',
     icons: {
       '16': 'src/assets/icon.png',
       '32': 'src/assets/icon.png',
@@ -22,11 +22,15 @@ export default defineManifest(async (env) => {
       'https://*.bing.com/',
       'https://*.openai.com/',
       'https://*.xfyun.cn/',
-      'https://bard.google.com/',
-      'https://*.chatdev.toscl.com/',
-      'https://*.poe.com/',
+      'https://*.llama2.ai/',
+      'https://*.plausible.io/',
+      'https://gemini.google.com/',
+      'https://*.toscl.com/',
+      'https://*.aliyun.com/',
+      'https://*.pi.ai/',
       'https://*.anthropic.com/',
       'https://*.claude.ai/',
+      'https://*.lmsys.org/',
     ],
     "content_security_policy": {
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
@@ -39,8 +43,8 @@ export default defineManifest(async (env) => {
         js: ['src/content-script/chatgpt-inpage-proxy.ts'],
       },
       {
-        "matches": ['https://chatdev.toscl.com/*'],
-        "js": ["src/content-script/chatdev-inpage.ts"]
+        "matches": ['https://*.toscl.com/*'],
+        "js": ["src/content-script/chatdev-inpage.tsx"]
       }
     ],
     commands: {
@@ -59,6 +63,16 @@ export default defineManifest(async (env) => {
     },
     declarative_net_request: {
       rule_resources: [
+        {
+          id: 'ruleset_chatgpt',
+          enabled: true,
+          path: 'src/rules/chatgpt.json',
+        },
+        {
+          id: 'ruleset_lmsys',
+          enabled: true,
+          path: 'src/rules/lmsys.json',
+        },
         {
           id: 'ruleset_bing',
           enabled: true,

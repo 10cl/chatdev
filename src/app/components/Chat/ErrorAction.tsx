@@ -8,6 +8,7 @@ import Button, { Props as ButtonProps } from '../Button'
 import MessageBubble from './MessageBubble'
 import {useAtom} from "jotai/index";
 import {showSettingsAtom} from "~app/state";
+import {setStore} from "~services/storage/memory-store";
 const ActionButton: FC<ButtonProps> = (props) => {
   return <Button {...props} size="small" className="drop-shadow-lg" color="primary" />
 }
@@ -38,7 +39,7 @@ const ChatGPTAuthErrorAction = () => {
 
   return (
     <div className="flex flex-row gap-2 items-center">
-      <ActionButton text={t('Login to ChatGPT')} onClick={fixChatGPT} isLoading={fixing} />
+      <a href="https://chat.openai.com" target='_blank' rel="noreferrer"><ActionButton text={t('Login to ChatGPT')} /></a>
       <span className="text-sm text-primary-text">OR</span>
       <a
         onClick={() => setShowSettings(true)}
@@ -57,8 +58,8 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
 
   if (error.code === ErrorCode.BING_UNAUTHORIZED) {
     return (
-      <a href="https://bing.com" target="_blank" rel="noreferrer">
-        <ActionButton text={t('Login at bing.com')} />
+      <a href="https://www.bing.com/chat" target="_blank" rel="noreferrer">
+        <ActionButton text={t('Login at Microsoft Copilot in Bing')} />
       </a>
     )
   }
@@ -154,7 +155,20 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
   if (error.code === ErrorCode.POE_MESSAGE_LIMIT) {
     return <p className="ml-2 text-secondary-text text-sm">{t('This is a limitation set by poe.com')}</p>
   }
-
+  if (error.code === ErrorCode.LMSYS_UNAUTHORIZED) {
+    return (
+      <a href="https://chat.lmsys.org/" target="_blank" rel="noreferrer">
+        <ActionButton text={t('Login to LMSYS')} />
+      </a>
+    )
+  }
+  if (error.code === ErrorCode.BAICHUAN_WEB_UNAUTHORIZED) {
+    return (
+      <a href="https://www.baichuan-ai.com" target="_blank" rel="noreferrer">
+        <ActionButton text={t('Login to BAICHUAN AI')} />
+      </a>
+    )
+  }
   return null
 }
 

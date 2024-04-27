@@ -8,7 +8,8 @@ import { uuid } from '~utils'
 import { ChatError } from '~utils/errors'
 import { BotId } from '../bots'
 import {
-  getStore, setAgentReset,
+  getPlayerMark,
+  getStore, isGameWindow, setAgentReset,
   setRealYaml,
   setRealYamlKey, setResponseErrorMessage, setResponseStream,
   setStore
@@ -35,11 +36,11 @@ export function useChat(botId: BotId) {
       const botMessageId = uuid()
 
         function getValidMark() {
-            const isGameMode = getStore("gameModeEnable", true)
+            const isGameMode = isGameWindow()
             if (!isGameMode) {
                 return ""
             }
-            return getStore("player_mark", "");
+            return getPlayerMark()
         }
       setChatState((draft) => {
         draft.messages.push({ id: uuid(), text: input, author: 'user', mark: getValidMark() }, { id: botMessageId, text: '', author: botId, mark: getValidMark()})

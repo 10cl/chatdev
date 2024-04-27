@@ -6,6 +6,7 @@ class ArkoseTokenGenerator {
     this.pendingPromises = []
     window.useArkoseSetupEnforcement = this.useArkoseSetupEnforcement.bind(this)
     this.injectScript()
+    // this.injectScriptGpt35()
   }
 
   useArkoseSetupEnforcement(enforcement) {
@@ -43,6 +44,14 @@ class ArkoseTokenGenerator {
     script.defer = true
     script.setAttribute('data-callback', 'useArkoseSetupEnforcement')
     document.body.appendChild(script)
+  }
+  injectScriptGpt35() {
+    // const script = document.createElement('script')
+    // script.src = Browser.runtime.getURL('/js/v2/3D86FBBA-9D22-402A-B512-3420086BA6CC/api.js')
+    // script.async = true
+    // script.defer = true
+    // script.setAttribute('data-callback', 'useArkoseSetupEnforcementfreeaccount')
+    // document.body.appendChild(script)
   }
 
   async generate() {

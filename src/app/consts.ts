@@ -2,7 +2,7 @@ import claudeLogo from '~/assets/anthropic-logo.png'
 import baichuanLogo from '~/assets/baichuan-logo.png'
 import bardLogo from '~/assets/bard-logo.svg'
 import bingLogo from '~/assets/bing-logo.svg'
-import chatglmLogo from '~/assets/chatglm-logo.svg'
+import yiLogo from '~/assets/yi-logo.svg'
 import chatgptLogo from '~/assets/chatgpt-logo.svg'
 import falconLogo from '~/assets/falcon-logo.jpeg'
 import llamaLogo from '~/assets/llama-logo.png'
@@ -10,7 +10,7 @@ import mistralLogo from '~/assets/mistral-logo.png'
 import piLogo from '~/assets/pi-logo.png'
 import qianwenLogo from '~/assets/qianwen-logo.png'
 import vicunaLogo from '~/assets/vicuna-logo.jpg'
-import wizardlmLogo from '~/assets/wizardlm-logo.png'
+import gemmaLogo from '~/assets/gemma-logo.png'
 import xunfeiLogo from '~/assets/xunfei-logo.png'
 import { BotId } from './bots'
 
@@ -19,12 +19,8 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: string }> = {
     name: 'ChatGPT',
     avatar: chatgptLogo,
   },
-  bing: {
-    name: 'Bing',
-    avatar: bingLogo,
-  },
-  bard: {
-    name: 'Bard',
+  gemini: {
+    name: 'Gemini',
     avatar: bardLogo,
   },
   claude: {
@@ -32,32 +28,32 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: string }> = {
     avatar: claudeLogo,
   },
   llama: {
-    name: 'Llama 2',
+    name: 'Llama 3 70B',
     avatar: llamaLogo,
   },
   vicuna: {
     name: 'Vicuna',
     avatar: vicunaLogo,
   },
-  falcon: {
+/*  falcon: {
     name: 'Falcon',
     avatar: falconLogo,
-  },
+  },*/
   mistral: {
-    name: 'Mistral',
+    name: 'Mixtral',
     avatar: mistralLogo,
   },
   pi: {
     name: 'Pi',
     avatar: piLogo,
   },
-  wizardlm: {
-    name: 'WizardLM',
-    avatar: wizardlmLogo,
+  gemma: {
+    name: 'Gemma',
+    avatar: gemmaLogo,
   },
-  chatglm: {
-    name: 'ChatGLM2',
-    avatar: chatglmLogo,
+  yi: {
+    name: 'Yi',
+    avatar: yiLogo,
   },
   xunfei: {
     name: 'iFlytek Spark',
@@ -71,10 +67,14 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: string }> = {
     name: 'Baichuan',
     avatar: baichuanLogo,
   },
+  bing: {
+    name: 'Bing',
+    avatar: bingLogo,
+  },
 }
 
 export const CHATGPT_HOME_URL = 'https://chat.openai.com'
-export const CHATGPT_API_MODELS = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-32k', 'gpt-4-turbo'] as const
+export const CHATGPT_API_MODELS = ['gpt-3.5-turbo', 'gpt-4-turbo', 'gpt-4'] as const
 export const ALL_IN_ONE_PAGE_ID = 'all'
 
 export const DEFAULT_CHATGPT_SYSTEM_MESSAGE =

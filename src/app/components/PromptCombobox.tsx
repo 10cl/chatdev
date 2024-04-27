@@ -1,26 +1,20 @@
 import { useInteractions, useListItem } from '@floating-ui/react'
 import cx from 'classnames'
-import { t } from 'i18next'
 import { FC, createContext, useContext } from 'react'
-import useSWR from 'swr'
-import { Prompt, loadLocalPrompts } from '~services/prompts'
-
-const LIBRARY_PROMPT: Prompt = {
-  id: 'PROMPT_LIBRARY',
-  title: t('Open Prompt Library'),
-  prompt: '',
-}
+import {useAtom} from "jotai/index";
+import {promptFlowTips} from "~app/state";
+import {getEditorStatus} from "~services/storage/memory-store";
 
 export interface ComboboxContextValue {
   activeIndex: number | null
   getItemProps: ReturnType<typeof useInteractions>['getItemProps']
-  handleSelect: (prompt: Prompt) => void
+  handleSelect: (prompt: string) => void
   setIsComboboxOpen: (open: boolean) => void
 }
 
 export const ComboboxContext = createContext<ComboboxContextValue>({} as ComboboxContextValue)
 
-const PromptItem: FC<{ prompt: Prompt }> = ({ prompt }) => {
+const PromptItem: FC<{ prompt: string }> = ({ prompt }) => {
   const context = useContext(ComboboxContext)
   const { ref, index } = useListItem()
   const isActive = index === context.activeIndex
@@ -46,23 +40,22 @@ const PromptItem: FC<{ prompt: Prompt }> = ({ prompt }) => {
         },
       })}
     >
-      {prompt.title}
+      {prompt}
     </div>
   )
 }
 
 const PromptCombobox: FC = () => {
-  const promptsQuery = useSWR('user-prompts', loadLocalPrompts)
-  if (!promptsQuery.data) {
+  const [tips, setTips] = useAtom(promptFlowTips);
+
+  if (getEditorStatus() || !tips || tips.length <= 0) {
     return null
   }
   return (
     <div className="overflow-auto rounded-md py-1 shadow-lg ring-1 ring-primary-border focus:outline-none text-sm min-w-[150px] bg-primary-background">
-      {promptsQuery.data.map((prompt) => {
-        return <PromptItem key={prompt.id} prompt={prompt} />
+      {!getEditorStatus() && tips && tips.length > 0 && tips.map((item: string, index: any) => {
+        return <PromptItem key={index} prompt={item} />
       })}
-      {promptsQuery.data.length > 0 && <div className="h-[1px] bg-primary-border" />}
-      <PromptItem key={LIBRARY_PROMPT.id} prompt={LIBRARY_PROMPT} />
     </div>
   )
 }

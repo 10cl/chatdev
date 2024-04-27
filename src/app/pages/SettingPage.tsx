@@ -12,8 +12,6 @@ import ChatGPTOpenRouterSettings from '~app/components/Settings/ChatGPTOpenRoute
 import ChatGPTPoeSettings from '~app/components/Settings/ChatGPTPoeSettings'
 import ChatGPWebSettings from '~app/components/Settings/ChatGPTWebSettings'
 import ClaudeAPISettings from '~app/components/Settings/ClaudeAPISettings'
-import ClaudeOpenRouterSettings from '~app/components/Settings/ClaudeOpenRouterSettings'
-import ClaudePoeSettings from '~app/components/Settings/ClaudePoeSettings'
 import ClaudeWebappSettings from '~app/components/Settings/ClaudeWebappSettings'
 import EnabledBotsSettings from '~app/components/Settings/EnabledBotsSettings'
 import KDB from '~app/components/Settings/KDB'
@@ -38,7 +36,7 @@ import {
   getRealYaml,
   setRealYaml,
   setRealYamlKey,
-  setStore
+  setStore, getBotId
 } from "~services/storage/memory-store";
 import store from "store2";
 
@@ -114,49 +112,8 @@ const SettingPage = () => {
   return (
     <PagePanel title={`${t('Settings')} (v${getVersion()})`}>
       <div className="flex flex-col gap-5 mt-3">
-        <div>
-          <p className="font-bold mb-1 text-lg">{t('Your Name')}</p>
-          <div className="flex flex-row gap-3">
-            <Input className="w-full" name="player_name" id="player_name" defaultValue={getStore("player_name", "ChatDev")} />
-          </div>
-        </div>
-        <div>
-          <p className="font-bold mb-1 text-lg">{t('Export/Import All Data')}</p>
-          <p className="mb-3 opacity-80">{t('Data includes all your settings, chat histories, and local prompts')}</p>
-          <div className="flex flex-row gap-3">
-            <Button size="small" text={t('Export')} icon={<BiExport />} onClick={exportData} />
-            <Button size="small" text={t('Import')} icon={<BiImport />} onClick={importData} />
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="font-bold text-lg">{t('Shortcut to open this app')}</p>
-          <div className="flex flex-row gap-2 items-center">
-            {shortcuts.length > 0 && (
-              <div className="flex flex-row gap-1">
-                {shortcuts.map((s) => (
-                  <KDB key={s} text={s} />
-                ))}
-              </div>
-            )}
-            <Button text={t('Change shortcut')} size="small" onClick={openShortcutPage} />
-          </div>
-        </div>
-        <div>
-          <p className="font-bold mb-2 text-lg">{t('Startup page')}</p>
-          <div className="w-[200px]">
-            <Select
-              options={[
-                ...Object.entries(CHATBOTS).map(([botId, bot]) => ({ name: bot.name, value: botId })),
-              ]}
-              value={userConfig.startupPage}
-              onChange={(v) => updateConfigValue({ startupPage: v })}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="font-bold text-lg">{t('Chatbots')}</p>
-          <EnabledBotsSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-        </div>
+
+        {getBotId() == "chatgpt" && (
         <div className="flex flex-col gap-1">
           <p className="font-bold text-lg">ChatGPT</p>
           <RadioGroup
@@ -166,16 +123,11 @@ const SettingPage = () => {
           />
           {userConfig.chatgptMode === ChatGPTMode.API ? (
             <ChatGPTAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : userConfig.chatgptMode === ChatGPTMode.Azure ? (
-            <ChatGPTAzureSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : userConfig.chatgptMode === ChatGPTMode.Poe ? (
-            <ChatGPTPoeSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : userConfig.chatgptMode === ChatGPTMode.OpenRouter ? (
-            <ChatGPTOpenRouterSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           ) : (
             <ChatGPWebSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
           )}
-        </div>
+        </div>)}
+        {getBotId() == "claude" && (
         <div className="flex flex-col gap-1">
           <p className="font-bold text-lg">Claude</p>
           <RadioGroup
@@ -185,15 +137,10 @@ const SettingPage = () => {
           />
           {userConfig.claudeMode === ClaudeMode.API ? (
             <ClaudeAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : userConfig.claudeMode === ClaudeMode.Webapp ? (
-            <ClaudeWebappSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : userConfig.claudeMode === ClaudeMode.OpenRouter ? (
-            <ClaudeOpenRouterSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          ) : (
-            <ClaudePoeSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />
-          )}
-        </div>
-        <div className="flex flex-col gap-1">
+          ) : <ClaudeWebappSettings userConfig={userConfig} updateConfigValue={updateConfigValue} />}
+        </div>)}
+        {getBotId() == "bing" && (
+          <div className="flex flex-col gap-1">
           <p className="font-bold text-lg">Bing</p>
           <div className="flex flex-row gap-3 items-center justify-between w-[250px]">
             <p className="font-medium text-base">{t('Chat style')}</p>
@@ -205,7 +152,7 @@ const SettingPage = () => {
               />
             </div>
           </div>
-        </div>
+        </div>)}
       </div>
       <Button color={dirty ? 'primary' : 'flat'} text={t('Save')} className="w-fit my-8" onClick={save} />
       <Toaster position="top-right" />

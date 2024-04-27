@@ -10,7 +10,7 @@ import {gameModeEnable, messageTimesTimesAtom} from "~app/state";
 import React from "react";
 import AgentCommunity from "~app/components/Agent/AgentCommunity";
 import ChatTipsCard from "~app/components/Chat/ChatTipsCard";
-import {getStore, setStore} from "~services/storage/memory-store";
+import {getStore, isChatMode, setStore} from "~services/storage/memory-store";
 
 interface Props {
   botId: BotId
@@ -29,7 +29,7 @@ const ChatMessageList: FC<Props> = (props) => {
                 {props.messages.length > 0 && props.messages.map((message, index) => {
                     return <ChatMessageCard key={message.id} message={message} className={index === 0 ? 'mt-5' : undefined} />
                 })}
-                {props.messages.length <= 0 && <ChatTipsCard key={changeTime} botId={props.botId} messages={props.messages}/>}
+                {props.messages.length <= 0 && !isChatMode() && <ChatTipsCard key={changeTime} botId={props.botId} messages={props.messages}/>}
                 {getStore("community_visited", true) && <AgentCommunity/> && setStore("community_visited", false)}
             </div>
         </ScrollToBottom>

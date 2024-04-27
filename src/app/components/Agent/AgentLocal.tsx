@@ -22,9 +22,10 @@ import {
   isNewAgentShowAtom, agentLocalDialogOpen,
   showEditorAtom
 } from "~app/state";
-import {getStore, isAgentCanRemove, setRealYamlKey, setStore} from "~services/storage/memory-store";
+import {getStore, setGameWindow, setRealYamlKey, setStore} from "~services/storage/memory-store";
 import {toast} from "react-hot-toast";
 import {ConversationContext} from "~app/context";
+import {isAgentCanRemove} from "~utils/prompt";
 
 const ActionButton = (props: { text: string; onClick: () => void }) => {
   return (
@@ -57,7 +58,7 @@ const PromptItem = (props: {
     <div
       className="group relative flex items-center space-x-3 rounded-lg border border-primary-border bg-primary-background px-5 py-4 shadow-sm hover:border-gray-400">
       {props.title.indexOf("Profile_") != -1 && (
-        <img src={("./assets/profile/" + props.title.replace("Profile_", "")) + ".png"} className="w-5 h-5"
+        <img src={("./assets/images/profile/" + props.title.replace("Profile_", "")) + ".png"} className="w-5 h-5"
              alt={props.title}/>
       )}
       {props.title.indexOf("Profile_") == -1 && (
@@ -113,7 +114,7 @@ function LocalPrompts(props: { insertPrompt: (text: string) => void }) {
 
       setIsPromptLibraryDialogOpen(false)
       setGameModeEnable(false)
-      setStore("gameModeEnable", false)
+      setGameWindow(false)
       setShowEditor(false)
       toast.success(t('Load success.'))
       conversation?.reset()

@@ -7,22 +7,27 @@ import { LMSYSBot } from './lmsys'
 import { PiBot } from './pi'
 import { QianwenWebBot } from './qianwen'
 import { XunfeiBot } from './xunfei'
+import {LlaMa2Bot} from "~app/bots/llama2";
 
 export type BotId =
   | 'chatgpt'
   | 'bing'
-  | 'bard'
+  | 'gemini'
   | 'claude'
   | 'xunfei'
   | 'vicuna'
-  | 'falcon'
   | 'mistral'
-  | 'chatglm'
+  | 'yi'
   | 'llama'
   | 'pi'
-  | 'wizardlm'
+  | 'gemma'
   | 'qianwen'
   | 'baichuan'
+
+export type ChatPage =
+  | 'side'
+  | 'page'
+  | 'extension'
 
 export function createBotInstance(botId: BotId) {
   switch (botId) {
@@ -30,30 +35,28 @@ export function createBotInstance(botId: BotId) {
       return new ChatGPTBot()
     case 'bing':
       return new BingWebBot()
-    case 'bard':
-      return new BardBot()
     case 'claude':
       return new ClaudeBot()
     case 'xunfei':
       return new XunfeiBot()
     case 'vicuna':
       return new LMSYSBot('vicuna-33b')
-    case 'chatglm':
-      return new LMSYSBot('chatglm2-6b')
+    case 'yi':
+      return new LMSYSBot('yi-34b-chat')
     case 'llama':
-      return new LMSYSBot('llama-2-70b-chat')
-    case 'wizardlm':
-      return new LMSYSBot('wizardlm-13b')
-    case 'falcon':
-      return new LMSYSBot('falcon-180b-chat')
+      return new LlaMa2Bot()
+    case 'gemma':
+      return new LMSYSBot('gemma-7b-it')
     case 'mistral':
-      return new LMSYSBot('mistral-7b-instruct')
+      return new LMSYSBot('mixtral-8x7b-instruct-v0.1')
     case 'pi':
       return new PiBot()
     case 'qianwen':
       return new QianwenWebBot()
     case 'baichuan':
       return new BaichuanWebBot()
+    case 'gemini':
+      return new BardBot()
   }
 }
 

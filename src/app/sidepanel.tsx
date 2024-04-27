@@ -29,7 +29,7 @@ function PremiumOnly() {
 }
 
 function SidePanelApp() {
-  return <SidePanelPage />
+  return <SidePanelPage type={"side"}/>
 }
 
 const container = document.getElementById('app')!

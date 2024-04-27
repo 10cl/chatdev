@@ -13,7 +13,7 @@ import themeIcon from '~/assets/icons/theme.svg'
 import logo from '~/assets/logo.svg'
 import minimalLogo from '~/assets/minimal-logo.svg'
 import { useEnabledBots } from '~app/hooks/use-enabled-bots'
-import { sidebarCollapsedAtom } from '~app/state'
+import {showNavSettingsAtom, showSettingsAtom, sidebarCollapsedAtom} from '~app/state'
 import CommandBar from '../CommandBar'
 import GuideModal from '../GuideModal'
 import ThemeSettingModal from '../ThemeSettingModal'
@@ -37,6 +37,9 @@ function Sidebar() {
   const [collapsed, setCollapsed] = useAtom(sidebarCollapsedAtom)
   const [themeSettingModalOpen, setThemeSettingModalOpen] = useState(false)
   const enabledBots = useEnabledBots()
+  const [showSettings, setShowSettings] = useAtom(showSettingsAtom)
+  const [showNavSettings, setShowNavSettings] = useAtom(showNavSettingsAtom)
+
   return (
     <aside
       className={cx(
@@ -83,6 +86,10 @@ function Sidebar() {
               <IconButton icon={discordIcon} />
             </a>
           </Tooltip>
+          {showNavSettings && (
+          <Tooltip content={t('Settings')}>
+              <IconButton icon={settingIcon} onClick={()=>setShowSettings(true)}/>
+          </Tooltip>)}
         </div>
       </div>
       <CommandBar />

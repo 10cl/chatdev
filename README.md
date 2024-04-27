@@ -51,16 +51,6 @@ It accelerates prompt engineering through **JavaScript Support** that allows imp
     <th align="center">ChatDev(OpenBMB)</th>
   </tr>
   <tr>
-    <td align="center">Goal</td>
-    <td align="center">Agent for virtual/real world.</td>
-    <td align="center">Agent for generate demo</td>
-  </tr>
-  <tr>
-    <td align="center">First commit</td>
-    <td align="center">Aug 20, 2023<a href="https://github.com/10cl/chatdev/commit/9007d6ab13d82b606dbef5302021c679cd30bac0">9007d6ab</a></td>
-    <td align="center">Sep 4, 2023<a href="https://github.com/OpenBMB/ChatDev/commit/acb93cf3d15cec5b9ee6eec0850ddd3932164329">acb93cf3</a></td>
-  </tr>
-  <tr>
     <td align="center">Programming Approach</td>
     <td align="center">TypeScript</td>
     <td align="center">Python Code</td>

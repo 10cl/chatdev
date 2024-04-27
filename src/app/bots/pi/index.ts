@@ -11,9 +11,9 @@ export class PiBot extends AbstractBot {
   private conversationContext?: ConversationContext
 
   async doSendMessage(params: SendMessageParams) {
-    if (!(await requestHostPermission('https://*.pi.ai/'))) {
+/*    if (!(await requestHostPermission('https://!*.pi.ai/'))) {
       throw new ChatError('Missing pi.ai permission', ErrorCode.MISSING_HOST_PERMISSION)
-    }
+    }*/
 
     if (!this.conversationContext?.initialized) {
       await fetch('https://pi.ai/api/chat/start', { method: 'POST' })
@@ -28,12 +28,13 @@ export class PiBot extends AbstractBot {
         'Content-Type': 'application/json',
       },
     })
-
+    let result = "";
     await parseSSEResponse(resp, (message) => {
       console.debug('pi sse', message)
       const data = JSON.parse(message)
       if (data.text) {
-        params.onEvent({ type: 'UPDATE_ANSWER', data: { text: data.text } })
+        result += data.text;
+        params.onEvent({ type: 'UPDATE_ANSWER', data: { text: result } })
       }
     })
 

@@ -6,7 +6,7 @@ import {useTranslation} from "react-i18next";
 import {Prompt, saveLocalPrompt} from "~services/prompts";
 import {
   getPromptValue, getRealYaml,
-  getStore, setEditorStatus,
+  getStore, setEditorStatus, setGameWindow,
   setRealYaml,
   setRealYamlKey,
   setStore
@@ -79,7 +79,7 @@ const NewAgentView: FC<Props> = ({messages, duplicate}) => {
             setStore("editorYamlTimes", editorYamlTimes)
 
             setGameModeEnable(false)
-            setStore("gameModeEnable", false)
+            setGameWindow(false)
           }
         } finally {
           setCreating(false)

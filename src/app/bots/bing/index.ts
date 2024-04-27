@@ -174,7 +174,7 @@ export class BingWebBot extends AbstractBot {
               type: 'ERROR',
               error: new ChatError(
                 event.item.result.error || 'Unknown error',
-                captcha ? ErrorCode.BING_CAPTCHA : ErrorCode.UNKOWN_ERROR,
+                captcha ? ErrorCode.BING_UNAUTHORIZED : ErrorCode.UNKOWN_ERROR,
               ),
             })
             return

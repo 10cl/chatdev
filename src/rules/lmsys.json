@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "origin",
+          "operation": "set",
+          "value": "https://chat.lmsys.org/"
+        },
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://chat.lmsys.org/"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "operation": "set",
+          "header": "Access-Control-Allow-Credentials",
+          "value": "true"
+        }
+      ]
+    },
+    "condition": {
+      "requestDomains": [
+        "chat.lmsys.org"
+      ],
+      "resourceTypes": [
+        "xmlhttprequest"
+      ]
+    }
+  }
+]

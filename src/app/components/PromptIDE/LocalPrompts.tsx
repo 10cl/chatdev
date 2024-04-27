@@ -11,18 +11,28 @@ import {
   saveLocalPrompt,
 } from "~services/prompts";
 import {
-  getEditorGenerateContent,
-  getPromptValue, getRealYaml, getRealYamlKey,
-  getStore, setAgentReset, setDupAgentYaml, setEditorGenerate, setPromptValue,
+  getPromptValue,
+  getRealYaml,
+  getRealYamlKey,
+  getStore,
+  setAgentReset,
+  setDupAgentYaml,
+  setEditorGenerate,
+  setPromptValue,
   setRealYaml,
-  setRealYamlKey, setRealYamlGenerating,
-  setStore, updateEditorResizeInfo
+  setRealYamlKey,
+  setRealYamlGenerating,
+  setStore,
+  getLayoutRight,
+  setEditorGenerateEnable,
+  isEditorGenerateEnable,
+  getEditorGenerateContent, setEditorInstance, getEditorInstance
 } from "~services/storage/memory-store";
 import AceEditor from "react-ace";
 import {useAtom} from "jotai/index";
 import {
   editorPromptAtom,
-  editorPromptTimesAtom, editorRightAtom, editorYamlTimesAtom, generateEnableAtom, isNewAgentShowAtom,
+  editorPromptTimesAtom, editorYamlTimesAtom, generateEnableAtom, isNewAgentShowAtom, showEditorAtom,
   showShareAtom
 } from "~app/state";
 import store from "store2";
@@ -68,11 +78,12 @@ function PromptForm() {
   const confirmTips = t('Are you sure you want to import the Agent?')
   const successTips = t('Imported Agent successfully')
   const [shareViewShow, setShowShareView] = useAtom(showShareAtom)
-  const [editorRight, setEditorRightAtom] = useAtom(editorRightAtom)
   const [yamlResizableRef, setYamlResizableRef] = useState<Resizable | null>(null);
   const [funcResizableRef, setFuncResizableRef] = useState<Resizable | null>(null);
-  const [promptIDERef, setPromptIDERef] = useState<HTMLDivElement | null>(null);
+  // const [promptIDERef, setPromptIDERef] = useState<HTMLDivElement | null>(null);
   const [isNewAgentShow, setNewAgentDialog] = useAtom(isNewAgentShowAtom)
+  const gameRef = useRef<HTMLDivElement>(null);
+  const [showEditor, setShowEditor] = useAtom(showEditorAtom)
 
   interface Enable {
     top?: boolean;
@@ -128,26 +139,6 @@ function PromptForm() {
     await localPromptsQuery.mutate()
   }
 
-  const getEditYaml = useCallback(() => {
-    if (!getStore("editor_yaml", {}).width) {
-      if (promptIDERef && promptIDERef.offsetWidth > 0) {
-        const width = promptIDERef.offsetWidth
-        const height = promptIDERef.offsetHeight
-        console.log("editor right: " + editorRight + ", promptIDERef width: " + width + ", height: " + height)
-        console.log(promptIDERef)
-        updateEditorResizeInfo(editorRight, width, height)
-        setEditorYamlTimes(editorYamlTimes + 1)
-      } else {
-        const gameContainer = getStore("game_wh", {})
-        if (gameContainer.width > 0 && gameContainer.height > 0) {
-          updateEditorResizeInfo(editorRight, gameContainer.width, gameContainer.height)
-          setEditorYamlTimes(editorYamlTimes + 1)
-        }
-      }
-    }
-    return getRealYaml()
-  }, [editorRight])
-
   function getEditPrompt() {
     const prompts = getStore("prompts", null);
     if (prompts !== null && prompts[editorPrompt]) {
@@ -183,9 +174,8 @@ function PromptForm() {
       setEditorGenerate('Yaml')
     }
 
-    if (event.type == "focus" && getEditorGenerateContent() == "") {
-      setEditorGenerate('')
-    }
+    setEditorInstance(editor)
+
   }
 
   function onFocusPrompt(event: any, editor: Ace.Editor | undefined) {
@@ -194,6 +184,7 @@ function PromptForm() {
     if (generateEnable && promptType == "func:") {
       setEditorGenerate('Prompt')
     }
+    setEditorInstance(editor)
   }
 
   function onSelectionChange(selectionValue: SelectionValue) {
@@ -207,10 +198,10 @@ function PromptForm() {
     let targetPath = '';
     const functionPath = 'func:';
     const promptPath = 'path:';
-    const regexFunc = /func:\s*([\w_]+)\s*/
-    const regexPath = /path:\s*([\w_]+)\s*/
+    const regexFunc = /func:\s*([^\s^'^"]+)\s*/
+    const regexPath = /path:\s*([^\s^'^"]+)\s*/
 
-    onChangeYaml(document.$lines.join("\n"))
+    // onChangeYaml(document.$lines.join("\n"))
     for (let i = 0; i < document.$lines.length; i++) {
       const line = document.$lines[i];
       const matchFunc = line.match(regexFunc)
@@ -282,6 +273,7 @@ function PromptForm() {
   }
 
   React.useEffect(() => {
+    console.log("editor use effect")
     // setEditorStatus("Yaml")
     setStore("editor_prompt_type", "path:")
     // data stub:
@@ -347,10 +339,28 @@ function PromptForm() {
       },
     };
     addCompleter(promptTablesCompleter);
-  }, [editorRight]);
+    if (!getStore("editor_yaml", undefined)) {
+      layoutChange(false)
+    }
+  }, []);
+
+  React.useEffect(() => {
+    setEditorGenerateEnable(generateEnable)
+  }, [generateEnable]);
+
+  React.useEffect(() => {
+    setEditorPromptTimes(editorPromptTimes + 1)
+  }, [showEditor]);
+
+  React.useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   function onChangePrompt(value: string) {
     const title = editorPrompt
+    console.log("onChangePrompt title: " + title + ", value: " + value)
+
     let prompt = null
     for (let i = 0; i < localPromptsQuery.data.length; i++) {
       if (localPromptsQuery.data[i].title == title) {
@@ -363,6 +373,7 @@ function PromptForm() {
     } else {
       savePrompt({id: uuid(), title: title, prompt: value})
     }
+    setRealYaml(getRealYaml())
   }
 
   async function importYaml() {
@@ -396,34 +407,17 @@ function PromptForm() {
   async function generate() {
     const newState = !generateEnable
     setGenerateEnable(newState)
-    if (newState){
-      setEditorGenerate('Yaml')
-    }else{
-      setEditorGenerate('')
-    }
   }
 
-  function onResizeYaml(event: MouseEvent | TouchEvent, direction: Direction, elementRef: HTMLElement, delta: NumberSize) {
-    console.log("onResizeYaml")
-    const yamlWidth = elementRef.offsetWidth
-    const yamlHeight = elementRef.offsetHeight
-    setStore("editor_yaml", {width: yamlWidth, height: yamlHeight})
-    console.log("editor width " + yamlWidth + " height: " + yamlHeight)
+  const handleResize = () => {
+      console.log("handleResize")
+    const newState = getLayoutRight()
+    const promptIDERef = gameRef.current;
+
     if (promptIDERef) {
-      const width = promptIDERef.offsetWidth
-      const height = promptIDERef.offsetHeight
-      updateEditorResizeInfo(editorRight, width, height)
-      setEditorYamlTimes(editorYamlTimes + 1)
-    }
-  }
-
-  function onResizeFunc(event: MouseEvent | TouchEvent, direction: Direction, elementRef: HTMLElement, delta: NumberSize) {
-    console.log("onResizeFunc")
-  }
-
-  const layoutChange = useCallback(() => {
-    const newState = !editorRight
-    if (promptIDERef) {
+      if (promptIDERef.offsetWidth == 0){
+        return
+      }
       if (!newState) {
         setStore("editor_yaml", {width: promptIDERef.offsetWidth, height: promptIDERef.offsetHeight / 2})
         setStore("editor_func", {width: promptIDERef.offsetWidth, height: promptIDERef.offsetHeight / 2})
@@ -431,22 +425,108 @@ function PromptForm() {
         setStore("editor_yaml", {width: promptIDERef.offsetWidth / 2, height: promptIDERef.offsetHeight})
         setStore("editor_func", {width: promptIDERef.offsetWidth / 2, height: promptIDERef.offsetHeight})
       }
-      setEditorRightAtom(newState)
-      setEditorYamlTimes(editorYamlTimes + 1)
+      setStore("editor_layout_right", newState);
     }
+
+    setEditorYamlTimes(editorYamlTimes + 1)
     setResizeKey(resizeKey + 1)
-  }, [resizeEnableFunc, resizeKey, setResizeKey, editorYamlTimes, setEditorYamlTimes, yamlResizableRef, funcResizableRef, promptIDERef])
+  };
+
+  function onResizeYaml(event: MouseEvent | TouchEvent, direction: Direction, elementRef: HTMLElement, delta: NumberSize) {
+    console.log("onResizeYaml")
+    const yamlWidth = elementRef.offsetWidth
+    const yamlHeight = elementRef.offsetHeight
+    if (yamlWidth != 0){
+      setStore("editor_yaml", {width: yamlWidth, height: yamlHeight})
+      console.log("editor width " + yamlWidth + " height: " + yamlHeight)
+      const promptIDERef = gameRef.current;
+      if (promptIDERef) {
+        const width = promptIDERef.offsetWidth
+        const height = promptIDERef.offsetHeight
+
+        if (width == 0) {
+          return
+        }
+        if (getLayoutRight()) {
+          let yamlWidth = getStore("editor_yaml", {}).width
+          if (!yamlWidth) {
+            yamlWidth = width / 2
+          } else if (width == yamlWidth) {
+            yamlWidth = width - 20
+          }
+          setStore("editor_yaml", {width: yamlWidth, height: height})
+          let funcWidth = width - yamlWidth
+          if (funcWidth == 0) {
+            funcWidth = width / 2
+          }
+          console.log("update size func: " + funcWidth + ", " + height)
+          setStore("editor_func", {width: funcWidth, height: height})
+        } else {
+          let yamlHeight = getStore("editor_yaml", {}).height
+          if (!yamlHeight) {
+            yamlHeight = height / 2
+          } else if (yamlHeight == height) {
+            yamlHeight = height - 20
+          }
+          setStore("editor_yaml", {width: width, height: yamlHeight})
+          let funcHeight = height - yamlHeight
+          if (funcHeight == 0) {
+            funcHeight = width / 2
+          }
+
+          console.log("update size func: " + width + ", " + funcHeight)
+          setStore("editor_func", {width: width, height: funcHeight})
+        }
+        setEditorYamlTimes(editorYamlTimes + 1)
+        setResizeKey(resizeKey + 1)
+      }
+    }
+  }
+
+  function onResizeFunc(event: MouseEvent | TouchEvent, direction: Direction, elementRef: HTMLElement, delta: NumberSize) {
+    console.log("onResizeFunc")
+    const funcWidth = elementRef.offsetWidth
+    const yamlHeight = elementRef.offsetHeight
+    if (funcWidth != 0){
+      setStore("editor_func", {width: funcWidth, height: yamlHeight})
+
+    }
+  }
+
+  const layoutChange = useCallback((update: boolean) => {
+    console.trace("layout change")
+    const newState = !getLayoutRight()
+    const promptIDERef = gameRef.current;
+
+    if (promptIDERef) {
+      if (promptIDERef.offsetWidth == 0){
+        return
+      }
+      if (!newState) {
+        setStore("editor_yaml", {width: promptIDERef.offsetWidth, height: promptIDERef.offsetHeight / 2})
+        setStore("editor_func", {width: promptIDERef.offsetWidth, height: promptIDERef.offsetHeight / 2})
+      } else {
+        setStore("editor_yaml", {width: promptIDERef.offsetWidth / 2, height: promptIDERef.offsetHeight})
+        setStore("editor_func", {width: promptIDERef.offsetWidth / 2, height: promptIDERef.offsetHeight})
+      }
+      setStore("editor_layout_right", newState);
+    }
+    if (update){
+      setEditorYamlTimes(editorYamlTimes + 1)
+      setResizeKey(resizeKey + 1)
+    }
+  }, [])
 
   return (
-    <div className="h-full flex flex-col promptide">
+    <div className="h-full flex flex-col promptide" id="promptide">
       <div className="flex items-left mx-3 margin-5">
         <div className="flex flex-row gap-3">
           <button type="button"
                   className={cx('rounded-xl', 'text-sm px-4 py-1', 'text-primary-text bg-secondary')}
-                  onClick={layoutChange}>
+                  onClick={()=>layoutChange(true)}>
             <div className="flex flex-row items-center gap-1 min-w-max">
               <img className="w-5 h-5 cursor-pointer"
-                   src={editorRight ? layoutBottomIcon : layoutRightIcon}/>
+                   src={getLayoutRight() ? layoutBottomIcon : layoutRightIcon}/>
             </div>
           </button>
           {/*<Button size="small" text={t('Export ALL')} icon={<BiExport />} onClick={exportAgentAll} />*/}
@@ -497,11 +577,10 @@ function PromptForm() {
           </Tooltip>
         </div>
       </div>
-      <div className={"h-full flex " + (editorRight ? "flex-cow" : "flex-col")} ref={c => {
-        setPromptIDERef(c);
-      }}>
+      <div className={"h-full flex " + (getLayoutRight() ? "flex-cow" : "flex-col")} ref={gameRef} >
 
         <Resizable
+          key={resizeKey}
           className="editor-yaml-margin"
           enable={resizeEnableYaml}
           size={getStore("editor_yaml")}
@@ -516,7 +595,7 @@ function PromptForm() {
             onSelectionChange={onSelectionChange}
             onFocus={onFocusYaml}
             onBlur={onFocusYaml}
-            defaultValue={getEditYaml()}
+            defaultValue={getRealYaml()}
             editorProps={{$blockScrolling: true}}
             setOptions={{
               useWorker: false,
@@ -558,7 +637,7 @@ function PromptForm() {
 }
 
 const LocalPrompts: FC<Props> = (props) => {
-  const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
+  const [editorYamlTimes] = useAtom(editorYamlTimesAtom)
 
   return (
     <div className={cx("overflow-hidden h-full ", props.className)}>

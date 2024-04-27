@@ -1,5 +1,5 @@
 import cx from 'classnames'
-import {FC, MouseEventHandler, Suspense, useCallback, useMemo, useRef, useState} from 'react'
+import {FC, Fragment, MouseEventHandler, Suspense, useCallback, useMemo, useRef, useState} from 'react'
 import { useTranslation } from 'react-i18next'
 import clearIcon from '~/assets/icons/clear.svg'
 import chatModeIcon from '~/assets/icons/chatmode.svg'
@@ -12,8 +12,9 @@ import addIcon from '~/assets/icons/add.svg'
 import closeIcon from '~/assets/icons/close.svg'
 import assistantIcon from '~/assets/icons/assistant.svg'
 import datasetsIcon from '~/assets/icons/datasets.svg'
+import flowIcon from '~/assets/icons/flow.svg'
+import flowBlueIcon from '~/assets/icons/flow_blue.svg'
 import settingsIcon from '~/assets/icons/setting_top.svg'
-import tipsIcon from '~/assets/ex_assets/profile/Wolfgang_Schulz.png'
 
 import { CHATBOTS } from '~app/consts'
 import { ConversationContext, ConversationContextValue } from '~app/context'
@@ -60,8 +61,6 @@ import {
   getEditorStatus,
   setResponseType,
   setResponseStream,
-  getTipsPosition,
-  getTipsContent,
   getHookedMessage,
   setHookedMessage,
   setPendingMessage,
@@ -72,11 +71,22 @@ import {
   getNodeType,
   getEmbeddingDocs,
   getResponseErrorMessage,
-  setResponseErrorMessage, setAgentReset, setRealYamlGenerating
+  setResponseErrorMessage,
+  setAgentReset,
+  setRealYamlGenerating,
+  getResponseStream,
+  isGameWindow,
+  setGameWindow,
+  isChatMode,
+  setChatMode,
+  setPromptFlowNode,
+  getPlayerMark,
+  isEditorGenerateEnable,
+  getPromptLib, setEditorGenerateTime, getEditorGenerateTime, setBotId, getBotId
 } from "~services/storage/memory-store";
 import {requestHostPermission} from "~app/utils/permissions";
 import {ChatError, ErrorCode} from "~utils/errors";
-import {UserConfig} from "~services/user-config";
+import {getUserConfig, UserConfig} from "~services/user-config";
 import AgentUploadDialog from "~app/components/Agent/AgentUploadDialog";
 import {useNavigate} from "@tanstack/react-router";
 import {importFromText} from "~app/utils/export";
@@ -102,14 +112,14 @@ import {
   yamlExceptionAtom,
   generateEnableAtom,
   embeddingEnableAtom,
-  showDdataSetsAtom,
+  showDdataSetsAtom, showNavSettingsAtom, promptFlowTips,
 } from "~app/state";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import NewAgentDialog from "~app/components/Agent/NewAgentDialog";
-import {loadUrl} from "~document-loader/loader";
+import {loadDoc, loadUrl} from "~document-loader/loader";
 import {embeddingMessage, retrieveDocs} from "~embedding/retrieve";
 import {Toaster, toast} from "react-hot-toast";
-import Browser from "webextension-polyfill";
+import Browser, {Runtime} from "webextension-polyfill";
 import {uuid} from "~utils";
 import {isPublicUrlFromWeb} from "~utils/format";
 import GameModeView from "~app/components/GameModeView";
@@ -117,6 +127,11 @@ import {toastCustom} from "~app/components/Toast";
 import ErrorAction from "~app/components/Chat/ErrorAction";
 import store from "store2";
 import DataSetDialog from "~app/components/Agent/DataSetDialog";
+import {PromptFlowDag, PromptFlowNode, promptflowx} from "promptflowx";
+import SwitchAgentDropdown from "~app/components/SwitchAgentDropdown";
+import {Menu, Transition} from "@headlessui/react";
+import i18next from "i18next";
+import {waitThreeSeconds} from "~utils/sse";
 
 interface Props {
   botId: BotId
@@ -136,7 +151,7 @@ const ConversationPanel: FC<Props> = (props) => {
   const mode = props.mode || 'full'
   const marginClass = 'mx-5'
   const [showHistory, setShowHistory] = useAtom(showHistoryAtom)
-  const [generateEnable, setGenerateEnable] = useAtom(generateEnableAtom)
+  const [generateEnable] = useAtom(generateEnableAtom)
 
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
@@ -157,6 +172,9 @@ const ConversationPanel: FC<Props> = (props) => {
   const [userConfig, setUserConfig] = useState<UserConfig | undefined>(undefined)
   const [fpHash, setFpHash] = useAtom(fpHashAtom);
   const [isEmbeddingEnable, setEmbeddingEnable] = useAtom(embeddingEnableAtom)
+  const [showNavSettings, setShowNavSettings] = useAtom(showNavSettingsAtom)
+  const [tips, setTips] = useAtom(promptFlowTips);
+  const [initNode, setInitNode] = useState("inputs");
 
   const navigate = useNavigate()
 
@@ -168,17 +186,12 @@ const ConversationPanel: FC<Props> = (props) => {
     setFpHash(visitorId)
   };
 
-  const updateConfigValue = useCallback(
-    (update: Partial<UserConfig>) => {
-      setUserConfig({ ...userConfig!, ...update })
-    },
-    [userConfig],
-  )
-
-  function propsMessageCheck(props: Props){
-    updateSendMessage(props)
-    return true;
-  }
+  const isBotShowSetting = useCallback(() => {
+    if(props.botId == 'chatgpt' || props.botId == 'claude' || props.botId == 'bing'){
+      return true
+    }
+    return false;
+  }, [props])
 
   const importShareAgent = useCallback((shareValue: string) => {
     toast.promise(
@@ -190,9 +203,10 @@ const ConversationPanel: FC<Props> = (props) => {
             setShowAssistant(false)
             setSeminarDisable(false)
             setWorkFlowingDisable(false)
+            setChatMode(false)
 
             setGameModeEnable(false)
-            setStore("gameModeEnable", false)
+            setGameWindow(false)
 
             const botId = props.botId as BotId
             navigate({to: '/chat/$botId', params: {botId}})
@@ -214,16 +228,16 @@ const ConversationPanel: FC<Props> = (props) => {
   useEffect(() => {
     // setShowEditor(false)
     setShowShareView(false)
-    // setEditorGenerate('')
     setGameFloatVisible(false)
     setIsPromptLibraryDialogOpen(false)
 
-    setStore("gameModeEnable", store.get("gameModeEnable", true))
+    setGameModeEnable(isGameWindow())
+    setWorkFlowingDisable(isChatMode())
 
     /*set fingerprint */
-    if (fpHash != ""){
+    if (fpHash != "") {
       setStore("fp", fpHash)
-    }else{
+    } else {
       setFp();
     }
 
@@ -236,7 +250,7 @@ const ConversationPanel: FC<Props> = (props) => {
         importShareAgent(publicValue)
       }
     }
-  }, [props])
+  }, [])
 
 
   const context: ConversationContextValue = useMemo(() => {
@@ -247,95 +261,172 @@ const ConversationPanel: FC<Props> = (props) => {
 
   const onSubmit = useCallback(
     async (input: string) => {
-      const isGameMode = getStore("gameModeEnable", true)
-      const isWorkFlowingDisable = getStore("workFlowingDisable", false)
+      setTips([])
+      setAgentReset(false)
+
+      const isGameMode = isGameWindow()
+      const isWorkFlowingDisable = isChatMode()
 
       // if in editor, send message as the Agent.
       if (getEditorStatus()){
-        setStore("workFlowingDisable", false)
+        setChatMode(false)
         setWorkFlowingDisable(false)
-      }else{
-        if(isGameMode){
-          // Generate Yaml
-          setEditorGenerate("")
+        if (!isEditorGenerateEnable()) {
+          setShowEditor(false)
+          setEditorStatus(false)
         }
       }
 
-      if (getStore("chat_reset")){
-        setStore("chat_reset", false)
-        resetConversation()
-      }
-
-      /*Game Mode*/if (isGameMode || !isWorkFlowingDisable){
+      /*Game Mode*/if (isGameMode){
         setPendingMessage(input)
-        updateConfigValue({ startupPage: props.botId })
-        await updateSendMessage(props)
+        if (getRealYaml() == undefined){
+          setRealYaml(getGameVilleYaml())
+        }
+        promptflowSubmit(input as string, props)
       }/*Chat Mode*/else{
-        props.onUserSendMessage(input as string, props.botId)
+        if (isWorkFlowingDisable){
+          props.onUserSendMessage(input as string, props.botId)
+        }else{
+          promptflowSubmit(input as string, props)
+        }
       }
     },
     [props],
   )
 
-  async function handleHookedMessage(sendProp: Props) {
-    const inputMessage = isHookedResponse("message")
-    const botId = sendProp.botId
+  function handleGlobalVar(prompt: string){
+    setTips([])
 
-    if (inputMessage) {
-      const loadType = getNodeType()
-      if(loadType == "url" || loadType == "doc"){
-        await toast.promise(
-            loadUrl(inputMessage).then(document => {
-              if (document != ""){
-                setResponseType("")
-                setResponseStream(document)
-              }
-            }),
-            {
-              loading: t('Load url...'),
-              success: <b>{t('Load success.')}</b>,
-              error: <b>{t('Load failed.')}</b>,
-            }, {
-              position: "top-center"
-            }
-        );
-      }else if (loadType == "retrieve"){
-        await toast.promise(
-            retrieveDocs(inputMessage), {
-              loading: t('Embedding & retrieve docs...'),
-              success: <b>{t('retrieve success.')}</b>,
-              error: <b>{t('retrieve failed.')}</b>,
-            }, {
-              position: "top-center"
-            }
-        );
-      }else{
-        sendProp.onUserSendMessage(inputMessage, botId)
+    prompt = prompt.replace("{game_npc_event}", isGameWindow() && window.player? window.player.perceiveChatEvent():"")
+    prompt = prompt.replace("{game_player_perceived_event}", isGameWindow() && window.player? window.player.perceiveEvent():"")
+    prompt = prompt.replace("{game_player_perceived_space}", isGameWindow() && window.player? window.player.perceiveSpace():"")
+    prompt = prompt.replace("{lang}", i18next.language)
+    prompt = prompt.replace("{now_time}", new Date().toLocaleString())
+    return prompt
+  }
+
+
+  async function nodeRequest(node: PromptFlowNode, prompt: string): Promise<string> {
+    setStore("flow_edge", initNode + "-" + node.name)
+    setStore("flow_node", node.name)
+
+    if (isHookedResponse("reset")){
+      throw new Error("stoped the promptflowx.")
+    }
+    setPromptFlowNode(node)
+
+    if (node.type == "url" && node.source.code){
+      await toast.promise(
+        loadUrl(prompt).then(document => {
+          if (document != ""){
+            setResponseStream(document)
+          }
+        }),
+        {
+          loading: t('Load url...'),
+          success: <b>{t('Load success.')}</b>,
+          error: <b>{t('Load failed.')}</b>,
+        }, {
+          position: "top-center"
+        }
+      );
+    }else if (node.type == "doc" && node.source.code){
+      await toast.promise(
+        loadDoc(prompt).then(document => {
+          if (document != ""){
+            setResponseStream(document)
+          }
+        }),
+        {
+          loading: t('Load url...'),
+          success: <b>{t('Load success.')}</b>,
+          error: <b>{t('Load failed.')}</b>,
+        }, {
+          position: "top-center"
+        }
+      );
+    }else{
+      // handle perceive...
+      prompt = handleGlobalVar(prompt)
+
+      console.log("request prompt: " + prompt)
+      await props.onUserSendMessage(prompt, props.botId)
+      console.log("response: " + getResponseStream())
+
+      await waitThreeSeconds()
+    }
+    return getResponseStream()
+
+  }
+
+  async function nodeCallback(node: PromptFlowNode) {
+    console.log('=> node handled:', node);
+
+    setStore("flow_edge", initNode + "-" + node.name)
+    setStore("flow_node", node.name)
+    setInitNode(node.name)
+
+    if (getEditorStatus() && isEditorGenerateEnable()){
+      setEditorGenerateContent(node.output)
+    }
+  }
+
+  async function promptflowSubmit(input: string, props: Props){
+    let yaml = getRealYaml()
+    if (getEditorStatus() && isEditorGenerateEnable()){
+      if (getEditorGenerate() == "Prompt"){
+        yaml = getPromptLib()["Action_YAML_Generate_Prompt"]
       }
+      yaml = getPromptLib()["Action_YAML_Generate_Yaml"]
+    }
+    console.log(yaml)
+    const promptLibs = getStore("prompts")
+    try {
+      setInitNode("inputs")
+      setStore("flow_node", initNode)
+      await promptflowx.execute(yaml, promptLibs, nodeRequest, nodeCallback, input);
+    }catch (e){
+      toast.error(e + "")
+    }
+    setPromptFlowNode(undefined)
+    setStore("flow_edge", initNode + "-" + "outputs")
+    setStore("flow_node", "outputs")
+  }
+
+  async function handleHookedMessage() {
+    const inputMessage = isHookedResponse("message")
+    if (inputMessage) {
+      await onSubmit(inputMessage as string)
     }
   }
 
   async function updateEditorContent() {
+    console.trace("updateEditorContent")
     if (getEditorGenerate() == "Yaml"){
-      setRealYamlGenerating(getEditorGenerateContent())
-      const editorYamlTimes = getStore("editorYamlTimes", 0) + 1
-      setEditorYamlTimes(editorYamlTimes)
-      setStore("editorYamlTimes", editorYamlTimes)
+
+      setRealYaml(getEditorGenerateContent())
+      setEditorGenerateContent("")
+
+      setEditorYamlTimes(editorYamlTimes + 1)
     }else if (getEditorGenerate() == "Prompt"){
-      setPromptValue(editorPrompt, getEditorGenerateContent())
       setEditorPromptTimes(editorPromptTimes + 1)
     }
   }
 
-  async function updateSendMessage(sendProp: Props) {
-    const isGameMode = getStore("gameModeEnable", true)
-    setStore("botid", sendProp.botId)
+  const propsMessageCheck = useCallback((sendProp: Props) => {
+    const isGameMode = isGameWindow()
+    if (getBotId() != sendProp.botId){
+      setBotId(sendProp.botId)
+      Browser.storage.sync.set({botId: sendProp.botId})
+      console.log("set botId: " + sendProp.botId)
+      setShowNavSettings(isBotShowSetting())
+    }
 
     /* Game mode, embedding llm response.*/
     if (isGameMode && isEmbeddingEnable){
       if (props.generating != getStore("chat_generating", false)) {
         if (!props.generating) {
-          await embeddingMessage(props.messages)
+          embeddingMessage(props.messages)
         }
         setStore("chat_generating", props.generating)
       }
@@ -343,14 +434,14 @@ const ConversationPanel: FC<Props> = (props) => {
 
     /* handle result.*/
     if (isHookedResponse("html")){
-      await Browser.storage.sync.set({task_html: getStore("task_html", "")})
+      Browser.storage.sync.set({task_html: getStore("task_html", "")})
       openHtmlDialog()
     }else if (isHookedResponse("generate")){
       toast.success(t('Successfully generated!'), {
         position: "top-center"
       })
 
-      await updateEditorContent()
+      updateEditorContent()
 
       finishEditorGenerate()
       setShowEditor(true)
@@ -359,15 +450,15 @@ const ConversationPanel: FC<Props> = (props) => {
       // generate yaml & reset conversion, protect against context
       resetConversation()
       // alert("Generate Success, You can continue editing in the editor.")
-    }else if (isHookedResponse("history")){
+    }/*else if (isHookedResponse("history")){
       toast.success(t('clear the history!'), {
         position: "top-center"
       })
       props.resetConversation()
-    }else if (getEditorGenerate() !== '' && getEditorGenerateContent() != ""){ // stream...
-      if (new Date().getTime() - getStore("generate_content_time", 0) > 500) {  // update for Yaml, 2s update
-        await updateEditorContent()
-        setStore("generate_content_time", new Date().getTime())
+    }*/else if (getEditorStatus() && isEditorGenerateEnable() && getEditorGenerateContent() != ""){ // stream...
+      if (new Date().getTime() - getEditorGenerateTime() > 2000) {  // update for Yaml, 2s update
+        updateEditorContent()
+        setEditorGenerateTime(new Date().getTime())
       }
     }
 
@@ -396,8 +487,9 @@ const ConversationPanel: FC<Props> = (props) => {
     }
 
     /*Handle hooked Message*/
-    await handleHookedMessage(sendProp)
-  }
+    handleHookedMessage()
+    return true;
+  }, [props])
 
   const openHtmlDialog = useCallback(() => {
     // setShowWebPreviewDialog(true)
@@ -429,42 +521,47 @@ const ConversationPanel: FC<Props> = (props) => {
     setEditorStatus(false)
     setGameFloatVisible(false)
 
-    const newState = !getStore("gameModeEnable", false)
+    const newState = !isGameWindow()
     setGameModeEnable(newState)
-    setStore("gameModeEnable", newState)
+    setGameWindow(newState)
     if (newState){
-      setStore("workFlowingDisable", false)
+      setChatMode(false)
       setWorkFlowingDisable(false)
-
-      setEditorGenerate("")
     }
   }
 
-  function setAgentSwitch() {
+  const setAgentSwitch = useCallback(async () => {
+    const isGameMode = isGameWindow()
     /* Game Mode should keep enable*/
     if (isGameMode){
-      toast.error(t("This should be enable in game mode."))
+      toast.error(t("Game Window only support Agent Mode."))
       return
     }
 
     finishEditorGenerate()
     setGameFloatVisible(false)
 
-    if (!window.confirm((workFlowingDisable?
-      t('Confirm whether to start your Agent?'):
-      t('Confirm whether to exit the Agent?')) as string)) {
-      return
-    }
+    // if (!window.confirm((workFlowingDisable?
+    //   t('Confirm whether to start your Agent?'):
+    //   t('Confirm whether to exit the Agent?')) as string)) {
+    //   return
+    // }
     trackEvent('open_prompt_flow_collapsed')
 
-    const newState = !getStore("workFlowingDisable", false)
-    setStore("workFlowingDisable", newState)
+    const newState = !isChatMode()
+    setChatMode(newState)
     setWorkFlowingDisable(newState)
+    if (newState){
+      resetConversation()
+    }
+
+    setAgentReset(true)
+    props.resetConversation()
 
     setStore("flow_node", "")
     setStore("flow_edge", "")
     setResponseType("");
-  }
+  }, [props])
 
   async function createNewAgentInGame(agentName: string) {
     setRealYamlKey(agentName)
@@ -473,7 +570,7 @@ const ConversationPanel: FC<Props> = (props) => {
       await saveLocalPrompt({
         id: uuid(),
         title: agentName,
-        prompt: "#TODO: defined your Agent structure for:" + getStore("player_mark", "") + "\n" + getGameVilleYaml(),
+        prompt: "#TODO: defined your Agent structure for:" + getPlayerMark() + "\n" + getGameVilleYaml(),
         type: "yaml"
       })
     }
@@ -488,20 +585,20 @@ const ConversationPanel: FC<Props> = (props) => {
     setStore("editorYamlTimes", editorYamlTimes)
 
     setGameModeEnable(false)
-    setStore("gameModeEnable", false)
+    setGameWindow(false)
   }
 
-  const openFlowEditor = useCallback(() => {
+  const openFlowEditor = useCallback(async () => {
     setGameFloatVisible(false)
 
-    const isGameMode = getStore("gameModeEnable", true)
-    const player_mark = getStore("player_mark", "")
+    const isGameMode = isGameWindow()
+    const player_mark = getPlayerMark()
     const yamlMark = getPromptValue(player_mark)
 
     if ((isGameMode && yamlMark) || !isGameMode) {
 
       if (isGameMode && getRealYaml() == undefined) {
-        setRealYaml("#TODO: defined your Agent structure for:" + getStore("player_mark", "") + "\n" + getGameVilleYaml())
+        setRealYaml("#TODO: defined your Agent structure for:" + getPlayerMark() + "\n" + getGameVilleYaml())
       }
 
       setEditorPrompt("Action_Prompt_Template");
@@ -516,13 +613,14 @@ const ConversationPanel: FC<Props> = (props) => {
 
       setShowAssistant(false)
 
-      setGameModeEnable(false)
-      setStore("gameModeEnable", false)
+      // setGameModeEnable(false)
+      // setGameWindow(false)
       toast.success('You are editing ' + getRealYamlKey(), {
         position: "bottom-right"
       })
     } else {
-      toastCustom(t('Here is undefined, Create a new Agent for ' + player_mark), ()=> createNewAgentInGame(player_mark), "Create")
+      await createNewAgentInGame(player_mark)
+      // toastCustom(t('Here is undefined, Create a new Agent for ' + player_mark), ()=> createNewAgentInGame(player_mark), "Create")
     }
     trackEvent('open_editor_prompt_flow')
   }, [])
@@ -531,9 +629,6 @@ const ConversationPanel: FC<Props> = (props) => {
     setShowEditor(false)
     setEditorStatus(false)
     trackEvent('close_editor_prompt_flow')
-
-    // focus set ''
-    setEditorGenerate('')
 
     // force update yaml
     setStore("yaml_update", true)
@@ -560,18 +655,6 @@ const ConversationPanel: FC<Props> = (props) => {
     trackEvent('open_datasets')
   },[])
 
-
-  const openSettings = useCallback(() => {
-    finishEditorGenerate()
-    setShowSettings(true)
-    trackEvent('open_settings')
-  },[])
-
-  const closeAssistant = useCallback(() => {
-    setShowAssistant(false)
-    trackEvent('close_assistant')
-  },[])
-
   const openYourAgent = useCallback(() => {
     finishEditorGenerate()
     setStore("prompt_edit", "")
@@ -579,11 +662,6 @@ const ConversationPanel: FC<Props> = (props) => {
     setGameFloatVisible(false)
     trackEvent('open_prompt_library')
   }, [])
-
-  function getLastMessage() {
-    const errorMsg = props.messages[props.messages.length-1].error
-    return errorMsg != undefined && errorMsg.message
-  }
 
   return (
     <ConversationContext.Provider value={context}>
@@ -600,14 +678,14 @@ const ConversationPanel: FC<Props> = (props) => {
               <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{botInfo.name}</span>
             </Tooltip>
             {mode === 'compact' && props.onSwitchBot && (
-              <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} />
+              <SwitchBotDropdown selectedBotId={props.botId} onChange={props.onSwitchBot} type={"extension"}/>
             )}
           </div>
-          <div className="flex flex-row items-center gap-2 shrink-0 cursor-pointer group">
-            <div className="flex flex-row items-center gap-2">
+          {!showEditor && <div className="flex flex-row items-center gap-2 shrink-0 cursor-pointer group">
+           <div className="flex flex-row items-center gap-2">
               <img src={gameIcon} className="w-5 h-5 cursor-pointer"/>
 
-              <Tooltip content={cx(isGameMode ? t('Chat Mode') : t('Game Mode'))}>
+              <Tooltip content={cx(isGameMode ? t('Chat Window') : t('Game Window'))}>
                 <button
                     className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", isGameMode ? '' : 'button-rotate-180')}
                     id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
@@ -619,59 +697,116 @@ const ConversationPanel: FC<Props> = (props) => {
 
               <img src={chatModeIcon} className="w-5 h-5 cursor-pointer"/>
             </div>
-          </div>
-          <div className="flex flex-row items-center gap-3">
-            {false && <Tooltip content={t('Open Web Preview')}>
-              <img src={htmlIcon} className="w-5 h-5 cursor-pointer" onClick={openHtmlDialog} />
-            </Tooltip>}
+          </div>}
 
-            {!workFlowingDisable && <Tooltip content={cx(showEditor ? t('Exit') : (t('Edit') + " " + t('Agent')))}>
-              <img src={!showEditor?editIcon:closeIcon} className="w-5 h-5 cursor-pointer" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
-            </Tooltip>}
-            {!workFlowingDisable && <Tooltip content={t('New Agent')}>
-              <img src={addIcon} className="w-5 h-5 cursor-pointer" onClick={newAgentButton} />
-            </Tooltip>}
-            {!workFlowingDisable && <Tooltip content={t('Your Agent')}>
-              <img src={libraryIcon} className="w-5 h-5 cursor-pointer" onClick={openYourAgent} />
-            </Tooltip>}
-            {!workFlowingDisable && <Tooltip content={cx(t('Agent Community'))}>
-              <img src={assistantIcon} className="w-5 h-5 cursor-pointer" onClick={openAssistant} />
-            </Tooltip>}
-            {!workFlowingDisable && <Tooltip content={cx(t('Knowledge'))}>
-              <img src={datasetsIcon} className="w-5 h-5 cursor-pointer" onClick={openDataSets} />
-            </Tooltip>}
-            <Tooltip content={cx(workFlowingDisable ? t('Start') : t('Stop')) + " " + t('Agent')}>
-              <button
-                  className={cx("bg-secondary relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out", workFlowingDisable ? '' : 'button-rotate-180 ' + (isGameMode ? "":'flow-open'))}
-                  id="headlessui-switch-:rd:" role="switch" type="button"  aria-checked="false"
-                  onClick={() => setAgentSwitch()}
-                  data-headlessui-state="" aria-labelledby="headlessui-label-:re:">
-                <span className={cx('translate-x-0 pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out')}></span>
-              </button>
+          {showEditor && <div className="pl-3 pr-3 rounded-[10px] bg-secondary flex flex-row items-center">
+            <Tooltip content={"Agent Name"}>
+              <span className="font-semibold text-primary-text text-sm cursor-default ml-2 mr-1">{getRealYamlKey()}</span>
             </Tooltip>
+            <img src={!showEditor?editIcon:closeIcon} className="w-4 h-4 object-contain rounded-full" onClick={!showEditor?openFlowEditor:closeFlowEditor} />
+          </div>}
+
+          <div className="flex flex-row items-center gap-3">
             <Tooltip content={t('Clear conversation')}>
               <img src={clearIcon} className="w-5 h-5 cursor-pointer" onClick={resetConversation} />
             </Tooltip>
             <Tooltip content={t('View history')}>
               <img src={historyIcon} className="w-5 h-5 cursor-pointer" onClick={openHistoryDialog} />
             </Tooltip>
-            <Tooltip content={cx(t('Settings'))}>
-              <img src={settingsIcon} className="w-5 h-5 cursor-pointer" onClick={openSettings} />
-            </Tooltip>
+              <Menu as="div" className="relative inline-block text-left h-5">
+                <Menu.Button>
+                  <img src={workFlowingDisable?flowIcon:flowBlueIcon} className="w-5 h-5 cursor-pointer" />
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                <Menu.Items className="absolute right-0 z-10 mt-2 rounded-md bg-secondary shadow-lg focus:outline-none">
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={newAgentButton}
+                    >
+                      <div className="w-4 h-4">
+                        <img src={addIcon} className="w-4 h-4 cursor-pointer"  />
+                      </div>
+                      <p className="text-sm whitespace-nowrap">{t('New Agent')}</p>
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={!showEditor?openFlowEditor:closeFlowEditor}
+                    >
+                      <div className="w-4 h-4">
+                        <img src={!showEditor?editIcon:closeIcon} className="w-4 h-4 cursor-pointer" />
+                      </div>
+                      <p className="text-sm whitespace-nowrap">{cx(showEditor ? t('Exit') : (t('Edit') + " " + t('Agent')))}</p>
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={openYourAgent}
+                    >
+                      <div className="w-4 h-4">
+                        <img src={libraryIcon} className="w-4 h-4 cursor-pointer"  />
+                      </div>
+                      <p className="text-sm whitespace-nowrap">{t('Your Agent')}</p>
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={openAssistant}
+                    >
+                      <div className="w-4 h-4">
+                        <img src={assistantIcon} className="w-4 h-4 cursor-pointer"  />
+                      </div>
+                      <p className="text-sm whitespace-nowrap">{t('Agent Community')}</p>
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={openDataSets}
+                    >
+                      <div className="w-4 h-4">
+                        <img src={datasetsIcon} className="w-4 h-4 cursor-pointer"  />
+                      </div>
+                      <p className="text-sm whitespace-nowrap">{t('Knowledge')}</p>
+                    </div>
+                  </Menu.Item>
+                  <Menu.Item >
+                    <div
+                      className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
+                      onClick={setAgentSwitch}
+                    >
+                      <p className="text-sm whitespace-nowrap">{workFlowingDisable? t('Switch to Agent Mode...'): t('Switch to Chat Mode...')}</p>
+                    </div>
+                  </Menu.Item>
+                </Menu.Items>
+              </Transition>
+            </Menu>
           </div>
         </div>
 
         <LocalPrompts className={cx(showEditor?"":"hidden")}/>
         <div className={"hidden"} key={changeTime}>{propsMessageCheck(props)}</div>
 
-        <div className={cx("promptgame overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
+        <div id={"chatdev-game-container"} className={cx("chatdev-game-container overflow-hidden h-full " + cx(showEditor ? "hidden" : ""))}>
           <ChatMessageList botId={props.botId} messages={props.messages}/>
-          <div id="loading">
+          {isGameMode && <div id="loading">
             <div id="loading-wrapper">
               <img src={loadingImg} alt=""/>
               <span>{t('Ensure you are logged in to the LLM website to access all features, When using the default Webapp Mode, no tokens will be consumed.')}</span>
             </div>
-          </div>
+          </div>}
           <GameModeView  botId={props.botId}/>
         </div>
 

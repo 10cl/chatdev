@@ -17,7 +17,7 @@ import {
   workFlowingDisableAtom
 } from "~app/state";
 import {trackEvent} from "~app/plausible";
-import {getStore, setRealYamlKey, setStore} from "~services/storage/memory-store";
+import {getStore, setChatMode, setGameWindow, setRealYamlKey, setStore} from "~services/storage/memory-store";
 import {BotId} from "~app/bots";
 import {ChatMessageModel} from "~types";
 import {ConversationContext} from "~app/context";
@@ -45,7 +45,7 @@ const PromptLabItem = (props: {
   const [editorPromptTimes, setEditorPromptTimes] = useAtom(editorPromptTimesAtom)
   const [editorYamlTimes, setEditorYamlTimes] = useAtom(editorYamlTimesAtom)
   const [showAssistant, setShowAssistant] = useAtom(showGptsDialogAtom)
-  const confirmTips = t('Are you sure you want to import the Agent?')
+  const confirmTips = t('Importing the Agent will overwrite the current one. Proceed?')
   const successTips = t('Imported Agent successfully')
   const successEditTips = t('Import succeeded. Do you need to edit?')
   const [showEditor, setShowEditor] = useAtom(showEditorAtom)
@@ -54,23 +54,24 @@ const PromptLabItem = (props: {
   const conversation = useContext(ConversationContext)
 
   const importToFlowYaml = useCallback(() => {
-    /*        if (!window.confirm(confirmTips)) {
-                return
-            }*/
+    if (!window.confirm(confirmTips)) {
+        return
+    }
     setShowAssistant(false)
     setSeminarDisable(false)
     setWorkFlowingDisable(false)
+    setChatMode(false)
     setShowEditor(false)
 
     setGameModeEnable(false)
-    setStore("gameModeEnable", false)
+    setGameWindow(false)
 
     setRealYamlKey("Default_Flow_Dag_Yaml")
 
     toast.promise(
-      loadYaml(props.share).then(promptYaml => {
+      loadYaml(props.share).then(async promptYaml => {
         try {
-          importFromText(JSON.parse(promptYaml.yaml))
+          await importFromText(JSON.parse(promptYaml.yaml))
         } catch (e) {
           alert(e)
         }
