@@ -10,6 +10,8 @@
 [![release][release-image]][release-url]
 [![last commit][last-commit-image]][last-commit-url]
 [![discord][discord-image]][discord-url]
+[![chrome-version][chrome-image]][chrome-url]
+[![chrome-user][chrome-user-image]][chrome-user-url]
 
 <a href="https://chrome.google.com/webstore/detail/chatdev-visualize-your-ai/dopllopmmfnghbahgbdejnkebfcmomej?utm_source=github"><img src="./screenshots/chrome-logo.png" width="200" alt="Get ChatDev for Chromium"></a>
 <a href="https://microsoftedge.microsoft.com/addons/detail/ceoneifbmcdiihmgfjeodiholmbpmibm?utm_source=github"><img src="./screenshots/edge-logo.png" width="160" alt="Get ChatDev for Microsoft Edge"></a>
@@ -27,9 +29,12 @@
 [last-commit-url]: https://github.com/10cl/chatdev/commits
 [discord-image]: https://img.shields.io/discord/977885982579884082?logo=discord
 [discord-url]: https://discord.gg/fdjWfgGPjb
+[chrome-url]: https://chromewebstore.google.com/detail/chatdev-ide-building-your/dopllopmmfnghbahgbdejnkebfcmomej
+[chrome-image]: https://img.shields.io/chrome-web-store/v/dopllopmmfnghbahgbdejnkebfcmomej
+[chrome-user-url]: https://chromewebstore.google.com/detail/chatdev-ide-building-your/dopllopmmfnghbahgbdejnkebfcmomej
+[chrome-user-image]: https://img.shields.io/chrome-web-store/users/dopllopmmfnghbahgbdejnkebfcmomej
 
 </div>
-
 
 ChatDev IDE is a tools for building your AI agent, Whether it's NPCs in games or powerful agent tools, you can design what you want for this platform.
 
