@@ -187,7 +187,7 @@ const ConversationPanel: FC<Props> = (props) => {
   };
 
   const isBotShowSetting = useCallback(() => {
-    if(props.botId == 'chatgpt' || props.botId == 'claude' || props.botId == 'bing'){
+    if(props.botId == 'chatgpt' || props.botId == 'claude' || props.botId == 'bing' || props.botId == 'ollama'){
       return true
     }
     return false;

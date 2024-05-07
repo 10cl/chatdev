@@ -39,7 +39,7 @@ const ChatGPTAuthErrorAction = () => {
 
   return (
     <div className="flex flex-row gap-2 items-center">
-      <a href="https://chat.openai.com" target='_blank' rel="noreferrer"><ActionButton text={t('Login to ChatGPT')} /></a>
+      <a href="https://chatgpt.com" target='_blank' rel="noreferrer"><ActionButton text={t('Login to ChatGPT')} /></a>
       <span className="text-sm text-primary-text">OR</span>
       <a
         onClick={() => setShowSettings(true)}
@@ -93,7 +93,7 @@ const ErrorAction: FC<{ error: ChatError }> = ({ error }) => {
   }
   if (error.code === ErrorCode.CHATGPT_AUTH) {
     return (
-      <a href="https://chat.openai.com" target="_blank" rel="noreferrer">
+      <a href="https://chatgpt.com" target="_blank" rel="noreferrer">
         <ActionButton text={t('Login to ChatGPT')} />
       </a>
     )

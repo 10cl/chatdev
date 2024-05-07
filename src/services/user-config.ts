@@ -11,10 +11,7 @@ export enum BingConversationStyle {
 
 export enum ChatGPTMode {
   Webapp = 'webapp',
-  API = 'api',
-  Azure = 'azure',
-  Poe = 'poe',
-  OpenRouter = 'openrouter',
+  API = 'api'
 }
 
 export enum ChatGPTWebModel {
@@ -35,15 +32,31 @@ export enum PoeClaudeModel {
 
 export enum ClaudeMode {
   Webapp = 'webapp',
-  API = 'api',
-  Poe = 'poe',
-  OpenRouter = 'openrouter',
+  API = 'api'
 }
 
 export enum ClaudeAPIModel {
-  'claude-2' = 'claude-2',
-  'claude-instant-1' = 'claude-instant-v1',
+  'claude-instant-1' = 'claude-instant-1.2',
+  'claude-2' = 'claude-2.1',
+  'claude-3-sonnet' = 'claude-3-sonnet-20240229',
+  'claude-3-opus' = 'claude-3-opus-20240229'
 }
+
+export enum OllamaAPIModel {
+  'Llama 3 8B ' = 'llama3',
+  'Llama 3 70B' = 'llama3:70b',
+  'Phi-3 3.8B ' = 'phi3',
+  'Mistral 7B ' = 'mistral',
+  'Neural Chat 7B ' = 'neural-chat',
+  'Starling  7B ' = 'starling-lm',
+  'Code Llama  7B ' = 'codellama',
+  'Llama 2 Uncensored  7B ' = 'llama2-uncensored',
+  'LLaVA 7B ' = 'llava',
+  'Gemma 2B ' = 'gemma:2b',
+  'Gemma 7B ' = 'gemma:7b',
+  'Solar 10.7B' = 'solar'
+}
+
 
 export enum OpenRouterClaudeModel {
   'claude-2' = 'claude-2',
@@ -59,19 +72,20 @@ const userConfigWithDefaultValue = {
   chatgptMode: ChatGPTMode.Webapp,
   chatgptWebappModelName: ChatGPTWebModel['GPT-3.5'],
   chatgptPoeModelName: PoeGPTModel['GPT-3.5'],
-  startupPage: "chatgpt",
   bingConversationStyle: BingConversationStyle.Balanced,
   poeModel: PoeClaudeModel['claude-instant'],
   azureOpenAIApiKey: '',
   azureOpenAIApiInstanceName: '',
   azureOpenAIApiDeploymentName: '',
-  enabledBots: Object.keys(CHATBOTS).slice(0, 8) as BotId[],
+  enabledBots: Object.keys(CHATBOTS) as BotId[],
   claudeApiKey: '',
-  claudeMode: ClaudeMode.Poe,
+  claudeMode: ClaudeMode.API,
   claudeApiModel: ClaudeAPIModel['claude-2'],
   openrouterOpenAIModel: CHATGPT_API_MODELS[0] as (typeof CHATGPT_API_MODELS)[number],
   openrouterClaudeModel: OpenRouterClaudeModel['claude-2'],
   openrouterApiKey: '',
+  ollamaApi: 'http://localhost:11434/api/chat',
+  ollamaModel: 'llama3'
 }
 
 export type UserConfig = typeof userConfigWithDefaultValue
@@ -92,12 +106,6 @@ export async function getUserConfig(): Promise<UserConfig> {
   }
   if (result.chatgptApiModel === 'gpt-3.5-turbo-16k') {
     result.chatgptApiModel = 'gpt-3.5-turbo'
-  }
-  if (
-    result.claudeApiModel !== ClaudeAPIModel['claude-2'] ||
-    result.claudeApiModel !== ClaudeAPIModel['claude-instant-1']
-  ) {
-    result.claudeApiModel = ClaudeAPIModel['claude-2']
   }
   return defaults(result, userConfigWithDefaultValue)
 }
