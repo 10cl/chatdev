@@ -46,6 +46,9 @@ const SwitchBotDropdown: FC<Props> = (props) => {
                   className="px-4 py-2 ui-active:bg-primary-blue ui-active:text-white ui-not-active:text-secondary-text cursor-pointer flex flex-row items-center gap-3 pr-8"
                   onClick={() => onSelect(botId)}
                 >
+                  {props.type != "page" && (<div className="w-4 h-4">
+                    <img src={bot.avatar} className="w-4 h-4" />
+                  </div>)}
                   <p className="text-sm whitespace-nowrap">{bot.name}</p>
                 </div>
               </Menu.Item>
