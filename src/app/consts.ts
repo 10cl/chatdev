@@ -4,7 +4,7 @@ import bardLogo from '~/assets/bard-logo.svg'
 import bingLogo from '~/assets/bing-logo.svg'
 import yiLogo from '~/assets/yi-logo.svg'
 import chatgptLogo from '~/assets/chatgpt-logo.svg'
-import falconLogo from '~/assets/falcon-logo.jpeg'
+import ollamaLogo from '~/assets/ollama-logo.png'
 import llamaLogo from '~/assets/llama-logo.png'
 import mistralLogo from '~/assets/mistral-logo.png'
 import piLogo from '~/assets/pi-logo.png'
@@ -31,14 +31,14 @@ export const CHATBOTS: Record<BotId, { name: string; avatar: string }> = {
     name: 'Llama 3 70B',
     avatar: llamaLogo,
   },
+  ollama: {
+    name: 'Ollama',
+    avatar: ollamaLogo,
+  },
   vicuna: {
     name: 'Vicuna',
     avatar: vicunaLogo,
   },
-/*  falcon: {
-    name: 'Falcon',
-    avatar: falconLogo,
-  },*/
   mistral: {
     name: 'Mixtral',
     avatar: mistralLogo,

@@ -39,6 +39,7 @@ import {
   setStore, getBotId
 } from "~services/storage/memory-store";
 import store from "store2";
+import OllamaAPISettings from "~app/components/Settings/OllamaAPISettings";
 
 const BING_STYLE_OPTIONS = [
   { name: 'Precise', value: BingConversationStyle.Precise },
@@ -153,6 +154,8 @@ const SettingPage = () => {
             </div>
           </div>
         </div>)}
+        {getBotId() == "ollama" && (
+          <OllamaAPISettings userConfig={userConfig} updateConfigValue={updateConfigValue} />)}
       </div>
       <Button color={dirty ? 'primary' : 'flat'} text={t('Save')} className="w-fit my-8" onClick={save} />
       <Toaster position="top-right" />

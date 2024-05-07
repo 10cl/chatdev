@@ -8,6 +8,7 @@ import { PiBot } from './pi'
 import { QianwenWebBot } from './qianwen'
 import { XunfeiBot } from './xunfei'
 import {LlaMa2Bot} from "~app/bots/llama2";
+import {OllamaBot} from "~app/bots/ollama";
 
 export type BotId =
   | 'chatgpt'
@@ -23,6 +24,7 @@ export type BotId =
   | 'gemma'
   | 'qianwen'
   | 'baichuan'
+  | 'ollama'
 
 export type ChatPage =
   | 'side'
@@ -31,6 +33,8 @@ export type ChatPage =
 
 export function createBotInstance(botId: BotId) {
   switch (botId) {
+    case 'ollama':
+      return new OllamaBot()
     case 'chatgpt':
       return new ChatGPTBot()
     case 'bing':
