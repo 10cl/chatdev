@@ -92,7 +92,7 @@
     "jquery": "^3.7.1",
     "js-base64": "^3.7.5",
     "js-sha3": "^0.9.3",
-    "jsdom": "^23.0.1",
+    "jsdom": "^24.1.0",
     "langchain": "^0.1.4",
     "lodash-es": "^4.17.21",
     "lucide-react": "^0.252.0",
